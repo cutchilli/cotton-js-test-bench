@@ -1,0 +1,1 @@
+{"dependencies":[{"name":"./index.js","dynamic":true}],"generated":{"html":"<html>\n  <head>\n    <title>Testy Sue</title>\n  </head>\n  <body>\n    <canvas id=\"yaboi\">\n    <script src=\"/cotton-js-test-bench.8d2766ad.js\"></script>\n  </canvas></body>\n</html>"},"hash":"d2f6c2bb20d1f85c294c8c3d461422bd","cacheData":{}}

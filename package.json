@@ -1,0 +1,12 @@
+{
+  "name": "cotton-js-test-bench",
+  "version": "1.0.0",
+  "description": "Test bench bro. Obvs. Ya dickhead.",
+  "main": "index.js",
+  "repository": "https://github.com/fegwin/cotton-js-test-bench",
+  "author": "Aswin Lakshman",
+  "license": "MIT",
+  "dependencies": {
+    "@agierens/cotton-js": "^1.0.2"
+  }
+}
