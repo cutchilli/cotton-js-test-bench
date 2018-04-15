@@ -34,6 +34,7 @@ export default class Letter extends Entity {
   }
 
   initialRender(context) {
+    
     context.fillStyle = `rgba(${getRandomLetterColour()}, ${1})`;
     context.shadowBlur = 0;
 
