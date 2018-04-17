@@ -2,10 +2,6 @@
 # yarn lockfile v1
 
 
-"@agierens/cotton-js@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@agierens/cotton-js/-/cotton-js-1.0.2.tgz#bbdafee4e39dd37ed93fc4dbf870117058853742"
-
 "cotton-js@https://github.com/fegwin/cotton-js.git":
   version "1.0.3"
   resolved "https://github.com/fegwin/cotton-js.git#e87cebbe5a2d0af6830145c50163cfdad66bae04"

@@ -3,7 +3,7 @@ import { Layer, util } from "cotton-js";
 import Letter from "./letter";
 import letters from "./letters";
 
-const { Vec } = util;
+const { Point } = util;
 
 const createText = (maxWidth, maxHeight, str, yOffset) => {
   const strUppered = str.toUpperCase();
@@ -17,7 +17,7 @@ const createText = (maxWidth, maxHeight, str, yOffset) => {
     var letter = new Letter(
       maxWidth,
       maxHeight,
-      new Vec(currX, yOffset),
+      new Point(currX, yOffset),
       letterMatrix
     );
     retVal.push(letter);

@@ -1,6 +1,6 @@
 import { Entity, util } from "cotton-js";
 
-const { getRandomNumber, Vec } = util;
+const { getRandomNumber, Point } = util;
 
 const getRandomLetterColour = () => {
   const colours = ["225,247,213", "255,189,189", "201,201,255", "241,203,255"];
@@ -10,7 +10,7 @@ const getRandomLetterColour = () => {
 
 export default class Letter extends Entity {
   constructor(maxWidth, maxHeight, pos, letterToDrawMatrix) {
-    let blockSize = new Vec(10, 10);
+    let blockSize = new Point(10, 10);
     let width = 0;
 
     letterToDrawMatrix.forEach(arr => {
@@ -23,8 +23,8 @@ export default class Letter extends Entity {
 
     super(
       pos,
-      new Vec(50, 50),
-      new Vec(width * blockSize.x, height * blockSize.y)
+      new Point(50, 50),
+      new Point(width * blockSize.x, height * blockSize.y)
     );
 
     this.blockSize = blockSize;
@@ -33,7 +33,8 @@ export default class Letter extends Entity {
     this.letterToDrawMatrix = letterToDrawMatrix;
   }
 
-  initialRender(context) {
+  draw() {
+    const context = this.buffer.getContext();
     
     context.fillStyle = `rgba(${getRandomLetterColour()}, ${1})`;
     context.shadowBlur = 0;

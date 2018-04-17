@@ -5,7 +5,9 @@ class CloudParticle extends Entity {
     super(pos, vel, size, traits);
   }
 
-  initialRender(context) {
+  draw() {
+    const context = this.buffer.getContext();
+
     const blueCloud = context.createRadialGradient(
       0,
       0,
@@ -29,9 +31,9 @@ export default class Cloud extends Layer {
 
     this.addEntity(
       new CloudParticle(
-        new util.Vec(0, 0),
-        new util.Vec(0, 0),
-        new util.Vec(this.width, this.height),
+        new util.Point(0, 0),
+        new util.Point(0, 0),
+        new util.Point(this.width, this.height),
         []
       )
     );
