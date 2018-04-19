@@ -11,13 +11,12 @@ canvas.width = width;
 canvas.height = height;
 
 let animator = new Animator(
-  new Compositor(width, height, [
+  new Compositor(width, height, canvas, [
     new Cloud(width, height),
     new BackgroundLayer(width, height),
     new TextLayer(width, height, "team"),
     new TextLayer(width, height, "cotton", 70)
-  ]),
-  canvas.getContext("2d")
+  ])
 );
 
 animator.start();
