@@ -10,6 +10,6 @@
     "cotton-js": "https://github.com/fegwin/cotton-js.git"
   },
   "scripts": {
-    "start": "parcel index.html"
+    "watch": "parcel index.html"
   }
 }
