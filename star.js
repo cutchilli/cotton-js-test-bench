@@ -1,5 +1,4 @@
 import { Entity, util } from "cotton-js";
-import { Vec } from "../cotton-js/dist/util/math";
 
 const { getRandomNumber, getRandomInt } = util;
 
@@ -23,7 +22,7 @@ export default class Star extends Entity {
     if (radius < 1 || radius > 3)
       throw new exception("radius must be between 2 and 4");
 
-    const size = new Vec(radius * trail, radius * trail);
+    const size = new util.Point(radius * trail, radius * trail);
 
     super(pos, vel, size);
 
@@ -35,7 +34,9 @@ export default class Star extends Entity {
     this.trail = trail;
   }
 
-  initialRender(context) {
+  draw() {
+    const context = this.buffer.getContext();
+
     context.fillStyle = `rgba(${this.colour}, ${this.opacity})`;
     context.shadowBlur = this.trail;
     context.shadowColor = `rgba(${this.colour}, ${this.opacity})`;

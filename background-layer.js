@@ -2,7 +2,7 @@ import { Layer, util } from "cotton-js";
 
 import Star from "./star";
 
-const { Vec, getRandomNumber } = util;
+const { Point, getRandomNumber } = util;
 const starCount = 200;
 
 export default class BackgroundLayer extends Layer {
@@ -22,11 +22,11 @@ export default class BackgroundLayer extends Layer {
         new Star(
           this.width,
           this.height,
-          new Vec(
+          new Point(
             getRandomNumber(0, this.width),
             getRandomNumber(0, this.height)
           ),
-          new Vec(
+          new Point(
             getRandomNumber(-maxVelocity, maxVelocity),
             getRandomNumber(-maxVelocity, maxVelocity)
           ),

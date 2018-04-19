@@ -7,7 +7,6 @@
   "author": "Aswin Lakshman",
   "license": "MIT",
   "dependencies": {
-    "@agierens/cotton-js": "^1.0.2",
     "cotton-js": "https://github.com/fegwin/cotton-js.git"
   },
   "scripts": {

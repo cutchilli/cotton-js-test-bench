@@ -77,258 +77,1714 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({34:[function(require,module,exports) {
+})({21:[function(require,module,exports) {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout() {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+})();
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch (e) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while (len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) {
+    return [];
+};
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () {
+    return '/';
+};
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function () {
+    return 0;
+};
+},{}],20:[function(require,module,exports) {
+var global = (1,eval)("this");
+var process = require("process");
+/*!
+ * @overview es6-promise - a tiny implementation of Promises/A+.
+ * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
+ * @license   Licensed under MIT license
+ *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
+ * @version   v4.2.4+314e4831
+ */
+
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.ES6Promise = factory());
+}(this, (function () { 'use strict';
+
+function objectOrFunction(x) {
+  var type = typeof x;
+  return x !== null && (type === 'object' || type === 'function');
+}
+
+function isFunction(x) {
+  return typeof x === 'function';
+}
+
+
+
+var _isArray = void 0;
+if (Array.isArray) {
+  _isArray = Array.isArray;
+} else {
+  _isArray = function (x) {
+    return Object.prototype.toString.call(x) === '[object Array]';
+  };
+}
+
+var isArray = _isArray;
+
+var len = 0;
+var vertxNext = void 0;
+var customSchedulerFn = void 0;
+
+var asap = function asap(callback, arg) {
+  queue[len] = callback;
+  queue[len + 1] = arg;
+  len += 2;
+  if (len === 2) {
+    // If len is 2, that means that we need to schedule an async flush.
+    // If additional callbacks are queued before the queue is flushed, they
+    // will be processed by this flush that we are scheduling.
+    if (customSchedulerFn) {
+      customSchedulerFn(flush);
+    } else {
+      scheduleFlush();
+    }
+  }
+};
+
+function setScheduler(scheduleFn) {
+  customSchedulerFn = scheduleFn;
+}
+
+function setAsap(asapFn) {
+  asap = asapFn;
+}
+
+var browserWindow = typeof window !== 'undefined' ? window : undefined;
+var browserGlobal = browserWindow || {};
+var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
+var isNode = typeof self === 'undefined' && typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
+
+// test for web worker but not in IE10
+var isWorker = typeof Uint8ClampedArray !== 'undefined' && typeof importScripts !== 'undefined' && typeof MessageChannel !== 'undefined';
+
+// node
+function useNextTick() {
+  // node version 0.10.x displays a deprecation warning when nextTick is used recursively
+  // see https://github.com/cujojs/when/issues/410 for details
+  return function () {
+    return process.nextTick(flush);
+  };
+}
+
+// vertx
+function useVertxTimer() {
+  if (typeof vertxNext !== 'undefined') {
+    return function () {
+      vertxNext(flush);
+    };
+  }
+
+  return useSetTimeout();
+}
+
+function useMutationObserver() {
+  var iterations = 0;
+  var observer = new BrowserMutationObserver(flush);
+  var node = document.createTextNode('');
+  observer.observe(node, { characterData: true });
+
+  return function () {
+    node.data = iterations = ++iterations % 2;
+  };
+}
+
+// web worker
+function useMessageChannel() {
+  var channel = new MessageChannel();
+  channel.port1.onmessage = flush;
+  return function () {
+    return channel.port2.postMessage(0);
+  };
+}
+
+function useSetTimeout() {
+  // Store setTimeout reference so es6-promise will be unaffected by
+  // other code modifying setTimeout (like sinon.useFakeTimers())
+  var globalSetTimeout = setTimeout;
+  return function () {
+    return globalSetTimeout(flush, 1);
+  };
+}
+
+var queue = new Array(1000);
+function flush() {
+  for (var i = 0; i < len; i += 2) {
+    var callback = queue[i];
+    var arg = queue[i + 1];
+
+    callback(arg);
+
+    queue[i] = undefined;
+    queue[i + 1] = undefined;
+  }
+
+  len = 0;
+}
+
+function attemptVertx() {
+  try {
+    var vertx = Function('return this')().require('vertx');
+    vertxNext = vertx.runOnLoop || vertx.runOnContext;
+    return useVertxTimer();
+  } catch (e) {
+    return useSetTimeout();
+  }
+}
+
+var scheduleFlush = void 0;
+// Decide what async method to use to triggering processing of queued callbacks:
+if (isNode) {
+  scheduleFlush = useNextTick();
+} else if (BrowserMutationObserver) {
+  scheduleFlush = useMutationObserver();
+} else if (isWorker) {
+  scheduleFlush = useMessageChannel();
+} else if (browserWindow === undefined && typeof require === 'function') {
+  scheduleFlush = attemptVertx();
+} else {
+  scheduleFlush = useSetTimeout();
+}
+
+function then(onFulfillment, onRejection) {
+  var parent = this;
+
+  var child = new this.constructor(noop);
+
+  if (child[PROMISE_ID] === undefined) {
+    makePromise(child);
+  }
+
+  var _state = parent._state;
+
+
+  if (_state) {
+    var callback = arguments[_state - 1];
+    asap(function () {
+      return invokeCallback(_state, child, callback, parent._result);
+    });
+  } else {
+    subscribe(parent, child, onFulfillment, onRejection);
+  }
+
+  return child;
+}
+
+/**
+  `Promise.resolve` returns a promise that will become resolved with the
+  passed `value`. It is shorthand for the following:
+
+  ```javascript
+  let promise = new Promise(function(resolve, reject){
+    resolve(1);
+  });
+
+  promise.then(function(value){
+    // value === 1
+  });
+  ```
+
+  Instead of writing the above, your code now simply becomes the following:
+
+  ```javascript
+  let promise = Promise.resolve(1);
+
+  promise.then(function(value){
+    // value === 1
+  });
+  ```
+
+  @method resolve
+  @static
+  @param {Any} value value that the returned promise will be resolved with
+  Useful for tooling.
+  @return {Promise} a promise that will become fulfilled with the given
+  `value`
+*/
+function resolve$1(object) {
+  /*jshint validthis:true */
+  var Constructor = this;
+
+  if (object && typeof object === 'object' && object.constructor === Constructor) {
+    return object;
+  }
+
+  var promise = new Constructor(noop);
+  resolve(promise, object);
+  return promise;
+}
+
+var PROMISE_ID = Math.random().toString(36).substring(2);
+
+function noop() {}
+
+var PENDING = void 0;
+var FULFILLED = 1;
+var REJECTED = 2;
+
+var TRY_CATCH_ERROR = { error: null };
+
+function selfFulfillment() {
+  return new TypeError("You cannot resolve a promise with itself");
+}
+
+function cannotReturnOwn() {
+  return new TypeError('A promises callback cannot return that same promise.');
+}
+
+function getThen(promise) {
+  try {
+    return promise.then;
+  } catch (error) {
+    TRY_CATCH_ERROR.error = error;
+    return TRY_CATCH_ERROR;
+  }
+}
+
+function tryThen(then$$1, value, fulfillmentHandler, rejectionHandler) {
+  try {
+    then$$1.call(value, fulfillmentHandler, rejectionHandler);
+  } catch (e) {
+    return e;
+  }
+}
+
+function handleForeignThenable(promise, thenable, then$$1) {
+  asap(function (promise) {
+    var sealed = false;
+    var error = tryThen(then$$1, thenable, function (value) {
+      if (sealed) {
+        return;
+      }
+      sealed = true;
+      if (thenable !== value) {
+        resolve(promise, value);
+      } else {
+        fulfill(promise, value);
+      }
+    }, function (reason) {
+      if (sealed) {
+        return;
+      }
+      sealed = true;
+
+      reject(promise, reason);
+    }, 'Settle: ' + (promise._label || ' unknown promise'));
+
+    if (!sealed && error) {
+      sealed = true;
+      reject(promise, error);
+    }
+  }, promise);
+}
+
+function handleOwnThenable(promise, thenable) {
+  if (thenable._state === FULFILLED) {
+    fulfill(promise, thenable._result);
+  } else if (thenable._state === REJECTED) {
+    reject(promise, thenable._result);
+  } else {
+    subscribe(thenable, undefined, function (value) {
+      return resolve(promise, value);
+    }, function (reason) {
+      return reject(promise, reason);
+    });
+  }
+}
+
+function handleMaybeThenable(promise, maybeThenable, then$$1) {
+  if (maybeThenable.constructor === promise.constructor && then$$1 === then && maybeThenable.constructor.resolve === resolve$1) {
+    handleOwnThenable(promise, maybeThenable);
+  } else {
+    if (then$$1 === TRY_CATCH_ERROR) {
+      reject(promise, TRY_CATCH_ERROR.error);
+      TRY_CATCH_ERROR.error = null;
+    } else if (then$$1 === undefined) {
+      fulfill(promise, maybeThenable);
+    } else if (isFunction(then$$1)) {
+      handleForeignThenable(promise, maybeThenable, then$$1);
+    } else {
+      fulfill(promise, maybeThenable);
+    }
+  }
+}
+
+function resolve(promise, value) {
+  if (promise === value) {
+    reject(promise, selfFulfillment());
+  } else if (objectOrFunction(value)) {
+    handleMaybeThenable(promise, value, getThen(value));
+  } else {
+    fulfill(promise, value);
+  }
+}
+
+function publishRejection(promise) {
+  if (promise._onerror) {
+    promise._onerror(promise._result);
+  }
+
+  publish(promise);
+}
+
+function fulfill(promise, value) {
+  if (promise._state !== PENDING) {
+    return;
+  }
+
+  promise._result = value;
+  promise._state = FULFILLED;
+
+  if (promise._subscribers.length !== 0) {
+    asap(publish, promise);
+  }
+}
+
+function reject(promise, reason) {
+  if (promise._state !== PENDING) {
+    return;
+  }
+  promise._state = REJECTED;
+  promise._result = reason;
+
+  asap(publishRejection, promise);
+}
+
+function subscribe(parent, child, onFulfillment, onRejection) {
+  var _subscribers = parent._subscribers;
+  var length = _subscribers.length;
+
+
+  parent._onerror = null;
+
+  _subscribers[length] = child;
+  _subscribers[length + FULFILLED] = onFulfillment;
+  _subscribers[length + REJECTED] = onRejection;
+
+  if (length === 0 && parent._state) {
+    asap(publish, parent);
+  }
+}
+
+function publish(promise) {
+  var subscribers = promise._subscribers;
+  var settled = promise._state;
+
+  if (subscribers.length === 0) {
+    return;
+  }
+
+  var child = void 0,
+      callback = void 0,
+      detail = promise._result;
+
+  for (var i = 0; i < subscribers.length; i += 3) {
+    child = subscribers[i];
+    callback = subscribers[i + settled];
+
+    if (child) {
+      invokeCallback(settled, child, callback, detail);
+    } else {
+      callback(detail);
+    }
+  }
+
+  promise._subscribers.length = 0;
+}
+
+function tryCatch(callback, detail) {
+  try {
+    return callback(detail);
+  } catch (e) {
+    TRY_CATCH_ERROR.error = e;
+    return TRY_CATCH_ERROR;
+  }
+}
+
+function invokeCallback(settled, promise, callback, detail) {
+  var hasCallback = isFunction(callback),
+      value = void 0,
+      error = void 0,
+      succeeded = void 0,
+      failed = void 0;
+
+  if (hasCallback) {
+    value = tryCatch(callback, detail);
+
+    if (value === TRY_CATCH_ERROR) {
+      failed = true;
+      error = value.error;
+      value.error = null;
+    } else {
+      succeeded = true;
+    }
+
+    if (promise === value) {
+      reject(promise, cannotReturnOwn());
+      return;
+    }
+  } else {
+    value = detail;
+    succeeded = true;
+  }
+
+  if (promise._state !== PENDING) {
+    // noop
+  } else if (hasCallback && succeeded) {
+    resolve(promise, value);
+  } else if (failed) {
+    reject(promise, error);
+  } else if (settled === FULFILLED) {
+    fulfill(promise, value);
+  } else if (settled === REJECTED) {
+    reject(promise, value);
+  }
+}
+
+function initializePromise(promise, resolver) {
+  try {
+    resolver(function resolvePromise(value) {
+      resolve(promise, value);
+    }, function rejectPromise(reason) {
+      reject(promise, reason);
+    });
+  } catch (e) {
+    reject(promise, e);
+  }
+}
+
+var id = 0;
+function nextId() {
+  return id++;
+}
+
+function makePromise(promise) {
+  promise[PROMISE_ID] = id++;
+  promise._state = undefined;
+  promise._result = undefined;
+  promise._subscribers = [];
+}
+
+function validationError() {
+  return new Error('Array Methods must be provided an Array');
+}
+
+var Enumerator = function () {
+  function Enumerator(Constructor, input) {
+    this._instanceConstructor = Constructor;
+    this.promise = new Constructor(noop);
+
+    if (!this.promise[PROMISE_ID]) {
+      makePromise(this.promise);
+    }
+
+    if (isArray(input)) {
+      this.length = input.length;
+      this._remaining = input.length;
+
+      this._result = new Array(this.length);
+
+      if (this.length === 0) {
+        fulfill(this.promise, this._result);
+      } else {
+        this.length = this.length || 0;
+        this._enumerate(input);
+        if (this._remaining === 0) {
+          fulfill(this.promise, this._result);
+        }
+      }
+    } else {
+      reject(this.promise, validationError());
+    }
+  }
+
+  Enumerator.prototype._enumerate = function _enumerate(input) {
+    for (var i = 0; this._state === PENDING && i < input.length; i++) {
+      this._eachEntry(input[i], i);
+    }
+  };
+
+  Enumerator.prototype._eachEntry = function _eachEntry(entry, i) {
+    var c = this._instanceConstructor;
+    var resolve$$1 = c.resolve;
+
+
+    if (resolve$$1 === resolve$1) {
+      var _then = getThen(entry);
+
+      if (_then === then && entry._state !== PENDING) {
+        this._settledAt(entry._state, i, entry._result);
+      } else if (typeof _then !== 'function') {
+        this._remaining--;
+        this._result[i] = entry;
+      } else if (c === Promise$1) {
+        var promise = new c(noop);
+        handleMaybeThenable(promise, entry, _then);
+        this._willSettleAt(promise, i);
+      } else {
+        this._willSettleAt(new c(function (resolve$$1) {
+          return resolve$$1(entry);
+        }), i);
+      }
+    } else {
+      this._willSettleAt(resolve$$1(entry), i);
+    }
+  };
+
+  Enumerator.prototype._settledAt = function _settledAt(state, i, value) {
+    var promise = this.promise;
+
+
+    if (promise._state === PENDING) {
+      this._remaining--;
+
+      if (state === REJECTED) {
+        reject(promise, value);
+      } else {
+        this._result[i] = value;
+      }
+    }
+
+    if (this._remaining === 0) {
+      fulfill(promise, this._result);
+    }
+  };
+
+  Enumerator.prototype._willSettleAt = function _willSettleAt(promise, i) {
+    var enumerator = this;
+
+    subscribe(promise, undefined, function (value) {
+      return enumerator._settledAt(FULFILLED, i, value);
+    }, function (reason) {
+      return enumerator._settledAt(REJECTED, i, reason);
+    });
+  };
+
+  return Enumerator;
+}();
+
+/**
+  `Promise.all` accepts an array of promises, and returns a new promise which
+  is fulfilled with an array of fulfillment values for the passed promises, or
+  rejected with the reason of the first passed promise to be rejected. It casts all
+  elements of the passed iterable to promises as it runs this algorithm.
+
+  Example:
+
+  ```javascript
+  let promise1 = resolve(1);
+  let promise2 = resolve(2);
+  let promise3 = resolve(3);
+  let promises = [ promise1, promise2, promise3 ];
+
+  Promise.all(promises).then(function(array){
+    // The array here would be [ 1, 2, 3 ];
+  });
+  ```
+
+  If any of the `promises` given to `all` are rejected, the first promise
+  that is rejected will be given as an argument to the returned promises's
+  rejection handler. For example:
+
+  Example:
+
+  ```javascript
+  let promise1 = resolve(1);
+  let promise2 = reject(new Error("2"));
+  let promise3 = reject(new Error("3"));
+  let promises = [ promise1, promise2, promise3 ];
+
+  Promise.all(promises).then(function(array){
+    // Code here never runs because there are rejected promises!
+  }, function(error) {
+    // error.message === "2"
+  });
+  ```
+
+  @method all
+  @static
+  @param {Array} entries array of promises
+  @param {String} label optional string for labeling the promise.
+  Useful for tooling.
+  @return {Promise} promise that is fulfilled when all `promises` have been
+  fulfilled, or rejected if any of them become rejected.
+  @static
+*/
+function all(entries) {
+  return new Enumerator(this, entries).promise;
+}
+
+/**
+  `Promise.race` returns a new promise which is settled in the same way as the
+  first passed promise to settle.
+
+  Example:
+
+  ```javascript
+  let promise1 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      resolve('promise 1');
+    }, 200);
+  });
+
+  let promise2 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      resolve('promise 2');
+    }, 100);
+  });
+
+  Promise.race([promise1, promise2]).then(function(result){
+    // result === 'promise 2' because it was resolved before promise1
+    // was resolved.
+  });
+  ```
+
+  `Promise.race` is deterministic in that only the state of the first
+  settled promise matters. For example, even if other promises given to the
+  `promises` array argument are resolved, but the first settled promise has
+  become rejected before the other promises became fulfilled, the returned
+  promise will become rejected:
+
+  ```javascript
+  let promise1 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      resolve('promise 1');
+    }, 200);
+  });
+
+  let promise2 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      reject(new Error('promise 2'));
+    }, 100);
+  });
+
+  Promise.race([promise1, promise2]).then(function(result){
+    // Code here never runs
+  }, function(reason){
+    // reason.message === 'promise 2' because promise 2 became rejected before
+    // promise 1 became fulfilled
+  });
+  ```
+
+  An example real-world use case is implementing timeouts:
+
+  ```javascript
+  Promise.race([ajax('foo.json'), timeout(5000)])
+  ```
+
+  @method race
+  @static
+  @param {Array} promises array of promises to observe
+  Useful for tooling.
+  @return {Promise} a promise which settles in the same way as the first passed
+  promise to settle.
+*/
+function race(entries) {
+  /*jshint validthis:true */
+  var Constructor = this;
+
+  if (!isArray(entries)) {
+    return new Constructor(function (_, reject) {
+      return reject(new TypeError('You must pass an array to race.'));
+    });
+  } else {
+    return new Constructor(function (resolve, reject) {
+      var length = entries.length;
+      for (var i = 0; i < length; i++) {
+        Constructor.resolve(entries[i]).then(resolve, reject);
+      }
+    });
+  }
+}
+
+/**
+  `Promise.reject` returns a promise rejected with the passed `reason`.
+  It is shorthand for the following:
+
+  ```javascript
+  let promise = new Promise(function(resolve, reject){
+    reject(new Error('WHOOPS'));
+  });
+
+  promise.then(function(value){
+    // Code here doesn't run because the promise is rejected!
+  }, function(reason){
+    // reason.message === 'WHOOPS'
+  });
+  ```
+
+  Instead of writing the above, your code now simply becomes the following:
+
+  ```javascript
+  let promise = Promise.reject(new Error('WHOOPS'));
+
+  promise.then(function(value){
+    // Code here doesn't run because the promise is rejected!
+  }, function(reason){
+    // reason.message === 'WHOOPS'
+  });
+  ```
+
+  @method reject
+  @static
+  @param {Any} reason value that the returned promise will be rejected with.
+  Useful for tooling.
+  @return {Promise} a promise rejected with the given `reason`.
+*/
+function reject$1(reason) {
+  /*jshint validthis:true */
+  var Constructor = this;
+  var promise = new Constructor(noop);
+  reject(promise, reason);
+  return promise;
+}
+
+function needsResolver() {
+  throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+}
+
+function needsNew() {
+  throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+}
+
+/**
+  Promise objects represent the eventual result of an asynchronous operation. The
+  primary way of interacting with a promise is through its `then` method, which
+  registers callbacks to receive either a promise's eventual value or the reason
+  why the promise cannot be fulfilled.
+
+  Terminology
+  -----------
+
+  - `promise` is an object or function with a `then` method whose behavior conforms to this specification.
+  - `thenable` is an object or function that defines a `then` method.
+  - `value` is any legal JavaScript value (including undefined, a thenable, or a promise).
+  - `exception` is a value that is thrown using the throw statement.
+  - `reason` is a value that indicates why a promise was rejected.
+  - `settled` the final resting state of a promise, fulfilled or rejected.
+
+  A promise can be in one of three states: pending, fulfilled, or rejected.
+
+  Promises that are fulfilled have a fulfillment value and are in the fulfilled
+  state.  Promises that are rejected have a rejection reason and are in the
+  rejected state.  A fulfillment value is never a thenable.
+
+  Promises can also be said to *resolve* a value.  If this value is also a
+  promise, then the original promise's settled state will match the value's
+  settled state.  So a promise that *resolves* a promise that rejects will
+  itself reject, and a promise that *resolves* a promise that fulfills will
+  itself fulfill.
+
+
+  Basic Usage:
+  ------------
+
+  ```js
+  let promise = new Promise(function(resolve, reject) {
+    // on success
+    resolve(value);
+
+    // on failure
+    reject(reason);
+  });
+
+  promise.then(function(value) {
+    // on fulfillment
+  }, function(reason) {
+    // on rejection
+  });
+  ```
+
+  Advanced Usage:
+  ---------------
+
+  Promises shine when abstracting away asynchronous interactions such as
+  `XMLHttpRequest`s.
+
+  ```js
+  function getJSON(url) {
+    return new Promise(function(resolve, reject){
+      let xhr = new XMLHttpRequest();
+
+      xhr.open('GET', url);
+      xhr.onreadystatechange = handler;
+      xhr.responseType = 'json';
+      xhr.setRequestHeader('Accept', 'application/json');
+      xhr.send();
+
+      function handler() {
+        if (this.readyState === this.DONE) {
+          if (this.status === 200) {
+            resolve(this.response);
+          } else {
+            reject(new Error('getJSON: `' + url + '` failed with status: [' + this.status + ']'));
+          }
+        }
+      };
+    });
+  }
+
+  getJSON('/posts.json').then(function(json) {
+    // on fulfillment
+  }, function(reason) {
+    // on rejection
+  });
+  ```
+
+  Unlike callbacks, promises are great composable primitives.
+
+  ```js
+  Promise.all([
+    getJSON('/posts'),
+    getJSON('/comments')
+  ]).then(function(values){
+    values[0] // => postsJSON
+    values[1] // => commentsJSON
+
+    return values;
+  });
+  ```
+
+  @class Promise
+  @param {Function} resolver
+  Useful for tooling.
+  @constructor
+*/
+
+var Promise$1 = function () {
+  function Promise(resolver) {
+    this[PROMISE_ID] = nextId();
+    this._result = this._state = undefined;
+    this._subscribers = [];
+
+    if (noop !== resolver) {
+      typeof resolver !== 'function' && needsResolver();
+      this instanceof Promise ? initializePromise(this, resolver) : needsNew();
+    }
+  }
+
+  /**
+  The primary way of interacting with a promise is through its `then` method,
+  which registers callbacks to receive either a promise's eventual value or the
+  reason why the promise cannot be fulfilled.
+   ```js
+  findUser().then(function(user){
+    // user is available
+  }, function(reason){
+    // user is unavailable, and you are given the reason why
+  });
+  ```
+   Chaining
+  --------
+   The return value of `then` is itself a promise.  This second, 'downstream'
+  promise is resolved with the return value of the first promise's fulfillment
+  or rejection handler, or rejected if the handler throws an exception.
+   ```js
+  findUser().then(function (user) {
+    return user.name;
+  }, function (reason) {
+    return 'default name';
+  }).then(function (userName) {
+    // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
+    // will be `'default name'`
+  });
+   findUser().then(function (user) {
+    throw new Error('Found user, but still unhappy');
+  }, function (reason) {
+    throw new Error('`findUser` rejected and we're unhappy');
+  }).then(function (value) {
+    // never reached
+  }, function (reason) {
+    // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
+    // If `findUser` rejected, `reason` will be '`findUser` rejected and we're unhappy'.
+  });
+  ```
+  If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
+   ```js
+  findUser().then(function (user) {
+    throw new PedagogicalException('Upstream error');
+  }).then(function (value) {
+    // never reached
+  }).then(function (value) {
+    // never reached
+  }, function (reason) {
+    // The `PedgagocialException` is propagated all the way down to here
+  });
+  ```
+   Assimilation
+  ------------
+   Sometimes the value you want to propagate to a downstream promise can only be
+  retrieved asynchronously. This can be achieved by returning a promise in the
+  fulfillment or rejection handler. The downstream promise will then be pending
+  until the returned promise is settled. This is called *assimilation*.
+   ```js
+  findUser().then(function (user) {
+    return findCommentsByAuthor(user);
+  }).then(function (comments) {
+    // The user's comments are now available
+  });
+  ```
+   If the assimliated promise rejects, then the downstream promise will also reject.
+   ```js
+  findUser().then(function (user) {
+    return findCommentsByAuthor(user);
+  }).then(function (comments) {
+    // If `findCommentsByAuthor` fulfills, we'll have the value here
+  }, function (reason) {
+    // If `findCommentsByAuthor` rejects, we'll have the reason here
+  });
+  ```
+   Simple Example
+  --------------
+   Synchronous Example
+   ```javascript
+  let result;
+   try {
+    result = findResult();
+    // success
+  } catch(reason) {
+    // failure
+  }
+  ```
+   Errback Example
+   ```js
+  findResult(function(result, err){
+    if (err) {
+      // failure
+    } else {
+      // success
+    }
+  });
+  ```
+   Promise Example;
+   ```javascript
+  findResult().then(function(result){
+    // success
+  }, function(reason){
+    // failure
+  });
+  ```
+   Advanced Example
+  --------------
+   Synchronous Example
+   ```javascript
+  let author, books;
+   try {
+    author = findAuthor();
+    books  = findBooksByAuthor(author);
+    // success
+  } catch(reason) {
+    // failure
+  }
+  ```
+   Errback Example
+   ```js
+   function foundBooks(books) {
+   }
+   function failure(reason) {
+   }
+   findAuthor(function(author, err){
+    if (err) {
+      failure(err);
+      // failure
+    } else {
+      try {
+        findBoooksByAuthor(author, function(books, err) {
+          if (err) {
+            failure(err);
+          } else {
+            try {
+              foundBooks(books);
+            } catch(reason) {
+              failure(reason);
+            }
+          }
+        });
+      } catch(error) {
+        failure(err);
+      }
+      // success
+    }
+  });
+  ```
+   Promise Example;
+   ```javascript
+  findAuthor().
+    then(findBooksByAuthor).
+    then(function(books){
+      // found books
+  }).catch(function(reason){
+    // something went wrong
+  });
+  ```
+   @method then
+  @param {Function} onFulfilled
+  @param {Function} onRejected
+  Useful for tooling.
+  @return {Promise}
+  */
+
+  /**
+  `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
+  as the catch block of a try/catch statement.
+  ```js
+  function findAuthor(){
+  throw new Error('couldn't find that author');
+  }
+  // synchronous
+  try {
+  findAuthor();
+  } catch(reason) {
+  // something went wrong
+  }
+  // async with promises
+  findAuthor().catch(function(reason){
+  // something went wrong
+  });
+  ```
+  @method catch
+  @param {Function} onRejection
+  Useful for tooling.
+  @return {Promise}
+  */
+
+
+  Promise.prototype.catch = function _catch(onRejection) {
+    return this.then(null, onRejection);
+  };
+
+  /**
+    `finally` will be invoked regardless of the promise's fate just as native
+    try/catch/finally behaves
+  
+    Synchronous example:
+  
+    ```js
+    findAuthor() {
+      if (Math.random() > 0.5) {
+        throw new Error();
+      }
+      return new Author();
+    }
+  
+    try {
+      return findAuthor(); // succeed or fail
+    } catch(error) {
+      return findOtherAuther();
+    } finally {
+      // always runs
+      // doesn't affect the return value
+    }
+    ```
+  
+    Asynchronous example:
+  
+    ```js
+    findAuthor().catch(function(reason){
+      return findOtherAuther();
+    }).finally(function(){
+      // author was either found, or not
+    });
+    ```
+  
+    @method finally
+    @param {Function} callback
+    @return {Promise}
+  */
+
+
+  Promise.prototype.finally = function _finally(callback) {
+    var promise = this;
+    var constructor = promise.constructor;
+
+    return promise.then(function (value) {
+      return constructor.resolve(callback()).then(function () {
+        return value;
+      });
+    }, function (reason) {
+      return constructor.resolve(callback()).then(function () {
+        throw reason;
+      });
+    });
+  };
+
+  return Promise;
+}();
+
+Promise$1.prototype.then = then;
+Promise$1.all = all;
+Promise$1.race = race;
+Promise$1.resolve = resolve$1;
+Promise$1.reject = reject$1;
+Promise$1._setScheduler = setScheduler;
+Promise$1._setAsap = setAsap;
+Promise$1._asap = asap;
+
+/*global self*/
+function polyfill() {
+  var local = void 0;
+
+  if (typeof global !== 'undefined') {
+    local = global;
+  } else if (typeof self !== 'undefined') {
+    local = self;
+  } else {
+    try {
+      local = Function('return this')();
+    } catch (e) {
+      throw new Error('polyfill failed because global object is unavailable in this environment');
+    }
+  }
+
+  var P = local.Promise;
+
+  if (P) {
+    var promiseToString = null;
+    try {
+      promiseToString = Object.prototype.toString.call(P.resolve());
+    } catch (e) {
+      // silently ignored
+    }
+
+    if (promiseToString === '[object Promise]' && !P.cast) {
+      return;
+    }
+  }
+
+  local.Promise = Promise$1;
+}
+
+// Strange compat..
+Promise$1.polyfill = polyfill;
+Promise$1.Promise = Promise$1;
+
+return Promise$1;
+
+})));
+
+
+
+//# sourceMappingURL=es6-promise.map
+
+},{"process":21}],18:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class CottonImage {
-    loadImage(url) {
-        return new Promise(resolve => {
-            const img = new Image();
-            img.addEventListener('load', () => {
+var es6_promise_1 = require("es6-promise");
+var CottonImage = (function () {
+    function CottonImage() {
+    }
+    CottonImage.prototype.loadImage = function (url) {
+        return new es6_promise_1.Promise(function (resolve) {
+            var img = new Image();
+            img.addEventListener('load', function () {
                 resolve(img);
             });
             img.src = url;
         });
-    }
-}
-exports.default = CottonImage;
-
-},{}],35:[function(require,module,exports) {
+    };
+    return CottonImage;
+}());
+exports.CottonImage = CottonImage;
+//# sourceMappingURL=image.js.map
+},{"es6-promise":20}],19:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Json {
-    loadJson(url) {
-        return fetch(url).then(r => r.json());
+var Json = (function () {
+    function Json() {
     }
-}
-exports.default = Json;
-
-},{}],33:[function(require,module,exports) {
+    Json.prototype.loadJson = function (url) {
+        return fetch(url).then(function (r) { return r.json(); });
+    };
+    return Json;
+}());
+exports.Json = Json;
+//# sourceMappingURL=json.js.map
+},{}],16:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class BoundingBox {
-    constructor(pos, size) {
+var BoundingBox = (function () {
+    function BoundingBox(pos, size) {
         this.pos = pos;
         this.size = size;
     }
-    overlaps(box) {
-        return (this.bottom > box.top &&
-            this.top < box.bottom &&
-            this.left < box.right &&
-            this.right > box.left);
-    }
-    get bottom() {
-        return this.pos.y + this.size.y;
-    }
-    set bottom(y) {
-        this.pos.y = y - this.size.y;
-    }
-    get top() {
-        return this.pos.y;
-    }
-    set top(y) {
-        this.pos.y = y;
-    }
-    get left() {
-        return this.pos.x;
-    }
-    set left(x) {
-        this.pos.x = x;
-    }
-    get right() {
-        return this.pos.x + this.size.x;
-    }
-    set right(x) {
-        this.pos.x = x - this.size.x;
-    }
-}
+    BoundingBox.prototype.overlaps = function (box) {
+        return BoundingBox.overlaps(this, box);
+    };
+    BoundingBox.overlaps = function (box1, box2) {
+        return (box1.bottom > box2.top &&
+            box1.top < box2.bottom &&
+            box1.left < box2.right &&
+            box1.right > box2.left);
+    };
+    Object.defineProperty(BoundingBox.prototype, "bottom", {
+        get: function () {
+            return this.pos.y + this.size.y;
+        },
+        set: function (y) {
+            this.pos.y = y - this.size.y;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BoundingBox.prototype, "top", {
+        get: function () {
+            return this.pos.y;
+        },
+        set: function (y) {
+            this.pos.y = y;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BoundingBox.prototype, "left", {
+        get: function () {
+            return this.pos.x;
+        },
+        set: function (x) {
+            this.pos.x = x;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BoundingBox.prototype, "right", {
+        get: function () {
+            return this.pos.x + this.size.x;
+        },
+        set: function (x) {
+            this.pos.x = x - this.size.x;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return BoundingBox;
+}());
 exports.BoundingBox = BoundingBox;
-class Vec {
-    constructor(x, y) {
+var Point = (function () {
+    function Point(x, y) {
         this.set(x, y);
     }
-    set(x, y) {
+    Point.prototype.set = function (x, y) {
         this.x = x;
         this.y = y;
-    }
-}
-exports.Vec = Vec;
-exports.getRandomNumber = (min, max) => Math.random() * (max - min) + min;
-
-},{}],27:[function(require,module,exports) {
+    };
+    return Point;
+}());
+exports.Point = Point;
+exports.getRandomNumber = function (min, max) { return Math.random() * (max - min) + min; };
+exports.getRandomInt = function (min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+};
+//# sourceMappingURL=math.js.map
+},{}],17:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const image_1 = require("./image");
-const json_1 = require("./json");
-const math_1 = require("./math");
-exports.default = Object.assign(image_1.default, json_1.default, {
+var image_1 = require("./image");
+var json_1 = require("./json");
+var math_1 = require("./math");
+exports.util = {
+    CottonImage: image_1.CottonImage,
+    Json: json_1.Json,
     BoundingBox: math_1.BoundingBox,
     getRandomNumber: math_1.getRandomNumber,
-    Vec: math_1.Vec
-});
+    getRandomInt: math_1.getRandomInt,
+    Point: math_1.Point,
+};
+//# sourceMappingURL=index.js.map
+},{"./image":18,"./json":19,"./math":16}],15:[function(require,module,exports) {
 
-},{"./image":34,"./json":35,"./math":33}],23:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Layer {
-    constructor(width, height, entities = []) {
-        this.entities = entities;
+var Buffer = (function () {
+    function Buffer(width, height, canvas) {
+        this.canvas = canvas || document.createElement('canvas');
+        this.canvas.width = canvas ? canvas.width : width;
+        this.canvas.height = canvas ? canvas.height : height;
+        this.context = this.canvas.getContext('2d');
+    }
+    Buffer.prototype.getContext = function () {
+        return this.context;
+    };
+    Buffer.prototype.getCanvas = function () {
+        return this.canvas;
+    };
+    Buffer.prototype.clear = function () {
+        this.context.clearRect(0, 0, this.width, this.height);
+    };
+    return Buffer;
+}());
+exports.Buffer = Buffer;
+;
+//# sourceMappingURL=buffer.js.map
+},{}],11:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var math_1 = require("./util/math");
+var buffer_1 = require("./buffer");
+var Layer = (function () {
+    function Layer(width, height, entities) {
+        if (entities === void 0) { entities = []; }
+        this.entities = [];
         this.width = width;
         this.height = height;
-        this.buffer = document.createElement("canvas");
-        this.buffer.width = width;
-        this.buffer.height = height;
-        this.bufferContext = this.buffer.getContext("2d");
+        this.buffer = new buffer_1.Buffer(this.width, this.height);
+        this.calculateBounds();
+        this.addEntities(entities);
     }
-    addEntity(entity) {
-        this.entities.push(entity);
-    }
-    removeEntity(entity) {
-        this.entities = this.entities.filter((e) => {
+    Layer.prototype.calculateBounds = function () {
+        this.bounds = new math_1.BoundingBox(new math_1.Point(0, 0), new math_1.Point(this.width, this.height));
+    };
+    Layer.prototype.addEntity = function (entity) {
+        this.addEntities([entity]);
+    };
+    Layer.prototype.addEntities = function (entities) {
+        this.entities = this.entities.concat(entities);
+    };
+    Layer.prototype.removeEntity = function (entity) {
+        this.entities = this.entities.filter(function (e) {
             return e !== entity;
         });
-    }
-    update(deltaTime) {
-        this.entities.forEach(entity => entity.update(deltaTime));
-    }
-    draw(context) {
-        this.bufferContext.clearRect(0, 0, this.width, this.height);
-        this.entities.forEach(entity => entity.draw(context));
-        context.drawImage(this.buffer, 0, 0);
-    }
-}
-exports.default = Layer;
-
-},{}],24:[function(require,module,exports) {
+    };
+    Layer.prototype.update = function (deltaTime) {
+        for (var i = 0; i < this.entities.length; i++) {
+            this.entities[i].update(deltaTime);
+        }
+    };
+    Layer.prototype.paintOn = function (context) {
+        this.buffer.clear();
+        for (var i = 0; i < this.entities.length; i++) {
+            var entity = this.entities[i];
+            if (math_1.BoundingBox.overlaps(this.bounds, entity.bounds))
+                entity.paintOn(this.buffer.getContext());
+        }
+        context.drawImage(this.buffer.getCanvas(), 0, 0);
+    };
+    return Layer;
+}());
+exports.Layer = Layer;
+//# sourceMappingURL=layer.js.map
+},{"./util/math":16,"./buffer":15}],12:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const math_1 = require("./util/math");
-class Entity {
-    constructor(pos, vel, size, traits = []) {
-        this.name = "entity";
+var math_1 = require("./util/math");
+var buffer_1 = require("./buffer");
+var Entity = (function () {
+    function Entity(pos, vel, size, traits) {
+        if (traits === void 0) { traits = []; }
+        this.name = 'entity';
         this.pos = pos;
         this.vel = vel;
         this.size = size;
         this.lifetime = 0;
+        this.firstPaintComplete = false;
         this.calculateBounds();
         this.initialiseTraits(traits);
-        this.buffer = document.createElement("canvas");
-        this.buffer.width = this.size.x;
-        this.buffer.height = this.size.y;
-        this.bufferContext = this.buffer.getContext("2d");
+        this.buffer = new buffer_1.Buffer(this.size.x, this.size.y);
     }
-    initialiseTraits(traits) {
-        traits.forEach(trait => {
-            this.traits[trait.getName()] = trait;
+    Entity.prototype.initialiseTraits = function (traits) {
+        var _this = this;
+        traits.forEach(function (trait) {
+            _this.traits[trait.getName()] = trait;
         });
-    }
-    addTrait(trait) {
-        this.traits[trait.getName()] = trait;
-    }
-    removeTrait(trait) {
-        delete this.traits[trait.getName()];
-    }
-    calculateBounds() {
+    };
+    Entity.prototype.calculateBounds = function () {
         this.bounds = new math_1.BoundingBox(this.pos, this.size);
-    }
-    draw(context) {
-        context.drawImage(this.buffer, this.pos.x, this.pos.y);
-    }
-    update(deltaTime) {
+    };
+    Entity.prototype.paintOn = function (context) {
+        if (!this.firstPaintComplete) {
+            var debug = false;
+            this.draw();
+            if (debug) {
+                var bufferContext = this.buffer.getContext();
+                bufferContext.strokeStyle = 'green';
+                bufferContext.rect(0, 0, this.size.x - 1, this.size.y - 1);
+                bufferContext.stroke();
+            }
+        }
+        context.drawImage(this.buffer.getCanvas(), (0.5 + this.pos.x) << 0, (0.5 + this.pos.y) << 0);
+    };
+    Entity.prototype.update = function (deltaTime) {
         for (var trait in this.traits) {
             this.traits[trait].update(this, deltaTime);
         }
         this.lifetime += deltaTime;
-    }
-}
-exports.default = Entity;
-
-},{"./util/math":33}],25:[function(require,module,exports) {
+    };
+    return Entity;
+}());
+exports.Entity = Entity;
+//# sourceMappingURL=entity.js.map
+},{"./util/math":16,"./buffer":15}],13:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Animator {
-    constructor(compositor, context, deltaTime = 1 / 60) {
+var Animator = (function () {
+    function Animator(compositor, context, deltaTime) {
+        if (deltaTime === void 0) { deltaTime = 1 / 60; }
         this.accumulatedTime = 0;
         this.lastTime = 0;
         this.deltaTime = deltaTime;
         this.compositor = compositor;
         this.context = context;
+        this.animate = this.animate.bind(this);
     }
-    enqueue() {
-        window.requestAnimationFrame(this.update);
-    }
-    update(time) {
+    Animator.prototype.enqueue = function () {
+        window.requestAnimationFrame(this.animate);
+    };
+    Animator.prototype.animate = function (time) {
         this.accumulatedTime += (time - this.lastTime) / 1000;
         if (this.accumulatedTime > 1) {
             this.accumulatedTime = 1;
         }
         while (this.accumulatedTime > this.deltaTime) {
-            this.animate(this.deltaTime);
+            this.compositor.update(this.deltaTime);
             this.accumulatedTime -= this.deltaTime;
         }
+        this.compositor.paintOn(this.context);
         this.lastTime = time;
         this.enqueue();
-    }
-    animate(deltaTime) {
-        this.compositor.update(deltaTime);
-        this.compositor.draw(this.context);
-    }
-    start() {
+    };
+    Animator.prototype.start = function () {
         this.enqueue();
-    }
-}
-exports.default = Animator;
-
-},{}],26:[function(require,module,exports) {
+    };
+    return Animator;
+}());
+exports.Animator = Animator;
+//# sourceMappingURL=animator.js.map
+},{}],14:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Compositor {
-    constructor(width, height, layers = []) {
+var buffer_1 = require("./buffer");
+var Compositor = (function () {
+    function Compositor(width, height, layers) {
+        if (layers === void 0) { layers = []; }
         this.layers = layers;
-        this.buffer = document.createElement('canvas');
-        this.buffer.width = width;
-        this.buffer.height = height;
-        this.bufferContext = this.buffer.getContext('2d');
+        this.buffer = new buffer_1.Buffer(width, height);
     }
-    addLayer(layer) {
+    Compositor.prototype.addLayer = function (layer) {
         this.layers.push(layer);
-    }
-    removeLayer(layer) {
-        this.layers = this.layers.filter((l) => {
-            return l !== layer;
-        });
-    }
-    update(deltaTime) {
-        this.layers.forEach(layer => layer.update(deltaTime));
-    }
-    draw(context) {
-        this.layers.forEach(layer => layer.draw(this.bufferContext));
-        context.drawImage(this.buffer, 0, 0);
-    }
-}
-exports.default = Compositor;
-
-},{}],21:[function(require,module,exports) {
+    };
+    Compositor.prototype.update = function (deltaTime) {
+        for (var i = 0; i < this.layers.length; i++) {
+            this.layers[i].update(deltaTime);
+        }
+    };
+    Compositor.prototype.paintOn = function (context) {
+        for (var i = 0; i < this.layers.length; i++) {
+            this.layers[i].paintOn(this.buffer.getContext());
+        }
+        context.drawImage(this.buffer.getCanvas(), 0, 0);
+    };
+    return Compositor;
+}());
+exports.Compositor = Compositor;
+//# sourceMappingURL=compositor.js.map
+},{"./buffer":15}],10:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = require("./util/index");
-exports.util = index_1.default;
+var util_1 = require("./util");
+exports.util = util_1.util;
 var layer_1 = require("./layer");
-exports.Layer = layer_1.default;
+exports.Layer = layer_1.Layer;
 var entity_1 = require("./entity");
-exports.Entity = entity_1.default;
+exports.Entity = entity_1.Entity;
 var animator_1 = require("./animator");
-exports.Animator = animator_1.default;
+exports.Animator = animator_1.Animator;
 var compositor_1 = require("./compositor");
-exports.Compositor = compositor_1.default;
-
-},{"./util/index":27,"./layer":23,"./entity":24,"./animator":25,"./compositor":26}],14:[function(require,module,exports) {
-const loader = require('./dist');
-
-module.exports = loader;
-
-},{"./dist":21}],13:[function(require,module,exports) {
+exports.Compositor = compositor_1.Compositor;
+//# sourceMappingURL=index.js.map
+},{"./util":17,"./layer":11,"./entity":12,"./animator":13,"./compositor":14}],9:[function(require,module,exports) {
 'use strict';
+
+var _dist = require('./dist');
+
+var cotton = _interopRequireWildcard(_dist);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+module.exports = cotton;
+},{"./dist":10}],6:[function(require,module,exports) {
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -338,7 +1794,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _cottonJs = require('@agierens/cotton-js');
+var _cottonJs = require("cotton-js");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -346,11 +1802,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var getRandomNumber = _cottonJs.util.getRandomNumber;
+var getRandomNumber = _cottonJs.util.getRandomNumber,
+    getRandomInt = _cottonJs.util.getRandomInt;
 
 
 var getRandomStarColour = function getRandomStarColour() {
-  var colours = ['225,247,213', '255,189,189', '201,201,255', '241,203,255'];
+  var colours = ["225,247,213", "255,189,189", "201,201,255", "241,203,255"];
 
   return colours[Math.floor(Math.random() * colours.length)];
 };
@@ -359,54 +1816,56 @@ var Star = function (_Entity) {
   _inherits(Star, _Entity);
 
   function Star(maxWidth, maxHeight, pos, vel) {
-    var colour = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : getRandomStarColour();
-    var opacity = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : Math.random();
-    var trail = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : getRandomNumber(0, 40);
-    var size = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : getRandomNumber(0.2, 0.9);
+    var radius = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 2;
+    var colour = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : getRandomStarColour();
+    var opacity = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : getRandomNumber(0.1, 1);
+    var trail = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : getRandomInt(5, 20);
 
     _classCallCheck(this, Star);
 
-    var _this = _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this));
+    if (radius < 1 || radius > 3) throw new exception("radius must be between 2 and 4");
 
-    _this.pos = pos;
-    _this.vel = vel;
-    _this.size = size;
+    var size = new _cottonJs.util.Point(radius * trail, radius * trail);
+
+    var _this = _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, pos, vel, size));
+
     _this.maxWidth = maxWidth;
     _this.maxHeight = maxHeight;
-    _this.maxRadius = 4;
-    _this.radius = _this.maxRadius * _this.size;
+    _this.radius = radius;
     _this.opacity = opacity;
     _this.colour = colour;
     _this.trail = trail;
-
-    // TODO fix sizing issue with entity. This should always be passed in
-    _this.buffer = document.createElement('canvas');
-    _this.bufferContext = _this.buffer.getContext('2d');
-    _this.buffer.width = _this.maxRadius * 2;
-    _this.buffer.height = _this.maxRadius * 2;
-    _this.bufferContext.fillStyle = 'rgba(' + _this.colour + ', ' + _this.opacity + ')';
-    _this.bufferContext.shadowBlur = _this.trail;
-    _this.bufferContext.shadowColor = 'rgba(' + _this.colour + ', ' + _this.opacity + ')';
-    _this.bufferContext.beginPath();
-    _this.bufferContext.arc(0, 0, _this.radius, 0, Math.PI * 2, false);
-    _this.bufferContext.fill();
-
-    _this.bufferContext.shadowBlur = 0;
     return _this;
   }
 
   _createClass(Star, [{
-    key: 'update',
+    key: "draw",
+    value: function draw() {
+      var context = this.buffer.getContext();
+
+      context.fillStyle = "rgba(" + this.colour + ", " + this.opacity + ")";
+      context.shadowBlur = this.trail;
+      context.shadowColor = "rgba(" + this.colour + ", " + this.opacity + ")";
+
+      // TODO fix sizing issue with entity. This should always be passed in
+      context.beginPath();
+      context.arc(this.size.x / 2, this.size.y / 2, this.radius, 0, Math.PI * 2, false);
+      context.fill();
+
+      context.shadowBlur = 0;
+    }
+  }, {
+    key: "update",
     value: function update(deltaTime) {
-      _get(Star.prototype.__proto__ || Object.getPrototypeOf(Star.prototype), 'update', this).call(this, deltaTime);
+      _get(Star.prototype.__proto__ || Object.getPrototypeOf(Star.prototype), "update", this).call(this, deltaTime);
 
       this.pos.x += this.vel.x * deltaTime;
       this.pos.y += this.vel.y * deltaTime;
 
-      if (this.pos.x > this.maxWidth) this.pos.x = 0;
-      if (this.pos.x < 0) this.pos.x = this.maxWidth;
+      if (this.pos.x > this.maxWidth) this.pos.x = 0 - this.size.x;
+      if (this.pos.x + this.size.x < 0) this.pos.x = this.maxWidth + this.size.x;
       if (this.pos.y > this.maxHeight) this.pos.y = 0;
-      if (this.pos.y < 0) this.pos.y = this.maxHeight;
+      if (this.pos.y + this.size.y < 0) this.pos.y = this.maxHeight - this.size.y;
     }
   }]);
 
@@ -414,8 +1873,8 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"@agierens/cotton-js":14}],7:[function(require,module,exports) {
-'use strict';
+},{"cotton-js":9}],3:[function(require,module,exports) {
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -423,9 +1882,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _cottonJs = require('@agierens/cotton-js');
+var _cottonJs = require("cotton-js");
 
-var _star = require('./star');
+var _star = require("./star");
 
 var _star2 = _interopRequireDefault(_star);
 
@@ -437,10 +1896,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Vec = _cottonJs.util.Vec,
+var Point = _cottonJs.util.Point,
     getRandomNumber = _cottonJs.util.getRandomNumber;
 
-var starCount = getRandomNumber(900, 1000);
+var starCount = 200;
 
 var BackgroundLayer = function (_Layer) {
   _inherits(BackgroundLayer, _Layer);
@@ -450,17 +1909,19 @@ var BackgroundLayer = function (_Layer) {
 
     var _this = _possibleConstructorReturn(this, (BackgroundLayer.__proto__ || Object.getPrototypeOf(BackgroundLayer)).call(this, width, height));
 
-    _this.entities = _this.createStars();
+    _this.addEntities(_this.createStars());
     return _this;
   }
 
   _createClass(BackgroundLayer, [{
-    key: 'createStars',
+    key: "createStars",
     value: function createStars() {
       var stars = [];
 
+      var maxVelocity = 100;
+
       for (var i = 0; i < starCount; i += 1) {
-        stars.push(new _star2.default(this.width, this.height, new Vec(getRandomNumber(0, this.width), getRandomNumber(0, this.height)), new Vec(-2, -2)));
+        stars.push(new _star2.default(this.width, this.height, new Point(getRandomNumber(0, this.width), getRandomNumber(0, this.height)), new Point(getRandomNumber(-maxVelocity, maxVelocity), getRandomNumber(-maxVelocity, maxVelocity)), getRandomNumber(2, 3)));
       }
 
       return stars;
@@ -471,8 +1932,8 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"@agierens/cotton-js":14,"./star":13}],15:[function(require,module,exports) {
-'use strict';
+},{"cotton-js":9,"./star":6}],7:[function(require,module,exports) {
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -482,7 +1943,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _cottonJs = require('@agierens/cotton-js');
+var _cottonJs = require("cotton-js");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -490,8 +1951,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var getRandomNumber = _cottonJs.util.getRandomNumber,
+    Point = _cottonJs.util.Point;
+
+
 var getRandomLetterColour = function getRandomLetterColour() {
-  var colours = ['225,247,213', '255,189,189', '201,201,255', '241,203,255'];
+  var colours = ["225,247,213", "255,189,189", "201,201,255", "241,203,255"];
 
   return colours[Math.floor(Math.random() * colours.length)];
 };
@@ -499,70 +1964,59 @@ var getRandomLetterColour = function getRandomLetterColour() {
 var Letter = function (_Entity) {
   _inherits(Letter, _Entity);
 
-  function Letter(pos, letterToDrawMatrix) {
+  function Letter(maxWidth, maxHeight, pos, letterToDrawMatrix) {
     _classCallCheck(this, Letter);
 
-    var _this = _possibleConstructorReturn(this, (Letter.__proto__ || Object.getPrototypeOf(Letter)).call(this));
+    var blockSize = new Point(10, 10);
+    var width = 0;
 
-    _this.pos = pos;
-    _this.vel = new _cottonJs.util.Vec(50, 50);
-    _this.size = 10;
+    letterToDrawMatrix.forEach(function (arr) {
+      if (arr.length > width) {
+        width = arr.length;
+      }
+    });
+
+    var height = letterToDrawMatrix.length;
+
+    var _this = _possibleConstructorReturn(this, (Letter.__proto__ || Object.getPrototypeOf(Letter)).call(this, pos, new Point(50, 50), new Point(width * blockSize.x, height * blockSize.y)));
+
+    _this.blockSize = blockSize;
+    _this.maxWidth = maxWidth;
+    _this.maxHeight = maxHeight;
     _this.letterToDrawMatrix = letterToDrawMatrix;
-
-    _this.buffer = document.createElement('canvas');
-    _this.bufferContext = _this.buffer.getContext('2d');
-
-    _this.drawLetter();
-    setInterval(function () {
-      _this.drawLetter();
-    }, 250);
     return _this;
   }
 
   _createClass(Letter, [{
-    key: 'drawLetter',
-    value: function drawLetter() {
-      var _this2 = this;
+    key: "draw",
+    value: function draw() {
+      var context = this.buffer.getContext();
 
-      this.width = this.letterToDrawMatrix[0].length;
-      this.letterToDrawMatrix.forEach(function (arr) {
-        if (arr.length > _this2.width) {
-          _this2.width = arr.length;
-        }
-      });
-      this.height = this.letterToDrawMatrix.length;
-      this.buffer.width = this.size * this.width;
-      this.buffer.height = this.size * this.height;
-      this.bufferContext.fillStyle = 'rgba(' + getRandomLetterColour() + ', ' + 1 + ')';
-      this.bufferContext.shadowBlur = 0;
+      context.fillStyle = "rgba(" + getRandomLetterColour() + ", " + 1 + ")";
+      context.shadowBlur = 0;
 
       for (var y = 0; y < this.letterToDrawMatrix.length; y += 1) {
         var row = this.letterToDrawMatrix[y];
         for (var x = 0; x < row.length; x += 1) {
           if (row[x]) {
-            this.bufferContext.fillRect(x * this.size, y * this.size, this.size, this.size);
+            context.fillRect(x * this.blockSize.x, y * this.blockSize.y, this.blockSize.x, this.blockSize.y);
           }
         }
       }
     }
   }, {
-    key: 'update',
+    key: "update",
     value: function update(deltaTime) {
-      _get(Letter.prototype.__proto__ || Object.getPrototypeOf(Letter.prototype), 'update', this).call(this, deltaTime);
+      _get(Letter.prototype.__proto__ || Object.getPrototypeOf(Letter.prototype), "update", this).call(this, deltaTime);
 
-      this.pos.y += this.vel.y * deltaTime;
       this.pos.x += this.vel.x * deltaTime;
+      this.pos.y += this.vel.y * deltaTime;
+      // Bounce
+      var variance = 0.2;
 
-      if (this.vel.x === 1 || this.vel.x === -1) this.vel.x = 0;
-      if (this.vel.y === 1 || this.vel.y === -1) this.vel.y = 0;
+      if (this.pos.x < 0 || this.pos.x > this.maxWidth - this.size.x) this.vel.x = -_cottonJs.util.getRandomNumber(this.vel.x - variance, this.vel.x + variance);
 
-      this.vel.x = _cottonJs.util.getRandomNumber(this.vel.x - 0.1, this.vel.x + 0.1);
-      this.vel.y = _cottonJs.util.getRandomNumber(this.vel.y - 0.1, this.vel.y + 0.1);
-
-      if (this.pos.y < 0) this.vel.y = -this.vel.y;
-      if (this.pos.x < 0) this.vel.x = -this.vel.x;
-      if (this.pos.y > window.innerHeight / 2 - this.size * this.height) this.vel.y = -this.vel.y;
-      if (this.pos.x > window.innerWidth / 2 - this.size * this.width) this.vel.x = -this.vel.x;
+      if (this.pos.y < 0 || this.pos.y > this.maxHeight - this.size.y) this.vel.y = -_cottonJs.util.getRandomNumber(this.vel.y - variance, this.vel.y + variance);
     }
   }]);
 
@@ -570,7 +2024,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"@agierens/cotton-js":14}],16:[function(require,module,exports) {
+},{"cotton-js":9}],8:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -618,20 +2072,20 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],8:[function(require,module,exports) {
-'use strict';
+},{}],4:[function(require,module,exports) {
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _cottonJs = require('@agierens/cotton-js');
+var _cottonJs = require("cotton-js");
 
-var _letter = require('./letter');
+var _letter = require("./letter");
 
 var _letter2 = _interopRequireDefault(_letter);
 
-var _letters = require('./letters');
+var _letters = require("./letters");
 
 var _letters2 = _interopRequireDefault(_letters);
 
@@ -643,10 +2097,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Vec = _cottonJs.util.Vec;
+var Point = _cottonJs.util.Point;
 
 
-var createText = function createText(str, yOffset) {
+var createText = function createText(maxWidth, maxHeight, str, yOffset) {
   var strUppered = str.toUpperCase();
   var retVal = [];
 
@@ -656,16 +2110,22 @@ var createText = function createText(str, yOffset) {
     var char = strUppered.charAt(i);
     var letterMatrix = _letters2.default[char];
 
-    retVal.push(new _letter2.default(new Vec(currX, yOffset), letterMatrix));
+    letter = new _letter2.default(maxWidth, maxHeight, new Point(currX, yOffset), letterMatrix);
+
+    retVal.push(letter);
+
     var maxLength = 0;
 
     letterMatrix.forEach(function (mat) {
       if (mat.length > maxLength) maxLength = mat.length;
     });
-    currX += maxLength * 22;
+
+    currX += maxLength * (letter.blockSize.x + 1);
   };
 
   for (var i = 0; i < strUppered.length; i += 1) {
+    var letter;
+
     _loop(i);
   }
 
@@ -680,15 +2140,15 @@ var TextLayer = function (_Layer) {
 
     _classCallCheck(this, TextLayer);
 
-    return _possibleConstructorReturn(this, (TextLayer.__proto__ || Object.getPrototypeOf(TextLayer)).call(this, width, height, createText(textToDisplay, yOffset)));
+    return _possibleConstructorReturn(this, (TextLayer.__proto__ || Object.getPrototypeOf(TextLayer)).call(this, width, height, createText(width, height, textToDisplay, yOffset)));
   }
 
   return TextLayer;
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"@agierens/cotton-js":14,"./letter":15,"./letters":16}],9:[function(require,module,exports) {
-'use strict';
+},{"cotton-js":9,"./letter":7,"./letters":8}],5:[function(require,module,exports) {
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -696,7 +2156,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _cottonJs = require('@agierens/cotton-js');
+var _cottonJs = require("cotton-js");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -704,60 +2164,79 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var CloudParticle = function (_Entity) {
+  _inherits(CloudParticle, _Entity);
+
+  function CloudParticle(pos, vel, size, traits) {
+    _classCallCheck(this, CloudParticle);
+
+    return _possibleConstructorReturn(this, (CloudParticle.__proto__ || Object.getPrototypeOf(CloudParticle)).call(this, pos, vel, size, traits));
+  }
+
+  _createClass(CloudParticle, [{
+    key: "draw",
+    value: function draw() {
+      var context = this.buffer.getContext();
+
+      var blueCloud = context.createRadialGradient(0, 0, this.size.x / 4, this.size.x / 2, this.size.y / 2, 2000);
+
+      blueCloud.addColorStop(0, "#061f47");
+      blueCloud.addColorStop(1, "#000000");
+
+      context.fillStyle = blueCloud;
+      context.fillRect(0, 0, this.size.x, this.size.y);
+    }
+  }]);
+
+  return CloudParticle;
+}(_cottonJs.Entity);
+
 var Cloud = function (_Layer) {
   _inherits(Cloud, _Layer);
 
   function Cloud(width, height) {
     _classCallCheck(this, Cloud);
 
-    return _possibleConstructorReturn(this, (Cloud.__proto__ || Object.getPrototypeOf(Cloud)).call(this, width, height, []));
-  }
+    var _this2 = _possibleConstructorReturn(this, (Cloud.__proto__ || Object.getPrototypeOf(Cloud)).call(this, width, height, []));
 
-  _createClass(Cloud, [{
-    key: 'draw',
-    value: function draw(context) {
-      var blueCloud = context.createRadialGradient(0, 0, this.width / 4, this.width / 2, this.height / 2, 2000);
-      blueCloud.addColorStop(0, '#061f47');
-      blueCloud.addColorStop(1, '#000000');
-      context.fillStyle = blueCloud;
-      context.fillRect(0, 0, this.width, this.height);
-    }
-  }]);
+    _this2.addEntity(new CloudParticle(new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(_this2.width, _this2.height), []));
+    return _this2;
+  }
 
   return Cloud;
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"@agierens/cotton-js":14}],5:[function(require,module,exports) {
-'use strict';
+},{"cotton-js":9}],2:[function(require,module,exports) {
+"use strict";
 
-var _cottonJs = require('@agierens/cotton-js');
+var _cottonJs = require("cotton-js");
 
-var _backgroundLayer = require('./background-layer');
+var _backgroundLayer = require("./background-layer");
 
 var _backgroundLayer2 = _interopRequireDefault(_backgroundLayer);
 
-var _textLayer = require('./text-layer');
+var _textLayer = require("./text-layer");
 
 var _textLayer2 = _interopRequireDefault(_textLayer);
 
-var _cloud = require('./cloud');
+var _cloud = require("./cloud");
 
 var _cloud2 = _interopRequireDefault(_cloud);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var canvas = document.getElementById('yaboi');
+var canvas = document.getElementById("yaboi");
 var width = window.innerWidth;
 var height = window.innerHeight;
 
 canvas.width = width;
 canvas.height = height;
 
-undefined.animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, [new _cloud2.default(width, height), new _backgroundLayer2.default(width, height), new _textLayer2.default(width, height, 'aswin'), new _textLayer2.default(width, height, 'lakshman', 70), new _textLayer2.default(width, height, '--------', 70 * 2), new _textLayer2.default(width, height, 'designer', 70 * 3), new _textLayer2.default(width, height, 'developer', 70 * 4)]), canvas.getContext('2d'));
+var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, [new _cloud2.default(width, height), new _backgroundLayer2.default(width, height), new _textLayer2.default(width, height, "team"), new _textLayer2.default(width, height, "cotton", 70)]), canvas.getContext("2d"));
 
-undefined.animator.start();
-},{"@agierens/cotton-js":14,"./background-layer":7,"./text-layer":8,"./cloud":9}],36:[function(require,module,exports) {
+animator.start();
+},{"cotton-js":9,"./background-layer":3,"./text-layer":4,"./cloud":5}],22:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -787,7 +2266,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '58075' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59501' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -926,5 +2405,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[36,5])
+},{}]},{},[22,2])
 //# sourceMappingURL=/cotton-js-test-bench.8d2766ad.map
