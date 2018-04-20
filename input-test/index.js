@@ -10,7 +10,7 @@ class SimpleEntity extends Entity {
     draw() { }
 };
 
-export const runInputTest = function run() {
+export const runInputTest = function runInputTest() {
     const rootEl = document.getElementById('yaboi');
     const width = window.innerWidth;
     const height = window.innerHeight;

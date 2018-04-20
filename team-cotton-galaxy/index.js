@@ -3,7 +3,7 @@ import BackgroundLayer from "./background-layer";
 import TextLayer from "./text-layer";
 import Cloud from "./cloud";
 
-export const runGalaxy = function run() {
+export const runGalaxy = function runGalaxy() {
   const canvas = document.getElementById("yaboi");
   const width = window.innerWidth;
   const height = window.innerHeight;
