@@ -58,22 +58,22 @@ export default class Letter extends Entity {
   update(deltaTime) {
     super.update(deltaTime);
 
-    this.pos.x += this.vel.x * deltaTime;
-    this.pos.y += this.vel.y * deltaTime;
+    this.position.x += this.velocity.x * deltaTime;
+    this.position.y += this.velocity.y * deltaTime;
     
     // Bounce
     var variance = 0.2;
 
-    if (this.pos.x < 0 || this.pos.x > this.maxWidth - this.size.x)
-      this.vel.x = -util.getRandomNumber(
-        this.vel.x - variance,
-        this.vel.x + variance
+    if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x)
+      this.velocity.x = -util.getRandomNumber(
+        this.velocity.x - variance,
+        this.velocity.x + variance
       );
 
-    if (this.pos.y < 0 || this.pos.y > this.maxHeight - this.size.y)
-      this.vel.y = -util.getRandomNumber(
-        this.vel.y - variance,
-        this.vel.y + variance
+    if (this.position.y < 0 || this.position.y > this.maxHeight - this.size.y)
+      this.velocity.y = -util.getRandomNumber(
+        this.velocity.y - variance,
+        this.velocity.y + variance
       );
   }
 }

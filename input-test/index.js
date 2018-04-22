@@ -16,19 +16,19 @@ export const runInputTest = function runInputTest() {
   const inputHandler = new input.Keyboard(window);
 
   inputHandler.addMapping('ArrowLeft', () => {
-      movableEntity.pos.x -= 10;
+      movableEntity.position.x -= 10;
   });
 
   inputHandler.addMapping('ArrowRight', () => {
-      movableEntity.pos.x += 10;
+      movableEntity.position.x += 10;
   });
 
   inputHandler.addMapping('ArrowUp', () => {
-      movableEntity.pos.y -= 10;
+      movableEntity.position.y -= 10;
   });
 
   inputHandler.addMapping('ArrowDown', () => {
-      movableEntity.pos.y += 10;
+      movableEntity.position.y += 10;
   });
 
   let animator = new Animator(
