@@ -11,5 +11,8 @@
   },
   "scripts": {
     "watch": "parcel index.html"
+  },
+  "devDependencies": {
+    "typescript": "^2.8.3"
   }
 }

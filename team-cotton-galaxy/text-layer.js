@@ -1,11 +1,11 @@
-import { Layer, util } from "cotton-js";
+import { Layer, util, EntityGraph } from "cotton-js";
 
 import Letter from "./letter";
 import letters from "./letters";
 
 const { Point } = util;
 
-const createText = (maxWidth, maxHeight, str, yOffset) => {
+const createText = (maxWidth, maxHeight, str, yOffset, entityGraph) => {
   const strUppered = str.toUpperCase();
   const retVal = [];
 
@@ -18,7 +18,8 @@ const createText = (maxWidth, maxHeight, str, yOffset) => {
       maxWidth,
       maxHeight,
       new Point(currX, yOffset),
-      letterMatrix
+      letterMatrix,
+      entityGraph
     );
     retVal.push(letter);
 
@@ -36,6 +37,8 @@ const createText = (maxWidth, maxHeight, str, yOffset) => {
 
 export default class TextLayer extends Layer {
   constructor(width, height, textToDisplay, yOffset = 0) {
-    super(width, height, createText(width, height, textToDisplay, yOffset));
+    super(width, height, new EntityGraph());
+
+    this.addEntities(createText(width, height, textToDisplay, yOffset, this.entityGraph));
   }
 }

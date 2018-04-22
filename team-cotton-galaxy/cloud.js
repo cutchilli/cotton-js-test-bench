@@ -1,8 +1,8 @@
-import { Entity, Layer, util } from "cotton-js";
+import { Entity, Layer, util, EntityGraph } from "cotton-js";
 
 class CloudParticle extends Entity {
-  constructor(pos, vel, size, traits) {
-    super(pos, vel, size, traits);
+  constructor(pos, vel, size, entityGraph) {
+    super(pos, vel, size, entityGraph);
   }
 
   draw() {
@@ -27,14 +27,14 @@ class CloudParticle extends Entity {
 
 export default class Cloud extends Layer {
   constructor(width, height) {
-    super(width, height, []);
+    super(width, height, new EntityGraph());
 
     this.addEntity(
       new CloudParticle(
         new util.Point(0, 0),
         new util.Point(0, 0),
         new util.Point(this.width, this.height),
-        []
+        this.entityGraph
       )
     );
   }

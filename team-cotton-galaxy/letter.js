@@ -9,7 +9,7 @@ const getRandomLetterColour = () => {
 };
 
 export default class Letter extends Entity {
-  constructor(maxWidth, maxHeight, pos, letterToDrawMatrix) {
+  constructor(maxWidth, maxHeight, pos, letterToDrawMatrix, entityGraph) {
     let blockSize = new Point(10, 10);
     let width = 0;
 
@@ -24,7 +24,8 @@ export default class Letter extends Entity {
     super(
       pos,
       new Point(50, 50),
-      new Point(width * blockSize.x, height * blockSize.y)
+      new Point(width * blockSize.x, height * blockSize.y),
+      entityGraph
     );
 
     this.blockSize = blockSize;
@@ -59,6 +60,7 @@ export default class Letter extends Entity {
 
     this.pos.x += this.vel.x * deltaTime;
     this.pos.y += this.vel.y * deltaTime;
+    
     // Bounce
     var variance = 0.2;
 

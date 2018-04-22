@@ -1,14 +1,6 @@
 import Cloud from "../team-cotton-galaxy/cloud";
-import { Animator, Compositor, Layer, Entity, util, input } from "cotton-js";
-
-class SimpleEntity extends Entity {
-    constructor(pos, vel, size) {
-        super(pos, vel, size, [], true);
-    }
-
-    // do nothing. We just want to see a box
-    draw() { }
-};
+import { Animator, Compositor, Layer, Entity, util, input, EntityGraph } from "cotton-js";
+import SimpleEntity from '../common/simple-entity';
 
 export const runInputTest = function runInputTest() {
     const rootEl = document.getElementById('yaboi');
@@ -44,7 +36,7 @@ export const runInputTest = function runInputTest() {
             width,
             height,
             rootEl,
-            [new Layer(width, height, [movableEntity])],
+            [new Layer(width, height, new EntityGraph(), [movableEntity])],
         )
     );
 

@@ -1,4 +1,4 @@
-import { Entity, util } from "cotton-js";
+import { Entity, util, EntityGraph } from "cotton-js";
 
 const { getRandomNumber, getRandomInt } = util;
 
@@ -10,6 +10,7 @@ const getRandomStarColour = () => {
 
 export default class Star extends Entity {
   constructor(
+    entityGraph,
     maxWidth,
     maxHeight,
     pos,
@@ -24,7 +25,7 @@ export default class Star extends Entity {
 
     const size = new util.Point(radius * trail, radius * trail);
 
-    super(pos, vel, size);
+    super(pos, vel, size, entityGraph);
 
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;

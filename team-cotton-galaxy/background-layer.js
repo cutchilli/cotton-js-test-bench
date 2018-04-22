@@ -1,4 +1,4 @@
-import { Layer, util } from "cotton-js";
+import { Layer, util, EntityGraph } from "cotton-js";
 
 import Star from "./star";
 
@@ -7,7 +7,7 @@ const starCount = 200;
 
 export default class BackgroundLayer extends Layer {
   constructor(width, height) {
-    super(width, height);
+    super(width, height, new EntityGraph());
 
     this.addEntities(this.createStars());
   }
@@ -20,6 +20,7 @@ export default class BackgroundLayer extends Layer {
     for (let i = 0; i < starCount; i += 1) {
       stars.push(
         new Star(
+          this.entityGraph,
           this.width,
           this.height,
           new Point(
