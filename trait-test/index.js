@@ -27,12 +27,13 @@ class BoundByPhysics extends Trait {
     super();
     this.terminalVelocity = terminalVelocity;
   }
+
   update(entity, entityGraph, deltaTime) {
     // Update velocity
     entity.velocity.x += deltaTime * entity.acceleration.x;
     entity.velocity.y += deltaTime * entity.acceleration.y;
 
-    // Cap out terminal velocity if required
+    // Cap out at terminal velocity if required
     if (Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
     if (Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
 
@@ -52,6 +53,53 @@ class Obstacle extends Trait {
   }
 }
 
+class ConstrainedByObstacles extends Trait {
+  getName() {
+    return this.constructor.name;
+  }
+
+  update(entity, entityGraph, deltaTime) {
+    // Have I encountered any obstacles?
+    const obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
+
+    obstacles.forEach((obstacle) => {
+      if (!util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+
+      // Based on current acceleration, check what needs a tweak
+
+      // We may have colided with left or right edge
+      if (entity.acceleration.x > 0 && entity.bounds.right > obstacle.bounds.left) {
+        // Coming in from the left
+        entity.acceleration.x = 0;
+        entity.position.x = obstacle.position.x - entity.size.x;
+        return;
+      }
+
+      if (entity.acceleration.x < 0 && entity.bounds.left < obstacle.bounds.right) {
+        // Coming in from the right
+        entity.acceleration.x = 0;
+        entity.position.x = obstacle.position.x + obstacle.size.x;
+        return;
+      }
+
+      // We may have colided with top or bottom edge
+      if (entity.acceleration.y > 0 && entity.bounds.bottom > obstacle.bounds.top) {
+        // Coming in from the top
+        entity.acceleration.y = 0;
+        entity.position.y = obstacle.position.y - entity.size.y;
+        return;
+      }
+
+      if (entity.acceleration.y < 0 && entity.bounds.top < obstacle.bounds.bottom) {
+        // Coming in from the bottom
+        entity.acceleration.y = 0;
+        entity.position.y = obstacle.position.y + obstacle.size.y;
+        return;
+      }
+    });
+  }
+}
+
 class Block extends SimpleEntity {
   constructor(pos, entityGraph) {
     super(
@@ -65,17 +113,22 @@ class Block extends SimpleEntity {
   }
 }
 
-// class Yaboi extends SimpleEntity {
-//   constructor(pos, entityGraph) {
-
-//   }
-// }
+class Yaboi extends SimpleEntity {
+  constructor(pos, entityGraph, traits) {
+    super(
+      pos,
+      new util.Point(0, 0),
+      new util.Point(20, 20),
+      entityGraph,
+      'yellow',
+      traits
+    );
+  }
+}
 
 export const runTraitTest = function runTraitTest() {
   
   const entityGraph = new EntityGraph();
-
-  // Create the traits, these will be the "rules" of the game  
 
   const entities = [];
 
@@ -88,7 +141,62 @@ export const runTraitTest = function runTraitTest() {
     x += 50;
   }
 
+  // Create the roof
+  x = 0;
+  y = 0;
+
+  while (x < width) {
+    entities.push(new Block(new util.Point(x, y), entityGraph));
+    x += 50;
+  }
+
+  // Create left wall
+  x = 0;
+  y = 0;
+
+  while (y < height) {
+    entities.push(new Block(new util.Point(x, y), entityGraph));
+    y += 50;
+  }
+
+  // Create right wall
+  x = width - 50;
+  y = 0;
+
+  while (y < height) {
+    entities.push(new Block(new util.Point(x, y), entityGraph));
+    y += 50;
+  }
+
   // Create the movable entity
+  const startingLoc1 = new util.Point(width/2, height/2);
+  const startingLoc2 = new util.Point(width/2, height/2);
+  const startingLoc3 = new util.Point(width/2, height/2);
+  const startingLoc4 = new util.Point(width/2, height/2);
+
+  entities.push(new Yaboi(startingLoc1, entityGraph, [
+    new BoundByGravity(new util.Point(-9.8, 0)),
+    new BoundByPhysics(new util.Point(120, 120)),
+    new ConstrainedByObstacles()
+  ]));
+
+  entities.push(new Yaboi(startingLoc2, entityGraph, [
+    new BoundByGravity(new util.Point(0, -9.8)),
+    new BoundByPhysics(new util.Point(120, 120)),
+    new ConstrainedByObstacles()
+  ]));
+
+  entities.push(new Yaboi(startingLoc3, entityGraph, [
+    new BoundByGravity(new util.Point(9.8, 0)),
+    new BoundByPhysics(new util.Point(120, 120)),
+    new ConstrainedByObstacles()
+  ]));
+
+  entities.push(new Yaboi(startingLoc4, entityGraph, [
+    new BoundByGravity(new util.Point(0, 9.8)),
+    new BoundByPhysics(new util.Point(120, 120)),
+    new ConstrainedByObstacles()
+  ]));
 
   let animator = new Animator(
       new Compositor(

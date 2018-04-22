@@ -77,7 +77,7 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({25:[function(require,module,exports) {
+})({46:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var PRESSED = 1;
@@ -116,7 +116,7 @@ var Keyboard = (function () {
 }());
 exports.Keyboard = Keyboard;
 //# sourceMappingURL=keyboard.js.map
-},{}],22:[function(require,module,exports) {
+},{}],36:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var keyboard_1 = require("./keyboard");
@@ -124,7 +124,7 @@ exports.input = {
     Keyboard: keyboard_1.Keyboard,
 };
 //# sourceMappingURL=index.js.map
-},{"./keyboard":25}],27:[function(require,module,exports) {
+},{"./keyboard":46}],51:[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {};
@@ -311,7 +311,7 @@ process.chdir = function (dir) {
 process.umask = function () {
     return 0;
 };
-},{}],26:[function(require,module,exports) {
+},{}],50:[function(require,module,exports) {
 var global = (1,eval)("this");
 var process = require("process");
 /*!
@@ -1494,7 +1494,7 @@ return Promise$1;
 
 //# sourceMappingURL=es6-promise.map
 
-},{"process":27}],23:[function(require,module,exports) {
+},{"process":51}],44:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var es6_promise_1 = require("es6-promise");
@@ -1514,7 +1514,7 @@ var CottonImage = (function () {
 }());
 exports.CottonImage = CottonImage;
 //# sourceMappingURL=image.js.map
-},{"es6-promise":26}],24:[function(require,module,exports) {
+},{"es6-promise":50}],45:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Json = (function () {
@@ -1527,7 +1527,7 @@ var Json = (function () {
 }());
 exports.Json = Json;
 //# sourceMappingURL=json.js.map
-},{}],20:[function(require,module,exports) {
+},{}],41:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var BoundingBox = (function () {
@@ -1605,7 +1605,7 @@ exports.getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 };
 //# sourceMappingURL=math.js.map
-},{}],21:[function(require,module,exports) {
+},{}],37:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var image_1 = require("./image");
@@ -1620,7 +1620,7 @@ exports.util = {
     getRandomNumber: math_1.getRandomNumber,
 };
 //# sourceMappingURL=index.js.map
-},{"./image":23,"./json":24,"./math":20}],19:[function(require,module,exports) {
+},{"./image":44,"./json":45,"./math":41}],40:[function(require,module,exports) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1646,7 +1646,7 @@ var Buffer = (function () {
 }());
 exports.Buffer = Buffer;
 //# sourceMappingURL=buffer.js.map
-},{}],14:[function(require,module,exports) {
+},{}],24:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1697,23 +1697,25 @@ var Layer = (function () {
 }());
 exports.Layer = Layer;
 //# sourceMappingURL=layer.js.map
-},{"./buffer":19,"./util/math":20}],15:[function(require,module,exports) {
+},{"./buffer":40,"./util/math":41}],25:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
 var math_1 = require("./util/math");
 var Entity = (function () {
-    function Entity(pos, vel, size, entityGraph, traits, debug) {
+    function Entity(position, velocity, size, entityGraph, traits, debug) {
         if (traits === void 0) { traits = []; }
         if (debug === void 0) { debug = false; }
         var _this = this;
         this.name = "entity";
         this.debug = debug;
-        this.pos = pos;
-        this.vel = vel;
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = new math_1.Point(0, 0);
         this.size = size;
         this.entityGraph = entityGraph;
         this.traits = traits;
+        this.trait = {};
         this.traits.forEach(function (trait) {
             _this.trait[trait.getName()] = trait;
         });
@@ -1734,12 +1736,12 @@ var Entity = (function () {
             }
             this.firstPaintComplete = true;
         }
-        context.drawImage(this.buffer.getCanvas(), (0.5 + this.pos.x) << 0, (0.5 + this.pos.y) << 0);
+        context.drawImage(this.buffer.getCanvas(), (0.5 + this.position.x) << 0, (0.5 + this.position.y) << 0);
     };
     Entity.prototype.update = function (deltaTime) {
         for (var _i = 0, _a = this.traits; _i < _a.length; _i++) {
             var trait = _a[_i];
-            trait.update(this, deltaTime);
+            trait.update(this, this.entityGraph, deltaTime);
         }
         this.lifetime += deltaTime;
     };
@@ -1747,13 +1749,13 @@ var Entity = (function () {
         return this.traits;
     };
     Entity.prototype.calculateBounds = function () {
-        this.bounds = new math_1.BoundingBox(this.pos, this.size);
+        this.bounds = new math_1.BoundingBox(this.position, this.size);
     };
     return Entity;
 }());
 exports.Entity = Entity;
 //# sourceMappingURL=entity.js.map
-},{"./buffer":19,"./util/math":20}],16:[function(require,module,exports) {
+},{"./buffer":40,"./util/math":41}],26:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Animator = (function () {
@@ -1788,7 +1790,7 @@ var Animator = (function () {
 }());
 exports.Animator = Animator;
 //# sourceMappingURL=animator.js.map
-},{}],17:[function(require,module,exports) {
+},{}],27:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1845,12 +1847,13 @@ var Compositor = (function () {
 }());
 exports.Compositor = Compositor;
 //# sourceMappingURL=compositor.js.map
-},{"./buffer":19}],18:[function(require,module,exports) {
+},{"./buffer":40}],28:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var EntityGraph = (function () {
     function EntityGraph() {
         this.entities = [];
+        this.entitiesByTrait = {};
     }
     EntityGraph.prototype.getEntitiesByTraits = function (trait) {
         return this.entitiesByTrait[trait.getName()] || [];
@@ -1885,7 +1888,20 @@ var EntityGraph = (function () {
 }());
 exports.EntityGraph = EntityGraph;
 //# sourceMappingURL=entity-graph.js.map
-},{}],13:[function(require,module,exports) {
+},{}],29:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Trait = (function () {
+    function Trait() {
+    }
+    Trait.prototype.update = function (entity, entityGraph, deltaTime) {
+        return;
+    };
+    return Trait;
+}());
+exports.Trait = Trait;
+//# sourceMappingURL=trait.js.map
+},{}],22:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var input_1 = require("./input");
@@ -1902,8 +1918,10 @@ var compositor_1 = require("./compositor");
 exports.Compositor = compositor_1.Compositor;
 var entity_graph_1 = require("./entity-graph");
 exports.EntityGraph = entity_graph_1.EntityGraph;
+var trait_1 = require("./trait");
+exports.Trait = trait_1.Trait;
 //# sourceMappingURL=index.js.map
-},{"./input":22,"./util":21,"./layer":14,"./entity":15,"./animator":16,"./compositor":17,"./entity-graph":18}],12:[function(require,module,exports) {
+},{"./input":36,"./util":37,"./layer":24,"./entity":25,"./animator":26,"./compositor":27,"./entity-graph":28,"./trait":29}],21:[function(require,module,exports) {
 'use strict';
 
 var _dist = require('./dist');
@@ -1913,7 +1931,7 @@ var cotton = _interopRequireWildcard(_dist);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 module.exports = cotton;
-},{"./dist":13}],9:[function(require,module,exports) {
+},{"./dist":22}],16:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1989,13 +2007,13 @@ var Star = function (_Entity) {
     value: function update(deltaTime) {
       _get(Star.prototype.__proto__ || Object.getPrototypeOf(Star.prototype), "update", this).call(this, deltaTime);
 
-      this.pos.x += this.vel.x * deltaTime;
-      this.pos.y += this.vel.y * deltaTime;
+      this.position.x += this.velocity.x * deltaTime;
+      this.position.y += this.velocity.y * deltaTime;
 
-      if (this.pos.x > this.maxWidth) this.pos.x = 0 - this.size.x;
-      if (this.pos.x + this.size.x < 0) this.pos.x = this.maxWidth + this.size.x;
-      if (this.pos.y > this.maxHeight) this.pos.y = 0;
-      if (this.pos.y + this.size.y < 0) this.pos.y = this.maxHeight - this.size.y;
+      if (this.position.x > this.maxWidth) this.position.x = 0 - this.size.x;
+      if (this.position.x + this.size.x < 0) this.position.x = this.maxWidth + this.size.x;
+      if (this.position.y > this.maxHeight) this.position.y = 0;
+      if (this.position.y + this.size.y < 0) this.position.y = this.maxHeight - this.size.y;
     }
   }]);
 
@@ -2003,7 +2021,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":12}],5:[function(require,module,exports) {
+},{"cotton-js":21}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2062,7 +2080,7 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"cotton-js":12,"./star":9}],10:[function(require,module,exports) {
+},{"cotton-js":21,"./star":16}],17:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2139,15 +2157,15 @@ var Letter = function (_Entity) {
     value: function update(deltaTime) {
       _get(Letter.prototype.__proto__ || Object.getPrototypeOf(Letter.prototype), "update", this).call(this, deltaTime);
 
-      this.pos.x += this.vel.x * deltaTime;
-      this.pos.y += this.vel.y * deltaTime;
+      this.position.x += this.velocity.x * deltaTime;
+      this.position.y += this.velocity.y * deltaTime;
 
       // Bounce
       var variance = 0.2;
 
-      if (this.pos.x < 0 || this.pos.x > this.maxWidth - this.size.x) this.vel.x = -_cottonJs.util.getRandomNumber(this.vel.x - variance, this.vel.x + variance);
+      if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x) this.velocity.x = -_cottonJs.util.getRandomNumber(this.velocity.x - variance, this.velocity.x + variance);
 
-      if (this.pos.y < 0 || this.pos.y > this.maxHeight - this.size.y) this.vel.y = -_cottonJs.util.getRandomNumber(this.vel.y - variance, this.vel.y + variance);
+      if (this.position.y < 0 || this.position.y > this.maxHeight - this.size.y) this.velocity.y = -_cottonJs.util.getRandomNumber(this.velocity.y - variance, this.velocity.y + variance);
     }
   }]);
 
@@ -2155,7 +2173,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"cotton-js":12}],11:[function(require,module,exports) {
+},{"cotton-js":21}],18:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2203,7 +2221,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],6:[function(require,module,exports) {
+},{}],11:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2281,7 +2299,7 @@ var TextLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":12,"./letter":10,"./letters":11}],7:[function(require,module,exports) {
+},{"cotton-js":21,"./letter":17,"./letters":18}],12:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2341,7 +2359,7 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":12}],3:[function(require,module,exports) {
+},{"cotton-js":21}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2359,7 +2377,7 @@ var _textLayer = require("./text-layer");
 
 var _textLayer2 = _interopRequireDefault(_textLayer);
 
-var _cloud = require("./cloud");
+var _cloud = require("../common/cloud");
 
 var _cloud2 = _interopRequireDefault(_cloud);
 
@@ -2377,42 +2395,53 @@ var runGalaxy = exports.runGalaxy = function runGalaxy() {
 
   animator.start();
 };
-},{"cotton-js":12,"./background-layer":5,"./text-layer":6,"./cloud":7}],8:[function(require,module,exports) {
+},{"cotton-js":21,"./background-layer":10,"./text-layer":11,"../common/cloud":12}],13:[function(require,module,exports) {
 "use strict";
 
-var __extends = this && this.__extends || function () {
-    var extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function (d, b) {
-        d.__proto__ = b;
-    } || function (d, b) {
-        for (var p in b) {
-            if (b.hasOwnProperty(p)) d[p] = b[p];
-        }
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() {
-            this.constructor = d;
-        }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-}();
-exports.__esModule = true;
-var cotton_js_1 = require("cotton-js");
-var cotton_js_2 = require("cotton-js");
-var SimpleEntity = /** @class */function (_super) {
-    __extends(SimpleEntity, _super);
-    function SimpleEntity(pos, vel, size, entityGraph) {
-        if (entityGraph === void 0) {
-            entityGraph = new cotton_js_2.EntityGraph();
-        }
-        return _super.call(this, pos, vel, size, entityGraph, [], true) || this;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _cottonJs = require("cotton-js");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SimpleEntity = function (_Entity) {
+  _inherits(SimpleEntity, _Entity);
+
+  function SimpleEntity(pos, vel, size) {
+    var entityGraph = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : new _cottonJs.EntityGraph();
+    var colour = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : "green";
+    var traits = arguments[5];
+
+    _classCallCheck(this, SimpleEntity);
+
+    var _this = _possibleConstructorReturn(this, (SimpleEntity.__proto__ || Object.getPrototypeOf(SimpleEntity)).call(this, pos, vel, size, entityGraph, traits, true));
+
+    _this.colour = colour;
+    return _this;
+  }
+
+  _createClass(SimpleEntity, [{
+    key: "draw",
+    value: function draw() {
+      var context = this.buffer.getContext();
+      context.fillStyle = this.colour;
+      context.fillRect(0, 0, this.size.x, this.size.y);
     }
-    // do nothing. We just want to see a box
-    SimpleEntity.prototype.draw = function () {};
-    return SimpleEntity;
-}(cotton_js_1.Entity);
-exports["default"] = SimpleEntity;
-},{"cotton-js":12}],4:[function(require,module,exports) {
+  }]);
+
+  return SimpleEntity;
+}(_cottonJs.Entity);
+
+exports.default = SimpleEntity;
+},{"cotton-js":21}],5:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2420,7 +2449,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.runInputTest = undefined;
 
-var _cloud = require("../team-cotton-galaxy/cloud");
+var _cloud = require("../common/cloud");
 
 var _cloud2 = _interopRequireDefault(_cloud);
 
@@ -2442,33 +2471,296 @@ var runInputTest = exports.runInputTest = function runInputTest() {
     var inputHandler = new _cottonJs.input.Keyboard(window);
 
     inputHandler.addMapping('ArrowLeft', function () {
-        movableEntity.pos.x -= 10;
+        movableEntity.position.x -= 10;
     });
 
     inputHandler.addMapping('ArrowRight', function () {
-        movableEntity.pos.x += 10;
+        movableEntity.position.x += 10;
     });
 
     inputHandler.addMapping('ArrowUp', function () {
-        movableEntity.pos.y -= 10;
+        movableEntity.position.y -= 10;
     });
 
     inputHandler.addMapping('ArrowDown', function () {
-        movableEntity.pos.y += 10;
+        movableEntity.position.y += 10;
     });
 
     var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityGraph(), [movableEntity])]));
 
     animator.start();
 };
-},{"../team-cotton-galaxy/cloud":7,"cotton-js":12,"../common/simple-entity":8}],2:[function(require,module,exports) {
+},{"../common/cloud":12,"cotton-js":21,"../common/simple-entity":13}],6:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.runTraitTest = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _cloud = require("../common/cloud");
+
+var _cloud2 = _interopRequireDefault(_cloud);
+
+var _simpleEntity = require("../common/simple-entity");
+
+var _simpleEntity2 = _interopRequireDefault(_simpleEntity);
+
+var _cottonJs = require("cotton-js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var rootEl = document.getElementById('yaboi');
+var width = window.innerWidth;
+var height = window.innerHeight;
+
+var BoundByGravity = function (_Trait) {
+  _inherits(BoundByGravity, _Trait);
+
+  function BoundByGravity(acceleration) {
+    _classCallCheck(this, BoundByGravity);
+
+    var _this = _possibleConstructorReturn(this, (BoundByGravity.__proto__ || Object.getPrototypeOf(BoundByGravity)).call(this));
+
+    _this.acceleration = acceleration;
+    return _this;
+  }
+
+  _createClass(BoundByGravity, [{
+    key: "update",
+    value: function update(entity, entityGraph, deltaTime) {
+      entity.acceleration.y = this.acceleration.y;
+      entity.acceleration.x = this.acceleration.x;
+    }
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.constructor.name;;
+    }
+  }]);
+
+  return BoundByGravity;
+}(_cottonJs.Trait);
+
+var BoundByPhysics = function (_Trait2) {
+  _inherits(BoundByPhysics, _Trait2);
+
+  function BoundByPhysics(terminalVelocity) {
+    _classCallCheck(this, BoundByPhysics);
+
+    var _this2 = _possibleConstructorReturn(this, (BoundByPhysics.__proto__ || Object.getPrototypeOf(BoundByPhysics)).call(this));
+
+    _this2.terminalVelocity = terminalVelocity;
+    return _this2;
+  }
+
+  _createClass(BoundByPhysics, [{
+    key: "update",
+    value: function update(entity, entityGraph, deltaTime) {
+      // Update velocity
+      entity.velocity.x += deltaTime * entity.acceleration.x;
+      entity.velocity.y += deltaTime * entity.acceleration.y;
+
+      // Cap out at terminal velocity if required
+      if (Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
+      if (Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
+
+      // Update position
+      entity.position.x += deltaTime * entity.velocity.x;
+      entity.position.y += deltaTime * entity.velocity.y;
+    }
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.constructor.name;
+    }
+  }]);
+
+  return BoundByPhysics;
+}(_cottonJs.Trait);
+
+var Obstacle = function (_Trait3) {
+  _inherits(Obstacle, _Trait3);
+
+  function Obstacle() {
+    _classCallCheck(this, Obstacle);
+
+    return _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).apply(this, arguments));
+  }
+
+  _createClass(Obstacle, [{
+    key: "getName",
+    value: function getName() {
+      return this.constructor.name;
+    }
+  }]);
+
+  return Obstacle;
+}(_cottonJs.Trait);
+
+var ConstrainedByObstacles = function (_Trait4) {
+  _inherits(ConstrainedByObstacles, _Trait4);
+
+  function ConstrainedByObstacles() {
+    _classCallCheck(this, ConstrainedByObstacles);
+
+    return _possibleConstructorReturn(this, (ConstrainedByObstacles.__proto__ || Object.getPrototypeOf(ConstrainedByObstacles)).apply(this, arguments));
+  }
+
+  _createClass(ConstrainedByObstacles, [{
+    key: "getName",
+    value: function getName() {
+      return this.constructor.name;
+    }
+  }, {
+    key: "update",
+    value: function update(entity, entityGraph, deltaTime) {
+      // Have I encountered any obstacles?
+      var obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
+
+      obstacles.forEach(function (obstacle) {
+        if (!_cottonJs.util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+
+        // Based on current acceleration, check what needs a tweak
+
+        // We may have colided with left or right edge
+        if (entity.acceleration.x > 0 && entity.bounds.right > obstacle.bounds.left) {
+          // Coming in from the left
+          entity.acceleration.x = 0;
+          entity.position.x = obstacle.position.x - entity.size.x;
+          return;
+        }
+
+        if (entity.acceleration.x < 0 && entity.bounds.left < obstacle.bounds.right) {
+          // Coming in from the right
+          entity.acceleration.x = 0;
+          entity.position.x = obstacle.position.x + obstacle.size.x;
+          return;
+        }
+
+        // We may have colided with top or bottom edge
+        if (entity.acceleration.y > 0 && entity.bounds.bottom > obstacle.bounds.top) {
+          // Coming in from the top
+          entity.acceleration.y = 0;
+          entity.position.y = obstacle.position.y - entity.size.y;
+          return;
+        }
+
+        if (entity.acceleration.y < 0 && entity.bounds.top < obstacle.bounds.bottom) {
+          // Coming in from the bottom
+          entity.acceleration.y = 0;
+          entity.position.y = obstacle.position.y + obstacle.size.y;
+          return;
+        }
+      });
+    }
+  }]);
+
+  return ConstrainedByObstacles;
+}(_cottonJs.Trait);
+
+var Block = function (_SimpleEntity) {
+  _inherits(Block, _SimpleEntity);
+
+  function Block(pos, entityGraph) {
+    _classCallCheck(this, Block);
+
+    return _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, pos, new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(50, 50), entityGraph, 'red', [new Obstacle()]));
+  }
+
+  return Block;
+}(_simpleEntity2.default);
+
+var Yaboi = function (_SimpleEntity2) {
+  _inherits(Yaboi, _SimpleEntity2);
+
+  function Yaboi(pos, entityGraph, traits) {
+    _classCallCheck(this, Yaboi);
+
+    return _possibleConstructorReturn(this, (Yaboi.__proto__ || Object.getPrototypeOf(Yaboi)).call(this, pos, new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(20, 20), entityGraph, 'yellow', traits));
+  }
+
+  return Yaboi;
+}(_simpleEntity2.default);
+
+var runTraitTest = exports.runTraitTest = function runTraitTest() {
+
+  var entityGraph = new _cottonJs.EntityGraph();
+
+  var entities = [];
+
+  // Create the floor
+  var x = 0;
+  var y = height - 50;
+
+  while (x < width) {
+    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    x += 50;
+  }
+
+  // Create the roof
+  x = 0;
+  y = 0;
+
+  while (x < width) {
+    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    x += 50;
+  }
+
+  // Create left wall
+  x = 0;
+  y = 0;
+
+  while (y < height) {
+    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    y += 50;
+  }
+
+  // Create right wall
+  x = width - 50;
+  y = 0;
+
+  while (y < height) {
+    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    y += 50;
+  }
+
+  // Create the movable entity
+  var startingLoc1 = new _cottonJs.util.Point(width / 2, height / 2);
+  var startingLoc2 = new _cottonJs.util.Point(width / 2, height / 2);
+  var startingLoc3 = new _cottonJs.util.Point(width / 2, height / 2);
+  var startingLoc4 = new _cottonJs.util.Point(width / 2, height / 2);
+
+  entities.push(new Yaboi(startingLoc1, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(-9.8, 0)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
+
+  entities.push(new Yaboi(startingLoc2, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(0, -9.8)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
+
+  entities.push(new Yaboi(startingLoc3, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(9.8, 0)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
+
+  entities.push(new Yaboi(startingLoc4, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(0, 9.8)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
+
+  var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityGraph(), entities)]));
+
+  animator.start();
+};
+},{"../common/cloud":12,"../common/simple-entity":13,"cotton-js":21}],2:[function(require,module,exports) {
 'use strict';
 
 var _teamCottonGalaxy = require('./team-cotton-galaxy');
 
 var _inputTest = require('./input-test');
 
-var tests = [_teamCottonGalaxy.runGalaxy, _inputTest.runInputTest];
+var _traitTest = require('./trait-test');
+
+var tests = [_teamCottonGalaxy.runGalaxy, _inputTest.runInputTest, _traitTest.runTraitTest];
 
 var rootEl = document.getElementById('test-buttons');
 
@@ -2482,7 +2774,7 @@ tests.forEach(function (test) {
   };
   rootEl.appendChild(testButton);
 });
-},{"./team-cotton-galaxy":3,"./input-test":4}],28:[function(require,module,exports) {
+},{"./team-cotton-galaxy":4,"./input-test":5,"./trait-test":6}],52:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -2512,7 +2804,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '49673' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '55002' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -2651,5 +2943,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[28,2])
+},{}]},{},[52,2])
 //# sourceMappingURL=/cotton-js-test-bench.8d2766ad.map
