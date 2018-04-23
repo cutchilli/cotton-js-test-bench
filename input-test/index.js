@@ -9,7 +9,6 @@ export const runInputTest = function runInputTest() {
 
   const movableEntity = new SimpleEntity(
       new util.Point(0, 0),
-      new util.Point(0, 0),
       new util.Point(50, 50)
   );
 

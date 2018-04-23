@@ -1,8 +1,8 @@
 import { Entity, EntityGraph } from 'cotton-js';
 
 export default class SimpleEntity extends Entity {
-  constructor(pos, vel, size, entityGraph = new EntityGraph(), colour = "green", traits) {
-      super(pos, vel, size, entityGraph, traits, true);
+  constructor(pos, size, entityGraph = new EntityGraph(), colour = "green", traits) {
+      super(pos, size, entityGraph, traits, true);
       this.colour = colour;
   }
 

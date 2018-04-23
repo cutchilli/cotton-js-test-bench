@@ -25,8 +25,9 @@ export default class Star extends Entity {
 
     const size = new util.Point(radius * trail, radius * trail);
 
-    super(pos, vel, size, entityGraph);
+    super(pos, size, entityGraph);
 
+    this.velocity = vel;
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
     this.radius = radius;

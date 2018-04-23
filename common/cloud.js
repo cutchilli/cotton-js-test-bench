@@ -2,7 +2,7 @@ import { Entity, Layer, util, EntityGraph } from "cotton-js";
 
 class CloudParticle extends Entity {
   constructor(pos, vel, size, entityGraph) {
-    super(pos, vel, size, entityGraph);
+    super(pos, size, entityGraph);
   }
 
   draw() {

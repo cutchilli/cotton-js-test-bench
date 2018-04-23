@@ -24,10 +24,10 @@ export default class Letter extends Entity {
     super(
       pos,
       new Point(50, 50),
-      new Point(width * blockSize.x, height * blockSize.y),
       entityGraph
     );
 
+    this.velocity = new Point(width * blockSize.x, height * blockSize.y);
     this.blockSize = blockSize;
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;

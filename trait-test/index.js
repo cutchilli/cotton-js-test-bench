@@ -13,6 +13,10 @@ class BoundByGravity extends Trait {
   }
 
   update(entity, entityGraph, deltaTime) {
+    if (!entity.acceleration) {
+      entity.acceleration = new util.Point(0, 0)
+    };
+
     entity.acceleration.y = this.acceleration.y;
     entity.acceleration.x = this.acceleration.x;
   }
@@ -29,6 +33,14 @@ class BoundByPhysics extends Trait {
   }
 
   update(entity, entityGraph, deltaTime) {
+    if (!entity.acceleration) {
+      entity.acceleration = new util.Point(0, 0)
+    };
+
+    if (!entity.velocity) {
+      entity.velocity = new util.Point(0, 0)
+    };
+
     // Update velocity
     entity.velocity.x += deltaTime * entity.acceleration.x;
     entity.velocity.y += deltaTime * entity.acceleration.y;
@@ -115,7 +127,6 @@ class Block extends SimpleEntity {
   constructor(pos, entityGraph) {
     super(
       pos,
-      new util.Point(0, 0),
       new util.Point(50, 50),
       entityGraph,
       'red',
@@ -128,7 +139,6 @@ class Yaboi extends SimpleEntity {
   constructor(pos, entityGraph, traits) {
     super(
       pos,
-      new util.Point(0, 0),
       new util.Point(20, 20),
       entityGraph,
       'yellow',
