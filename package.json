@@ -7,7 +7,8 @@
   "author": "Aswin Lakshman",
   "license": "MIT",
   "dependencies": {
-    "cotton-js": "https://github.com/fegwin/cotton-js.git"
+    "cotton-js": "https://github.com/fegwin/cotton-js.git",
+    "es6-promise": "^4.2.4"
   },
   "scripts": {
     "watch": "parcel index.html"
