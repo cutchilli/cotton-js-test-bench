@@ -116,7 +116,7 @@ var Keyboard = (function () {
 }());
 exports.Keyboard = Keyboard;
 //# sourceMappingURL=keyboard.js.map
-},{}],29:[function(require,module,exports) {
+},{}],28:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var keyboard_1 = require("./keyboard");
@@ -1535,27 +1535,45 @@ var BoundingBox = (function () {
         this.pos = pos;
         this.size = size;
     }
-    BoundingBox.overlaps = function (box1, box2) {
-        return (box1.bottom > box2.top &&
-            box1.top < box2.bottom &&
-            box1.left < box2.right &&
-            box1.right > box2.left);
+    BoundingBox.contains = function (a, b) {
+        return !(b.left < a.left ||
+            b.top < a.top ||
+            b.right > a.right ||
+            b.bottom > a.bottom);
     };
-    BoundingBox.getOverlappingSides = function (entity, box2) {
+    BoundingBox.touches = function (a, b) {
+        if (a.left > b.right || b.left > a.right) {
+            return false;
+        }
+        if (a.top > b.bottom || b.top > a.bottom) {
+            return false;
+        }
+        return true;
+    };
+    BoundingBox.overlaps = function (a, b) {
+        if (a.left >= b.right || b.left >= a.right) {
+            return false;
+        }
+        if (a.top >= b.bottom || b.top >= a.bottom) {
+            return false;
+        }
+        return true;
+    };
+    BoundingBox.getOverlappingSides = function (box1, box2) {
         var left = false;
         var right = false;
         var top = false;
         var bottom = false;
-        if (entity.left < box2.right && entity.right > box2.left) {
-            left = true;
-        }
-        if (entity.right > box2.left && entity.left < box2.right) {
+        if (BoundingBox.touches(box1, box2) && box1.left < box2.left && box1.right >= box2.left) {
             right = true;
         }
-        if (entity.top < box2.bottom && entity.bottom > box2.top) {
+        if (BoundingBox.touches(box1, box2) && box1.right > box2.right && box1.left <= box2.right) {
+            left = true;
+        }
+        if (BoundingBox.touches(box1, box2) && box1.top < box2.bottom && box1.bottom >= box2.bottom) {
             top = true;
         }
-        if (entity.bottom > box2.top && entity.top < box2.top) {
+        if (BoundingBox.touches(box1, box2) && box1.bottom > box2.top && box1.top <= box2.top) {
             bottom = true;
         }
         return {
@@ -1564,6 +1582,12 @@ var BoundingBox = (function () {
             right: right,
             top: top,
         };
+    };
+    BoundingBox.prototype.contains = function (box) {
+        return BoundingBox.contains(this, box);
+    };
+    BoundingBox.prototype.touches = function (box) {
+        return BoundingBox.touches(this, box);
     };
     BoundingBox.prototype.overlaps = function (box) {
         return BoundingBox.overlaps(this, box);
@@ -1632,7 +1656,7 @@ exports.getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 };
 //# sourceMappingURL=math.js.map
-},{}],28:[function(require,module,exports) {
+},{}],29:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var image_1 = require("./image");
@@ -1874,7 +1898,7 @@ var Compositor = (function () {
 }());
 exports.Compositor = Compositor;
 //# sourceMappingURL=compositor.js.map
-},{"./buffer":32}],20:[function(require,module,exports) {
+},{"./buffer":32}],21:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var EntityGraph = (function () {
@@ -1915,7 +1939,7 @@ var EntityGraph = (function () {
 }());
 exports.EntityGraph = EntityGraph;
 //# sourceMappingURL=entity-graph.js.map
-},{}],21:[function(require,module,exports) {
+},{}],20:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Trait = (function () {
@@ -1948,7 +1972,7 @@ exports.EntityGraph = entity_graph_1.EntityGraph;
 var trait_1 = require("./trait");
 exports.Trait = trait_1.Trait;
 //# sourceMappingURL=index.js.map
-},{"./input":29,"./util":28,"./layer":16,"./entity":17,"./animator":18,"./compositor":19,"./entity-graph":20,"./trait":21}],13:[function(require,module,exports) {
+},{"./input":28,"./util":29,"./layer":16,"./entity":17,"./animator":18,"./compositor":19,"./entity-graph":21,"./trait":20}],13:[function(require,module,exports) {
 'use strict';
 
 var _dist = require('./dist');
@@ -2048,7 +2072,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":13}],8:[function(require,module,exports) {
+},{"cotton-js":13}],6:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2248,7 +2272,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],9:[function(require,module,exports) {
+},{}],7:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2326,7 +2350,7 @@ var TextLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":13,"./letter":11,"./letters":12}],6:[function(require,module,exports) {
+},{"cotton-js":13,"./letter":11,"./letters":12}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2386,7 +2410,7 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":13}],4:[function(require,module,exports) {
+},{"cotton-js":13}],3:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2422,7 +2446,7 @@ var runGalaxy = exports.runGalaxy = function runGalaxy() {
 
   animator.start();
 };
-},{"cotton-js":13,"./background-layer":8,"./text-layer":9,"../common/cloud":6}],7:[function(require,module,exports) {
+},{"cotton-js":13,"./background-layer":6,"./text-layer":7,"../common/cloud":8}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2468,7 +2492,7 @@ var SimpleEntity = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = SimpleEntity;
-},{"cotton-js":13}],3:[function(require,module,exports) {
+},{"cotton-js":13}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2517,7 +2541,7 @@ var runInputTest = exports.runInputTest = function runInputTest() {
 
     animator.start();
 };
-},{"../common/cloud":6,"cotton-js":13,"../common/simple-entity":7}],5:[function(require,module,exports) {
+},{"../common/cloud":8,"cotton-js":13,"../common/simple-entity":9}],5:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2654,7 +2678,7 @@ var ConstrainedByObstacles = function (_Trait4) {
       var obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
 
       obstacles.forEach(function (obstacle) {
-        if (!_cottonJs.util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+        if (!_cottonJs.util.BoundingBox.touches(entity.bounds, obstacle.bounds)) return;
 
         var sides = _cottonJs.util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
 
@@ -2663,38 +2687,38 @@ var ConstrainedByObstacles = function (_Trait4) {
         if (sides.bottom) {
           // Coming in from the top
           entity.acceleration.y = 0;
-          // entity.velocity.y = 0;
+          entity.velocity.y = 0;
           entity.position.y = obstacle.position.y - entity.size.y;
           console.log('bottom');
-          return;
+          // return;
         }
 
         if (sides.top) {
           // Coming in from the bottom
           entity.acceleration.y = 0;
-          // entity.velocity.y = 0;
+          entity.velocity.y = 0;
           entity.position.y = obstacle.position.y + obstacle.size.y;
           console.log('top');
-          return;
+          // return;
         }
 
         // We may have colided with left or right edge
         if (sides.right) {
           // Coming in from the left
           entity.acceleration.x = 0;
-          // entity.velocity.x = 0;
+          entity.velocity.x = 0;
           entity.position.x = obstacle.position.x - entity.size.x;
           console.log('left');
-          return;
+          // return;
         }
 
         if (sides.left) {
           // Coming in from the right
           entity.acceleration.x = 0;
-          // entity.velocity.x = 0;
+          entity.velocity.x = 0;
           entity.position.x = obstacle.position.x + obstacle.size.x;
           console.log('right');
-          return;
+          // return;
         }
       });
     }
@@ -2777,29 +2801,17 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
 
   entities.push(new Yaboi(startingLoc1, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(-9.8, 3)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
 
-  // entities.push(new Yaboi(startingLoc2, entityGraph, [
-  //   new BoundByGravity(new util.Point(3, -9.8)),
-  //   new BoundByPhysics(new util.Point(120, 120)),
-  //   new ConstrainedByObstacles()
-  // ]));
+  entities.push(new Yaboi(startingLoc2, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(3, -9.8)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
 
-  // entities.push(new Yaboi(startingLoc3, entityGraph, [
-  //   new BoundByGravity(new util.Point(9.8, 3)),
-  //   new BoundByPhysics(new util.Point(120, 120)),
-  //   new ConstrainedByObstacles()
-  // ]));
+  entities.push(new Yaboi(startingLoc3, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(9.8, 3)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
 
-  // entities.push(new Yaboi(startingLoc4, entityGraph, [
-  //   new BoundByGravity(new util.Point(3, 9.8)),
-  //   new BoundByPhysics(new util.Point(120, 120)),
-  //   new ConstrainedByObstacles()
-  // ]));
+  entities.push(new Yaboi(startingLoc4, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(3, 9.8)), new BoundByPhysics(new _cottonJs.util.Point(120, 120)), new ConstrainedByObstacles()]));
 
   var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityGraph(), entities)]));
 
   animator.start();
 };
-},{"../common/cloud":6,"../common/simple-entity":7,"cotton-js":13}],2:[function(require,module,exports) {
+},{"../common/cloud":8,"../common/simple-entity":9,"cotton-js":13}],2:[function(require,module,exports) {
 'use strict';
 
 var _teamCottonGalaxy = require('./team-cotton-galaxy');
@@ -2822,7 +2834,7 @@ tests.forEach(function (test) {
   };
   rootEl.appendChild(testButton);
 });
-},{"./team-cotton-galaxy":4,"./input-test":3,"./trait-test":5}],44:[function(require,module,exports) {
+},{"./team-cotton-galaxy":3,"./input-test":4,"./trait-test":5}],44:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -2852,7 +2864,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '52189' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '58416' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 

@@ -65,7 +65,7 @@ class ConstrainedByObstacles extends Trait {
     const obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
 
     obstacles.forEach((obstacle) => {
-      if (!util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+      if (!util.BoundingBox.touches(entity.bounds, obstacle.bounds)) return;
 
       const sides = util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
 
@@ -74,38 +74,38 @@ class ConstrainedByObstacles extends Trait {
       if (sides.bottom) {
         // Coming in from the top
         entity.acceleration.y = 0;
-        // entity.velocity.y = 0;
+        entity.velocity.y = 0;
         entity.position.y = obstacle.position.y - entity.size.y;
         console.log('bottom');
-        return;
+        // return;
       }
 
       if (sides.top) {
         // Coming in from the bottom
         entity.acceleration.y = 0;
-        // entity.velocity.y = 0;
+        entity.velocity.y = 0;
         entity.position.y = obstacle.position.y + obstacle.size.y;
         console.log('top');
-        return;
+        // return;
       }
 
       // We may have colided with left or right edge
       if (sides.right) {
         // Coming in from the left
         entity.acceleration.x = 0;
-        // entity.velocity.x = 0;
+        entity.velocity.x = 0;
         entity.position.x = obstacle.position.x - entity.size.x;
         console.log('left');
-        return;
+        // return;
       }
 
       if (sides.left) {
         // Coming in from the right
         entity.acceleration.x = 0;
-        // entity.velocity.x = 0;
+        entity.velocity.x = 0;
         entity.position.x = obstacle.position.x + obstacle.size.x;
         console.log('right');
-        return;
+        // return;
       }
     });
   }
@@ -191,23 +191,23 @@ export const runTraitTest = function runTraitTest() {
     new ConstrainedByObstacles()
   ]));
 
-  // entities.push(new Yaboi(startingLoc2, entityGraph, [
-  //   new BoundByGravity(new util.Point(3, -9.8)),
-  //   new BoundByPhysics(new util.Point(120, 120)),
-  //   new ConstrainedByObstacles()
-  // ]));
+  entities.push(new Yaboi(startingLoc2, entityGraph, [
+    new BoundByGravity(new util.Point(3, -9.8)),
+    new BoundByPhysics(new util.Point(120, 120)),
+    new ConstrainedByObstacles()
+  ]));
 
-  // entities.push(new Yaboi(startingLoc3, entityGraph, [
-  //   new BoundByGravity(new util.Point(9.8, 3)),
-  //   new BoundByPhysics(new util.Point(120, 120)),
-  //   new ConstrainedByObstacles()
-  // ]));
+  entities.push(new Yaboi(startingLoc3, entityGraph, [
+    new BoundByGravity(new util.Point(9.8, 3)),
+    new BoundByPhysics(new util.Point(120, 120)),
+    new ConstrainedByObstacles()
+  ]));
 
-  // entities.push(new Yaboi(startingLoc4, entityGraph, [
-  //   new BoundByGravity(new util.Point(3, 9.8)),
-  //   new BoundByPhysics(new util.Point(120, 120)),
-  //   new ConstrainedByObstacles()
-  // ]));
+  entities.push(new Yaboi(startingLoc4, entityGraph, [
+    new BoundByGravity(new util.Point(3, 9.8)),
+    new BoundByPhysics(new util.Point(120, 120)),
+    new ConstrainedByObstacles()
+  ]));
 
   let animator = new Animator(
       new Compositor(
