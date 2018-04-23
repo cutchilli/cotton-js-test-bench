@@ -12,7 +12,7 @@ class BoundByGravity extends Trait {
     this.acceleration = acceleration;
   }
 
-  update(entity, entityGraph, deltaTime) {    
+  update(entity, entityGraph, deltaTime) {
     entity.acceleration.y = this.acceleration.y;
     entity.acceleration.x = this.acceleration.x;
   }
@@ -34,8 +34,10 @@ class BoundByPhysics extends Trait {
     entity.velocity.y += deltaTime * entity.acceleration.y;
 
     // Cap out at terminal velocity if required
-    if (Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
-    if (Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
+    if (Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x))
+      entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
+    if (Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y))
+      entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
 
     // Update position
     entity.position.x += deltaTime * entity.velocity.x;
@@ -65,35 +67,44 @@ class ConstrainedByObstacles extends Trait {
     obstacles.forEach((obstacle) => {
       if (!util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
 
+      const sides = util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+
       // Based on current acceleration, check what needs a tweak
-
-      // We may have colided with left or right edge
-      if (entity.acceleration.x > 0 && entity.bounds.right > obstacle.bounds.left) {
-        // Coming in from the left
-        entity.acceleration.x = 0;
-        entity.position.x = obstacle.position.x - entity.size.x;
-        return;
-      }
-
-      if (entity.acceleration.x < 0 && entity.bounds.left < obstacle.bounds.right) {
-        // Coming in from the right
-        entity.acceleration.x = 0;
-        entity.position.x = obstacle.position.x + obstacle.size.x;
-        return;
-      }
-
       // We may have colided with top or bottom edge
-      if (entity.acceleration.y > 0 && entity.bounds.bottom > obstacle.bounds.top) {
+      if (sides.bottom) {
         // Coming in from the top
         entity.acceleration.y = 0;
+        // entity.velocity.y = 0;
         entity.position.y = obstacle.position.y - entity.size.y;
+        console.log('bottom');
         return;
       }
 
-      if (entity.acceleration.y < 0 && entity.bounds.top < obstacle.bounds.bottom) {
+      if (sides.top) {
         // Coming in from the bottom
         entity.acceleration.y = 0;
+        // entity.velocity.y = 0;
         entity.position.y = obstacle.position.y + obstacle.size.y;
+        console.log('top');
+        return;
+      }
+
+      // We may have colided with left or right edge
+      if (sides.right) {
+        // Coming in from the left
+        entity.acceleration.x = 0;
+        // entity.velocity.x = 0;
+        entity.position.x = obstacle.position.x - entity.size.x;
+        console.log('left');
+        return;
+      }
+
+      if (sides.left) {
+        // Coming in from the right
+        entity.acceleration.x = 0;
+        // entity.velocity.x = 0;
+        entity.position.x = obstacle.position.x + obstacle.size.x;
+        console.log('right');
         return;
       }
     });
@@ -175,28 +186,28 @@ export const runTraitTest = function runTraitTest() {
   const startingLoc4 = new util.Point(width/2, height/2);
 
   entities.push(new Yaboi(startingLoc1, entityGraph, [
-    new BoundByGravity(new util.Point(-9.8, 0)),
+    new BoundByGravity(new util.Point(-9.8, 3)),
     new BoundByPhysics(new util.Point(120, 120)),
     new ConstrainedByObstacles()
   ]));
 
-  entities.push(new Yaboi(startingLoc2, entityGraph, [
-    new BoundByGravity(new util.Point(0, -9.8)),
-    new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles()
-  ]));
+  // entities.push(new Yaboi(startingLoc2, entityGraph, [
+  //   new BoundByGravity(new util.Point(3, -9.8)),
+  //   new BoundByPhysics(new util.Point(120, 120)),
+  //   new ConstrainedByObstacles()
+  // ]));
 
-  entities.push(new Yaboi(startingLoc3, entityGraph, [
-    new BoundByGravity(new util.Point(9.8, 0)),
-    new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles()
-  ]));
+  // entities.push(new Yaboi(startingLoc3, entityGraph, [
+  //   new BoundByGravity(new util.Point(9.8, 3)),
+  //   new BoundByPhysics(new util.Point(120, 120)),
+  //   new ConstrainedByObstacles()
+  // ]));
 
-  entities.push(new Yaboi(startingLoc4, entityGraph, [
-    new BoundByGravity(new util.Point(0, 9.8)),
-    new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles()
-  ]));
+  // entities.push(new Yaboi(startingLoc4, entityGraph, [
+  //   new BoundByGravity(new util.Point(3, 9.8)),
+  //   new BoundByPhysics(new util.Point(120, 120)),
+  //   new ConstrainedByObstacles()
+  // ]));
 
   let animator = new Animator(
       new Compositor(
