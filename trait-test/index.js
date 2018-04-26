@@ -32,7 +32,7 @@ class BoundByPhysics extends Trait {
     this.terminalVelocity = terminalVelocity;
   }
 
-  update(entity, entityGraph, deltaTime) {
+  setPhysicsDefaults(entity) {
     if (!entity.acceleration) {
       entity.acceleration = new util.Point(0, 0)
     };
@@ -40,27 +40,63 @@ class BoundByPhysics extends Trait {
     if (!entity.velocity) {
       entity.velocity = new util.Point(0, 0)
     };
+  }
 
+  update(entity, entityGraph, deltaTime) {
+    this.setPhysicsDefaults(entity);
+    this.updateX(entity, entityGraph, deltaTime);
+    this.updateY(entity, entityGraph, deltaTime);
+  }
+
+  updateY(entity, entityGraph, deltaTime) {
     // Update velocity
-    entity.velocity.x += deltaTime * entity.acceleration.x;
     entity.velocity.y += deltaTime * entity.acceleration.y;
 
     // Cap out at terminal velocity if required
-    if (Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x))
-      entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
-    if (Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y))
+    if (this.terminalVelocity && Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y))
       entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
 
-    const obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
+    // Update position
+    entity.position.y += deltaTime * entity.velocity.y;
+  }
+
+  updateX(entity, entityGraph, deltaTime) {
+    // Update velocity
+    entity.velocity.x += deltaTime * entity.acceleration.x;
+
+    // Cap out at terminal velocity if required
+    if (this.terminalVelocity && Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x))
+      entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
 
     // Update position
     entity.position.x += deltaTime * entity.velocity.x;
-    entity.position.x += this.detectCollisionsX(entity, obstacles);
-    entity.position.y += deltaTime * entity.velocity.y;
-    entity.position.y += this.detectCollisionsY(entity, obstacles);
   }
 
-  detectCollisionsX(entity, obstacles) {
+  getName() {
+    return this.constructor.name;
+  }
+}
+
+class BoundByPhysicsConstrainedByObstacles extends BoundByPhysics {
+  constructor(terminalVelocity) {
+    super(terminalVelocity);
+  }
+
+  update(entity, entityGraph, deltaTime) {
+    const obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
+
+    this.setPhysicsDefaults(entity);
+
+    // Process X
+    this.updateX(entity, entityGraph, deltaTime);
+    this.applyObstacleCollisionResolutionX(entity, obstacles);
+    
+    // Process Y
+    this.updateY(entity, entityGraph, deltaTime);
+    this.applyObstacleCollisionResolutionY(entity, obstacles);
+  }
+
+  applyObstacleCollisionResolutionX(entity, obstacles) {
     let xResolution = 0;
     
     obstacles.forEach((obstacle) => {
@@ -70,24 +106,20 @@ class BoundByPhysics extends Trait {
 
       // We may have colided with left or right edge
       if (sides.right) {
-        xResolution -= entity.bounds.right - obstacle.bounds.left;
         // Coming in from the left
-        console.log('left');
-        // return;
+        xResolution -= entity.bounds.right - obstacle.bounds.left;
       }
 
       if (sides.left) {
+        // Coming in from the right        
         xResolution += obstacle.bounds.right - entity.bounds.left;
-        // Coming in from the right
-        console.log('right');
-        // return;
       }
     });
 
-    return xResolution;
+    entity.position.x += xResolution;
   }
 
-  detectCollisionsY(entity, obstacles) {
+  applyObstacleCollisionResolutionY(entity, obstacles) {
     let yResolution = 0;
 
     obstacles.forEach((obstacle) => {
@@ -98,35 +130,21 @@ class BoundByPhysics extends Trait {
       // Based on current acceleration, check what needs a tweak
       // We may have colided with top or bottom edge
       if (sides.bottom) {
+        // Coming in from the top        
         yResolution -= entity.bounds.bottom - obstacle.bounds.top;
-        // Coming in from the top
-        console.log('bottom');
-        // return;
       }
 
       if (sides.top) {
-        yResolution += obstacle.bounds.bottom - entity.bounds.top;
         // Coming in from the bottom
-        console.log('top');
-        // return;
+        yResolution += obstacle.bounds.bottom - entity.bounds.top;
       }
     });
 
-    return yResolution;
-  }
-
-  getName() {
-    return this.constructor.name;
+    entity.position.y += yResolution;
   }
 }
 
 class Obstacle extends Trait {
-  getName() {
-    return this.constructor.name;
-  }
-}
-
-class ConstrainedByObstacles extends Trait {
   getName() {
     return this.constructor.name;
   }
@@ -206,26 +224,22 @@ export const runTraitTest = function runTraitTest() {
 
   entities.push(new Yaboi(startingLoc1, entityGraph, [
     new BoundByGravity(new util.Point(-9.8, 3)),
-    new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles()
+    new BoundByPhysicsConstrainedByObstacles(new util.Point(120, 120))
   ]));
 
   entities.push(new Yaboi(startingLoc2, entityGraph, [
     new BoundByGravity(new util.Point(3, -9.8)),
-    new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles()
+    new BoundByPhysicsConstrainedByObstacles(new util.Point(120, 120))
   ]));
 
   entities.push(new Yaboi(startingLoc3, entityGraph, [
     new BoundByGravity(new util.Point(9.8, 3)),
-    new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles()
+    new BoundByPhysicsConstrainedByObstacles(new util.Point(120, 120))
   ]));
 
   entities.push(new Yaboi(startingLoc4, entityGraph, [
     new BoundByGravity(new util.Point(3, 9.8)),
-    new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles(),
+    new BoundByPhysicsConstrainedByObstacles(new util.Point(120, 120))
   ]));
 
   let animator = new Animator(
