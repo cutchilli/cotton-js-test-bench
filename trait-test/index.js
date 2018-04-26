@@ -51,9 +51,68 @@ class BoundByPhysics extends Trait {
     if (Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y))
       entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
 
+    const obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
+
     // Update position
     entity.position.x += deltaTime * entity.velocity.x;
+    entity.position.x += this.detectCollisionsX(entity, obstacles);
     entity.position.y += deltaTime * entity.velocity.y;
+    entity.position.y += this.detectCollisionsY(entity, obstacles);
+  }
+
+  detectCollisionsX(entity, obstacles) {
+    let xResolution = 0;
+    
+    obstacles.forEach((obstacle) => {
+      if (!util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+
+      const sides = util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+
+      // We may have colided with left or right edge
+      if (sides.right) {
+        xResolution -= entity.bounds.right - obstacle.bounds.left;
+        // Coming in from the left
+        console.log('left');
+        // return;
+      }
+
+      if (sides.left) {
+        xResolution += obstacle.bounds.right - entity.bounds.left;
+        // Coming in from the right
+        console.log('right');
+        // return;
+      }
+    });
+
+    return xResolution;
+  }
+
+  detectCollisionsY(entity, obstacles) {
+    let yResolution = 0;
+
+    obstacles.forEach((obstacle) => {
+      if (!util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+
+      const sides = util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+
+      // Based on current acceleration, check what needs a tweak
+      // We may have colided with top or bottom edge
+      if (sides.bottom) {
+        yResolution -= entity.bounds.bottom - obstacle.bounds.top;
+        // Coming in from the top
+        console.log('bottom');
+        // return;
+      }
+
+      if (sides.top) {
+        yResolution += obstacle.bounds.bottom - entity.bounds.top;
+        // Coming in from the bottom
+        console.log('top');
+        // return;
+      }
+    });
+
+    return yResolution;
   }
 
   getName() {
@@ -70,56 +129,6 @@ class Obstacle extends Trait {
 class ConstrainedByObstacles extends Trait {
   getName() {
     return this.constructor.name;
-  }
-
-  update(entity, entityGraph, deltaTime) {
-    // Have I encountered any obstacles?
-    const obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
-
-    obstacles.forEach((obstacle) => {
-      if (!util.BoundingBox.touches(entity.bounds, obstacle.bounds)) return;
-
-      const sides = util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
-
-      // Based on current acceleration, check what needs a tweak
-      // We may have colided with top or bottom edge
-      if (sides.bottom) {
-        // Coming in from the top
-        entity.acceleration.y = 0;
-        entity.velocity.y = 0;
-        entity.position.y = obstacle.position.y - entity.size.y;
-        console.log('bottom');
-        // return;
-      }
-
-      if (sides.top) {
-        // Coming in from the bottom
-        entity.acceleration.y = 0;
-        entity.velocity.y = 0;
-        entity.position.y = obstacle.position.y + obstacle.size.y;
-        console.log('top');
-        // return;
-      }
-
-      // We may have colided with left or right edge
-      if (sides.right) {
-        // Coming in from the left
-        entity.acceleration.x = 0;
-        entity.velocity.x = 0;
-        entity.position.x = obstacle.position.x - entity.size.x;
-        console.log('left');
-        // return;
-      }
-
-      if (sides.left) {
-        // Coming in from the right
-        entity.acceleration.x = 0;
-        entity.velocity.x = 0;
-        entity.position.x = obstacle.position.x + obstacle.size.x;
-        console.log('right');
-        // return;
-      }
-    });
   }
 }
 
@@ -141,7 +150,7 @@ class Yaboi extends SimpleEntity {
       pos,
       new util.Point(20, 20),
       entityGraph,
-      'yellow',
+      'cyan',
       traits
     );
   }
@@ -216,7 +225,7 @@ export const runTraitTest = function runTraitTest() {
   entities.push(new Yaboi(startingLoc4, entityGraph, [
     new BoundByGravity(new util.Point(3, 9.8)),
     new BoundByPhysics(new util.Point(120, 120)),
-    new ConstrainedByObstacles()
+    new ConstrainedByObstacles(),
   ]));
 
   let animator = new Animator(

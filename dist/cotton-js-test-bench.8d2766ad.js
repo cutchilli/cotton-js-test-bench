@@ -1760,8 +1760,8 @@ var Entity = (function () {
         var _this = this;
         this.name = "entity";
         this.debug = debug;
+        this.previousPosition = new math_1.Point(position.x, position.y);
         this.position = position;
-        this.acceleration = new math_1.Point(0, 0);
         this.size = size;
         this.entityGraph = entityGraph;
         this.traits = traits;
@@ -1781,7 +1781,7 @@ var Entity = (function () {
             if (this.debug) {
                 var bufferContext = this.buffer.getContext();
                 bufferContext.strokeStyle = "green";
-                bufferContext.rect(0, 0, this.size.x - 1, this.size.y - 1);
+                bufferContext.rect(0, 0, this.size.x, this.size.y);
                 bufferContext.stroke();
             }
             this.firstPaintComplete = true;
@@ -1789,6 +1789,8 @@ var Entity = (function () {
         context.drawImage(this.buffer.getCanvas(), (0.5 + this.position.x) << 0, (0.5 + this.position.y) << 0);
     };
     Entity.prototype.update = function (deltaTime) {
+        this.previousPosition.x = this.position.x;
+        this.previousPosition.y = this.position.y;
         for (var _i = 0, _a = this.traits; _i < _a.length; _i++) {
             var trait = _a[_i];
             trait.update(this, this.entityGraph, deltaTime);
@@ -2072,7 +2074,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":13}],6:[function(require,module,exports) {
+},{"cotton-js":13}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2131,7 +2133,7 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"cotton-js":13,"./star":10}],12:[function(require,module,exports) {
+},{"cotton-js":13,"./star":10}],11:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2225,7 +2227,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"cotton-js":13}],11:[function(require,module,exports) {
+},{"cotton-js":13}],12:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2273,7 +2275,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],7:[function(require,module,exports) {
+},{}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2351,7 +2353,7 @@ var TextLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":13,"./letter":12,"./letters":11}],8:[function(require,module,exports) {
+},{"cotton-js":13,"./letter":11,"./letters":12}],6:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2411,7 +2413,7 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":13}],3:[function(require,module,exports) {
+},{"cotton-js":13}],5:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2447,7 +2449,7 @@ var runGalaxy = exports.runGalaxy = function runGalaxy() {
 
   animator.start();
 };
-},{"cotton-js":13,"./background-layer":6,"./text-layer":7,"../common/cloud":8}],9:[function(require,module,exports) {
+},{"cotton-js":13,"./background-layer":8,"./text-layer":9,"../common/cloud":6}],7:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2493,7 +2495,7 @@ var SimpleEntity = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = SimpleEntity;
-},{"cotton-js":13}],5:[function(require,module,exports) {
+},{"cotton-js":13}],3:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2542,7 +2544,7 @@ var runInputTest = exports.runInputTest = function runInputTest() {
 
     animator.start();
 };
-},{"../common/cloud":8,"cotton-js":13,"../common/simple-entity":9}],4:[function(require,module,exports) {
+},{"../common/cloud":6,"cotton-js":13,"../common/simple-entity":7}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2637,9 +2639,70 @@ var BoundByPhysics = function (_Trait2) {
       if (Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
       if (Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
 
+      var obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
+
       // Update position
       entity.position.x += deltaTime * entity.velocity.x;
+      entity.position.x += this.detectCollisionsX(entity, obstacles);
       entity.position.y += deltaTime * entity.velocity.y;
+      entity.position.y += this.detectCollisionsY(entity, obstacles);
+    }
+  }, {
+    key: "detectCollisionsX",
+    value: function detectCollisionsX(entity, obstacles) {
+      var xResolution = 0;
+
+      obstacles.forEach(function (obstacle) {
+        if (!_cottonJs.util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+
+        var sides = _cottonJs.util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+
+        // We may have colided with left or right edge
+        if (sides.right) {
+          xResolution -= entity.bounds.right - obstacle.bounds.left;
+          // Coming in from the left
+          console.log('left');
+          // return;
+        }
+
+        if (sides.left) {
+          xResolution += obstacle.bounds.right - entity.bounds.left;
+          // Coming in from the right
+          console.log('right');
+          // return;
+        }
+      });
+
+      return xResolution;
+    }
+  }, {
+    key: "detectCollisionsY",
+    value: function detectCollisionsY(entity, obstacles) {
+      var yResolution = 0;
+
+      obstacles.forEach(function (obstacle) {
+        if (!_cottonJs.util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
+
+        var sides = _cottonJs.util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+
+        // Based on current acceleration, check what needs a tweak
+        // We may have colided with top or bottom edge
+        if (sides.bottom) {
+          yResolution -= entity.bounds.bottom - obstacle.bounds.top;
+          // Coming in from the top
+          console.log('bottom');
+          // return;
+        }
+
+        if (sides.top) {
+          yResolution += obstacle.bounds.bottom - entity.bounds.top;
+          // Coming in from the bottom
+          console.log('top');
+          // return;
+        }
+      });
+
+      return yResolution;
     }
   }, {
     key: "getName",
@@ -2684,57 +2747,6 @@ var ConstrainedByObstacles = function (_Trait4) {
     value: function getName() {
       return this.constructor.name;
     }
-  }, {
-    key: "update",
-    value: function update(entity, entityGraph, deltaTime) {
-      // Have I encountered any obstacles?
-      var obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
-
-      obstacles.forEach(function (obstacle) {
-        if (!_cottonJs.util.BoundingBox.touches(entity.bounds, obstacle.bounds)) return;
-
-        var sides = _cottonJs.util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
-
-        // Based on current acceleration, check what needs a tweak
-        // We may have colided with top or bottom edge
-        if (sides.bottom) {
-          // Coming in from the top
-          entity.acceleration.y = 0;
-          entity.velocity.y = 0;
-          entity.position.y = obstacle.position.y - entity.size.y;
-          console.log('bottom');
-          // return;
-        }
-
-        if (sides.top) {
-          // Coming in from the bottom
-          entity.acceleration.y = 0;
-          entity.velocity.y = 0;
-          entity.position.y = obstacle.position.y + obstacle.size.y;
-          console.log('top');
-          // return;
-        }
-
-        // We may have colided with left or right edge
-        if (sides.right) {
-          // Coming in from the left
-          entity.acceleration.x = 0;
-          entity.velocity.x = 0;
-          entity.position.x = obstacle.position.x - entity.size.x;
-          console.log('left');
-          // return;
-        }
-
-        if (sides.left) {
-          // Coming in from the right
-          entity.acceleration.x = 0;
-          entity.velocity.x = 0;
-          entity.position.x = obstacle.position.x + obstacle.size.x;
-          console.log('right');
-          // return;
-        }
-      });
-    }
   }]);
 
   return ConstrainedByObstacles;
@@ -2758,7 +2770,7 @@ var Yaboi = function (_SimpleEntity2) {
   function Yaboi(pos, entityGraph, traits) {
     _classCallCheck(this, Yaboi);
 
-    return _possibleConstructorReturn(this, (Yaboi.__proto__ || Object.getPrototypeOf(Yaboi)).call(this, pos, new _cottonJs.util.Point(20, 20), entityGraph, 'yellow', traits));
+    return _possibleConstructorReturn(this, (Yaboi.__proto__ || Object.getPrototypeOf(Yaboi)).call(this, pos, new _cottonJs.util.Point(20, 20), entityGraph, 'cyan', traits));
   }
 
   return Yaboi;
@@ -2824,7 +2836,7 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
 
   animator.start();
 };
-},{"../common/cloud":8,"../common/simple-entity":9,"cotton-js":13}],2:[function(require,module,exports) {
+},{"../common/cloud":6,"../common/simple-entity":7,"cotton-js":13}],2:[function(require,module,exports) {
 'use strict';
 
 var _teamCottonGalaxy = require('./team-cotton-galaxy');
@@ -2847,7 +2859,7 @@ tests.forEach(function (test) {
   };
   rootEl.appendChild(testButton);
 });
-},{"./team-cotton-galaxy":3,"./input-test":5,"./trait-test":4}],35:[function(require,module,exports) {
+},{"./team-cotton-galaxy":5,"./input-test":3,"./trait-test":4}],35:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -2877,7 +2889,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '64322' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59118' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
