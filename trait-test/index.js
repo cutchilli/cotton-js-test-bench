@@ -86,7 +86,7 @@ export const runTraitTest = function runTraitTest() {
       new Yaboi(
           new Vector2(width/2, height/2), 
           entityLibrary, [
-            new BoundByGravity(new Vector2(getRandomNumber(-9.8, 9.8), getRandomNumber(-9.8, 9.8))),
+            new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))),
             new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)),
           ]
     ));

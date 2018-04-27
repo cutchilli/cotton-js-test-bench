@@ -27,7 +27,7 @@ export default class Letter extends Entity {
       entityLibrary
     );
 
-    this.velocity = new Vector2(width * blockSize.x, height * blockSize.y);
+    this.velocity = new Vector2(60, 60);
     this.blockSize = blockSize;
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
@@ -61,19 +61,10 @@ export default class Letter extends Entity {
     this.position.x += this.velocity.x * deltaTime;
     this.position.y += this.velocity.y * deltaTime;
     
-    // Bounce
-    var variance = 0.2;
-
     if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x)
-      this.velocity.x = -util.getRandomNumber(
-        this.velocity.x - variance,
-        this.velocity.x + variance
-      );
+      this.velocity.x = -this.velocity.x;
 
     if (this.position.y < 0 || this.position.y > this.maxHeight - this.size.y)
-      this.velocity.y = -util.getRandomNumber(
-        this.velocity.y - variance,
-        this.velocity.y + variance
-      );
+      this.velocity.y = -this.velocity.y;
   }
 }

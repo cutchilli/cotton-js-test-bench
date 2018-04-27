@@ -2350,7 +2350,7 @@ var Letter = function (_Entity) {
 
     var _this = _possibleConstructorReturn(this, (Letter.__proto__ || Object.getPrototypeOf(Letter)).call(this, pos, new Vector2(50, 50), entityLibrary));
 
-    _this.velocity = new Vector2(width * blockSize.x, height * blockSize.y);
+    _this.velocity = new Vector2(60, 60);
     _this.blockSize = blockSize;
     _this.maxWidth = maxWidth;
     _this.maxHeight = maxHeight;
@@ -2383,12 +2383,9 @@ var Letter = function (_Entity) {
       this.position.x += this.velocity.x * deltaTime;
       this.position.y += this.velocity.y * deltaTime;
 
-      // Bounce
-      var variance = 0.2;
+      if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x) this.velocity.x = -this.velocity.x;
 
-      if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x) this.velocity.x = -_cottonJs.util.getRandomNumber(this.velocity.x - variance, this.velocity.x + variance);
-
-      if (this.position.y < 0 || this.position.y > this.maxHeight - this.size.y) this.velocity.y = -_cottonJs.util.getRandomNumber(this.velocity.y - variance, this.velocity.y + variance);
+      if (this.position.y < 0 || this.position.y > this.maxHeight - this.size.y) this.velocity.y = -this.velocity.y;
     }
   }]);
 
@@ -2831,7 +2828,7 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
   }
 
   for (var i = 0; i < 150; i += 1) {
-    entities.push(new Yaboi(new Vector2(width / 2, height / 2), entityLibrary, [new BoundByGravity(new Vector2(getRandomNumber(-9.8, 9.8), getRandomNumber(-9.8, 9.8))), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120))]));
+    entities.push(new Yaboi(new Vector2(width / 2, height / 2), entityLibrary, [new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120))]));
   }
 
   var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cloud2.default(width, height), new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), entities)]));
