@@ -1,5 +1,5 @@
 import Cloud from "../common/cloud";
-import { Animator, Compositor, Layer, Entity, util, input, EntityGraph } from "cotton-js";
+import { Animator, Compositor, Layer, Entity, util, input, EntityLibrary } from "cotton-js";
 import SimpleEntity from '../common/simple-entity';
 
 export const runInputTest = function runInputTest() {
@@ -8,8 +8,8 @@ export const runInputTest = function runInputTest() {
   const height = window.innerHeight;
 
   const movableEntity = new SimpleEntity(
-      new util.Point(0, 0),
-      new util.Point(50, 50)
+      new util.Vector2(0, 0),
+      new util.Vector2(50, 50)
   );
 
   const inputHandler = new input.Keyboard(window);
@@ -35,7 +35,7 @@ export const runInputTest = function runInputTest() {
           width,
           height,
           rootEl,
-          [new Layer(width, height, new EntityGraph(), [movableEntity])],
+          [new Layer(width, height, new EntityLibrary(), [movableEntity])],
       )
   );
 

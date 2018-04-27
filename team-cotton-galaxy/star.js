@@ -1,4 +1,4 @@
-import { Entity, util, EntityGraph } from "cotton-js";
+import { Entity, util, EntityLibrary } from "cotton-js";
 
 const { getRandomNumber, getRandomInt } = util;
 
@@ -10,7 +10,7 @@ const getRandomStarColour = () => {
 
 export default class Star extends Entity {
   constructor(
-    entityGraph,
+    entityLibrary,
     maxWidth,
     maxHeight,
     pos,
@@ -23,9 +23,9 @@ export default class Star extends Entity {
     if (radius < 1 || radius > 3)
       throw new exception("radius must be between 2 and 4");
 
-    const size = new util.Point(radius * trail, radius * trail);
+    const size = new util.Vector2(radius * trail, radius * trail);
 
-    super(pos, size, entityGraph);
+    super(pos, size, entityLibrary);
 
     this.velocity = vel;
     this.maxWidth = maxWidth;

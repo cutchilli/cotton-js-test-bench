@@ -77,7 +77,7 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({26:[function(require,module,exports) {
+})({46:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var PRESSED = 1;
@@ -116,7 +116,7 @@ var Keyboard = (function () {
 }());
 exports.Keyboard = Keyboard;
 //# sourceMappingURL=keyboard.js.map
-},{}],24:[function(require,module,exports) {
+},{}],36:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var keyboard_1 = require("./keyboard");
@@ -124,7 +124,7 @@ exports.input = {
     Keyboard: keyboard_1.Keyboard,
 };
 //# sourceMappingURL=index.js.map
-},{"./keyboard":26}],30:[function(require,module,exports) {
+},{"./keyboard":46}],61:[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {};
@@ -311,7 +311,7 @@ process.chdir = function (dir) {
 process.umask = function () {
     return 0;
 };
-},{}],29:[function(require,module,exports) {
+},{}],60:[function(require,module,exports) {
 var global = (1,eval)("this");
 var process = require("process");
 /*!
@@ -1494,7 +1494,7 @@ return Promise$1;
 
 //# sourceMappingURL=es6-promise.map
 
-},{"process":30}],27:[function(require,module,exports) {
+},{"process":61}],47:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var es6_promise_1 = require("es6-promise");
@@ -1514,7 +1514,7 @@ var CottonImage = (function () {
 }());
 exports.CottonImage = CottonImage;
 //# sourceMappingURL=image.js.map
-},{"es6-promise":29}],28:[function(require,module,exports) {
+},{"es6-promise":60}],48:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Json = (function () {
@@ -1527,7 +1527,7 @@ var Json = (function () {
 }());
 exports.Json = Json;
 //# sourceMappingURL=json.js.map
-},{}],23:[function(require,module,exports) {
+},{}],43:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var BoundingBox = (function () {
@@ -1583,18 +1583,6 @@ var BoundingBox = (function () {
             top: top,
         };
     };
-    BoundingBox.prototype.contains = function (box) {
-        return BoundingBox.contains(this, box);
-    };
-    BoundingBox.prototype.touches = function (box) {
-        return BoundingBox.touches(this, box);
-    };
-    BoundingBox.prototype.overlaps = function (box) {
-        return BoundingBox.overlaps(this, box);
-    };
-    BoundingBox.prototype.getOverlappingSides = function (box) {
-        return BoundingBox.getOverlappingSides(this, box);
-    };
     Object.defineProperty(BoundingBox.prototype, "bottom", {
         get: function () {
             return this.pos.y + this.size.y;
@@ -1638,25 +1626,26 @@ var BoundingBox = (function () {
     return BoundingBox;
 }());
 exports.BoundingBox = BoundingBox;
-var Point = (function () {
-    function Point(x, y) {
+var Vector2 = (function () {
+    function Vector2(x, y) {
         this.set(x, y);
     }
-    Point.prototype.set = function (x, y) {
+    Vector2.prototype.set = function (x, y) {
         this.x = x;
         this.y = y;
     };
-    return Point;
+    return Vector2;
 }());
-exports.Point = Point;
+exports.Vector2 = Vector2;
 exports.getRandomNumber = function (min, max) { return Math.random() * (max - min) + min; };
 exports.getRandomInt = function (min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
 };
+exports.sign = function (n) { return n && n / Math.abs(n); };
 //# sourceMappingURL=math.js.map
-},{}],25:[function(require,module,exports) {
+},{}],37:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var image_1 = require("./image");
@@ -1666,12 +1655,12 @@ exports.util = {
     BoundingBox: math_1.BoundingBox,
     CottonImage: image_1.CottonImage,
     Json: json_1.Json,
-    Point: math_1.Point,
+    Vector2: math_1.Vector2,
     getRandomInt: math_1.getRandomInt,
     getRandomNumber: math_1.getRandomNumber,
 };
 //# sourceMappingURL=index.js.map
-},{"./image":27,"./json":28,"./math":23}],22:[function(require,module,exports) {
+},{"./image":47,"./json":48,"./math":43}],42:[function(require,module,exports) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1697,18 +1686,18 @@ var Buffer = (function () {
 }());
 exports.Buffer = Buffer;
 //# sourceMappingURL=buffer.js.map
-},{}],16:[function(require,module,exports) {
+},{}],24:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
 var math_1 = require("./util/math");
 var Layer = (function () {
-    function Layer(width, height, entityGraph, entities) {
+    function Layer(width, height, entityLibrary, entities) {
         if (entities === void 0) { entities = []; }
         this.entities = [];
         this.width = width;
         this.height = height;
-        this.entityGraph = entityGraph;
+        this.entityLibrary = entityLibrary;
         this.buffer = new buffer_1.Buffer(this.width, this.height);
         this.calculateBounds();
         this.addEntities(entities);
@@ -1723,7 +1712,7 @@ var Layer = (function () {
         this.entities = this.entities.filter(function (e) {
             return e !== entity;
         });
-        this.entityGraph.deregisterEntity(entity);
+        this.entityLibrary.deregisterEntity(entity);
     };
     Layer.prototype.update = function (deltaTime) {
         for (var _i = 0, _a = this.entities; _i < _a.length; _i++) {
@@ -1742,28 +1731,29 @@ var Layer = (function () {
         context.drawImage(this.buffer.getCanvas(), 0, 0);
     };
     Layer.prototype.calculateBounds = function () {
-        this.bounds = new math_1.BoundingBox(new math_1.Point(0, 0), new math_1.Point(this.width, this.height));
+        this.bounds = new math_1.BoundingBox(new math_1.Vector2(0, 0), new math_1.Vector2(this.width, this.height));
     };
     return Layer;
 }());
 exports.Layer = Layer;
 //# sourceMappingURL=layer.js.map
-},{"./buffer":22,"./util/math":23}],17:[function(require,module,exports) {
+},{"./buffer":42,"./util/math":43}],25:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
 var math_1 = require("./util/math");
 var Entity = (function () {
-    function Entity(position, size, entityGraph, traits, debug) {
+    function Entity(position, size, entityLibrary, traits, debug) {
         if (traits === void 0) { traits = []; }
         if (debug === void 0) { debug = false; }
         var _this = this;
         this.name = "entity";
         this.debug = debug;
-        this.previousPosition = new math_1.Point(position.x, position.y);
         this.position = position;
+        this.velocity = new math_1.Vector2(0, 0);
+        this.acceleration = new math_1.Vector2(0, 0);
         this.size = size;
-        this.entityGraph = entityGraph;
+        this.entityLibrary = entityLibrary;
         this.traits = traits;
         this.trait = {};
         this.traits.forEach(function (trait) {
@@ -1773,7 +1763,7 @@ var Entity = (function () {
         this.firstPaintComplete = false;
         this.calculateBounds();
         this.buffer = new buffer_1.Buffer(this.size.x, this.size.y);
-        this.entityGraph.registerEntity(this);
+        this.entityLibrary.registerEntity(this);
     }
     Entity.prototype.paintOn = function (context) {
         if (!this.firstPaintComplete) {
@@ -1789,11 +1779,9 @@ var Entity = (function () {
         context.drawImage(this.buffer.getCanvas(), (0.5 + this.position.x) << 0, (0.5 + this.position.y) << 0);
     };
     Entity.prototype.update = function (deltaTime) {
-        this.previousPosition.x = this.position.x;
-        this.previousPosition.y = this.position.y;
         for (var _i = 0, _a = this.traits; _i < _a.length; _i++) {
             var trait = _a[_i];
-            trait.update(this, this.entityGraph, deltaTime);
+            trait.update(this, this.entityLibrary, deltaTime);
         }
         this.lifetime += deltaTime;
     };
@@ -1807,7 +1795,7 @@ var Entity = (function () {
 }());
 exports.Entity = Entity;
 //# sourceMappingURL=entity.js.map
-},{"./buffer":22,"./util/math":23}],18:[function(require,module,exports) {
+},{"./buffer":42,"./util/math":43}],26:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Animator = (function () {
@@ -1819,8 +1807,8 @@ var Animator = (function () {
         this.compositor = compositor;
         this.animate = this.animate.bind(this);
     }
-    Animator.prototype.enqueue = function () {
-        window.requestAnimationFrame(this.animate);
+    Animator.prototype.start = function () {
+        this.enqueue();
     };
     Animator.prototype.animate = function (time) {
         this.accumulatedTime += (time - this.lastTime) / 1000;
@@ -1835,14 +1823,14 @@ var Animator = (function () {
         this.lastTime = time;
         this.enqueue();
     };
-    Animator.prototype.start = function () {
-        this.enqueue();
+    Animator.prototype.enqueue = function () {
+        window.requestAnimationFrame(this.animate);
     };
     return Animator;
 }());
 exports.Animator = Animator;
 //# sourceMappingURL=animator.js.map
-},{}],19:[function(require,module,exports) {
+},{}],27:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1899,21 +1887,18 @@ var Compositor = (function () {
 }());
 exports.Compositor = Compositor;
 //# sourceMappingURL=compositor.js.map
-},{"./buffer":22}],20:[function(require,module,exports) {
+},{"./buffer":42}],28:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var EntityGraph = (function () {
-    function EntityGraph() {
+var EntityLibrary = (function () {
+    function EntityLibrary() {
         this.entities = [];
         this.entitiesByTrait = {};
     }
-    EntityGraph.prototype.getEntitiesByTraits = function (trait) {
-        return this.entitiesByTrait[trait.getName()] || [];
-    };
-    EntityGraph.prototype.getEntitiesByTraitName = function (traitName) {
+    EntityLibrary.prototype.getEntitiesByTraitName = function (traitName) {
         return this.entitiesByTrait[traitName] || [];
     };
-    EntityGraph.prototype.registerEntity = function (entity) {
+    EntityLibrary.prototype.registerEntity = function (entity) {
         var _this = this;
         this.entities.push(entity);
         var traits = entity.getTraits();
@@ -1924,36 +1909,218 @@ var EntityGraph = (function () {
             _this.entitiesByTrait[trait.getName()].push(entity);
         });
     };
-    EntityGraph.prototype.deregisterEntity = function (entity) {
+    EntityLibrary.prototype.deregisterEntity = function (entity) {
         var _this = this;
         var traits = entity.getTraits();
         traits.forEach(function (trait) {
             if (!_this.entitiesByTrait[trait.getName()]) {
-                throw new Error("EntityGraph out of sync");
+                throw new Error("EntityLibrary out of sync");
             }
             _this.entitiesByTrait[trait.getName()] =
                 _this.entitiesByTrait[trait.getName()].filter(function (e) { return e !== entity; });
             _this.entities = _this.entities.filter(function (e) { return e !== entity; });
         });
     };
-    return EntityGraph;
+    return EntityLibrary;
 }());
-exports.EntityGraph = EntityGraph;
-//# sourceMappingURL=entity-graph.js.map
-},{}],21:[function(require,module,exports) {
+exports.EntityLibrary = EntityLibrary;
+//# sourceMappingURL=entity-library.js.map
+},{}],29:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Trait = (function () {
     function Trait() {
     }
-    Trait.prototype.update = function (entity, entityGraph, deltaTime) {
+    Trait.prototype.update = function (entity, entityLibrary, deltaTime) {
         return;
     };
     return Trait;
 }());
 exports.Trait = Trait;
 //# sourceMappingURL=trait.js.map
-},{}],15:[function(require,module,exports) {
+},{}],49:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var __1 = require("..");
+var math_1 = require("../util/math");
+var BoundByGravity = (function (_super) {
+    __extends(BoundByGravity, _super);
+    function BoundByGravity(acceleration) {
+        var _this = _super.call(this) || this;
+        _this.acceleration = acceleration;
+        return _this;
+    }
+    BoundByGravity.prototype.update = function (entity, entityLibrary, deltaTime) {
+        if (!entity.acceleration) {
+            entity.acceleration = new math_1.Vector2(0, 0);
+        }
+        entity.acceleration.y = this.acceleration.y;
+        entity.acceleration.x = this.acceleration.x;
+    };
+    BoundByGravity.prototype.getName = function () {
+        return "BoundByGravity";
+    };
+    return BoundByGravity;
+}(__1.Trait));
+exports.BoundByGravity = BoundByGravity;
+//# sourceMappingURL=bound-by-gravity.js.map
+},{"..":22,"../util/math":43}],50:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var __1 = require("..");
+var math_1 = require("../util/math");
+var BoundByPhysics = (function (_super) {
+    __extends(BoundByPhysics, _super);
+    function BoundByPhysics(terminalVelocity) {
+        var _this = _super.call(this) || this;
+        _this.terminalVelocity = terminalVelocity;
+        return _this;
+    }
+    BoundByPhysics.prototype.update = function (entity, entityLibrary, deltaTime) {
+        this.updateX(entity, entityLibrary, deltaTime);
+        this.updateY(entity, entityLibrary, deltaTime);
+    };
+    BoundByPhysics.prototype.getName = function () {
+        return "BoundByPhysics";
+    };
+    BoundByPhysics.prototype.updateY = function (entity, entityLibrary, deltaTime) {
+        entity.velocity.y += deltaTime * entity.acceleration.y;
+        if (this.terminalVelocity && Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) {
+            entity.velocity.y = math_1.sign(entity.velocity.y) * this.terminalVelocity.y;
+        }
+        entity.position.y += deltaTime * entity.velocity.y;
+    };
+    BoundByPhysics.prototype.updateX = function (entity, entityLibrary, deltaTime) {
+        entity.velocity.x += deltaTime * entity.acceleration.x;
+        if (this.terminalVelocity && Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) {
+            entity.velocity.x = math_1.sign(entity.velocity.x) * this.terminalVelocity.x;
+        }
+        entity.position.x += deltaTime * entity.velocity.x;
+    };
+    return BoundByPhysics;
+}(__1.Trait));
+exports.BoundByPhysics = BoundByPhysics;
+//# sourceMappingURL=bound-by-physics.js.map
+},{"..":22,"../util/math":43}],51:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var math_1 = require("../util/math");
+var bound_by_physics_1 = require("./bound-by-physics");
+var BoundByPhysicsConstrainedByObstacles = (function (_super) {
+    __extends(BoundByPhysicsConstrainedByObstacles, _super);
+    function BoundByPhysicsConstrainedByObstacles(terminalVelocity) {
+        return _super.call(this, terminalVelocity) || this;
+    }
+    BoundByPhysicsConstrainedByObstacles.prototype.update = function (entity, entityLibrary, deltaTime) {
+        var obstacles = entityLibrary.getEntitiesByTraitName("Obstacle");
+        this.updateX(entity, entityLibrary, deltaTime);
+        this.resolveCollisionsX(entity, obstacles);
+        this.updateY(entity, entityLibrary, deltaTime);
+        this.resolveCollisionsY(entity, obstacles);
+    };
+    BoundByPhysicsConstrainedByObstacles.prototype.resolveCollisionsX = function (entity, obstacles) {
+        obstacles.forEach(function (obstacle) {
+            if (!math_1.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) {
+                return;
+            }
+            var sides = math_1.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+            if (sides.right) {
+                entity.position.x -= entity.bounds.right - obstacle.bounds.left;
+            }
+            if (sides.left) {
+                entity.position.x += obstacle.bounds.right - entity.bounds.left;
+            }
+        });
+    };
+    BoundByPhysicsConstrainedByObstacles.prototype.resolveCollisionsY = function (entity, obstacles) {
+        obstacles.forEach(function (obstacle) {
+            if (!math_1.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) {
+                return;
+            }
+            var sides = math_1.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+            if (sides.bottom) {
+                entity.position.y -= entity.bounds.bottom - obstacle.bounds.top;
+            }
+            if (sides.top) {
+                entity.position.y += obstacle.bounds.bottom - entity.bounds.top;
+            }
+        });
+    };
+    return BoundByPhysicsConstrainedByObstacles;
+}(bound_by_physics_1.BoundByPhysics));
+exports.BoundByPhysicsConstrainedByObstacles = BoundByPhysicsConstrainedByObstacles;
+//# sourceMappingURL=bound-by-physics-constrained-by-obstacles.js.map
+},{"../util/math":43,"./bound-by-physics":50}],52:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var __1 = require("..");
+var Obstacle = (function (_super) {
+    __extends(Obstacle, _super);
+    function Obstacle() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Obstacle.prototype.getName = function () {
+        return "Obstacle";
+    };
+    return Obstacle;
+}(__1.Trait));
+exports.Obstacle = Obstacle;
+//# sourceMappingURL=obstacle.js.map
+},{"..":22}],38:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var bound_by_gravity_1 = require("./bound-by-gravity");
+var bound_by_physics_1 = require("./bound-by-physics");
+var bound_by_physics_constrained_by_obstacles_1 = require("./bound-by-physics-constrained-by-obstacles");
+var obstacle_1 = require("./obstacle");
+exports.traits = {
+    BoundByGravity: bound_by_gravity_1.BoundByGravity,
+    BoundByPhysics: bound_by_physics_1.BoundByPhysics,
+    BoundByPhysicsConstrainedByObstacles: bound_by_physics_constrained_by_obstacles_1.BoundByPhysicsConstrainedByObstacles,
+    Obstacle: obstacle_1.Obstacle,
+};
+//# sourceMappingURL=index.js.map
+},{"./bound-by-gravity":49,"./bound-by-physics":50,"./bound-by-physics-constrained-by-obstacles":51,"./obstacle":52}],22:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var input_1 = require("./input");
@@ -1968,12 +2135,14 @@ var animator_1 = require("./animator");
 exports.Animator = animator_1.Animator;
 var compositor_1 = require("./compositor");
 exports.Compositor = compositor_1.Compositor;
-var entity_graph_1 = require("./entity-graph");
-exports.EntityGraph = entity_graph_1.EntityGraph;
+var entity_library_1 = require("./entity-library");
+exports.EntityLibrary = entity_library_1.EntityLibrary;
 var trait_1 = require("./trait");
 exports.Trait = trait_1.Trait;
+var traits_1 = require("./traits");
+exports.traits = traits_1.traits;
 //# sourceMappingURL=index.js.map
-},{"./input":24,"./util":25,"./layer":16,"./entity":17,"./animator":18,"./compositor":19,"./entity-graph":20,"./trait":21}],14:[function(require,module,exports) {
+},{"./input":36,"./util":37,"./layer":24,"./entity":25,"./animator":26,"./compositor":27,"./entity-library":28,"./trait":29,"./traits":38}],16:[function(require,module,exports) {
 'use strict';
 
 var _dist = require('./dist');
@@ -1983,7 +2152,7 @@ var cotton = _interopRequireWildcard(_dist);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 module.exports = cotton;
-},{"./dist":15}],11:[function(require,module,exports) {
+},{"./dist":22}],17:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2015,7 +2184,7 @@ var getRandomStarColour = function getRandomStarColour() {
 var Star = function (_Entity) {
   _inherits(Star, _Entity);
 
-  function Star(entityGraph, maxWidth, maxHeight, pos, vel) {
+  function Star(entityLibrary, maxWidth, maxHeight, pos, vel) {
     var radius = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 2;
     var colour = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : getRandomStarColour();
     var opacity = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : getRandomNumber(0.1, 1);
@@ -2025,9 +2194,9 @@ var Star = function (_Entity) {
 
     if (radius < 1 || radius > 3) throw new exception("radius must be between 2 and 4");
 
-    var size = new _cottonJs.util.Point(radius * trail, radius * trail);
+    var size = new _cottonJs.util.Vector2(radius * trail, radius * trail);
 
-    var _this = _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, pos, size, entityGraph));
+    var _this = _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, pos, size, entityLibrary));
 
     _this.velocity = vel;
     _this.maxWidth = maxWidth;
@@ -2074,7 +2243,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":14}],7:[function(require,module,exports) {
+},{"cotton-js":16}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2097,7 +2266,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Point = _cottonJs.util.Point,
+var Vector2 = _cottonJs.util.Vector2,
     getRandomNumber = _cottonJs.util.getRandomNumber;
 
 var starCount = 200;
@@ -2108,7 +2277,7 @@ var BackgroundLayer = function (_Layer) {
   function BackgroundLayer(width, height) {
     _classCallCheck(this, BackgroundLayer);
 
-    var _this = _possibleConstructorReturn(this, (BackgroundLayer.__proto__ || Object.getPrototypeOf(BackgroundLayer)).call(this, width, height, new _cottonJs.EntityGraph()));
+    var _this = _possibleConstructorReturn(this, (BackgroundLayer.__proto__ || Object.getPrototypeOf(BackgroundLayer)).call(this, width, height, new _cottonJs.EntityLibrary()));
 
     _this.addEntities(_this.createStars());
     return _this;
@@ -2122,7 +2291,7 @@ var BackgroundLayer = function (_Layer) {
       var maxVelocity = 100;
 
       for (var i = 0; i < starCount; i += 1) {
-        stars.push(new _star2.default(this.entityGraph, this.width, this.height, new Point(getRandomNumber(0, this.width), getRandomNumber(0, this.height)), new Point(getRandomNumber(-maxVelocity, maxVelocity), getRandomNumber(-maxVelocity, maxVelocity)), getRandomNumber(2, 3)));
+        stars.push(new _star2.default(this.entityLibrary, this.width, this.height, new Vector2(getRandomNumber(0, this.width), getRandomNumber(0, this.height)), new Vector2(getRandomNumber(-maxVelocity, maxVelocity), getRandomNumber(-maxVelocity, maxVelocity)), getRandomNumber(2, 3)));
       }
 
       return stars;
@@ -2133,7 +2302,7 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"cotton-js":14,"./star":11}],12:[function(require,module,exports) {
+},{"cotton-js":16,"./star":17}],18:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2153,7 +2322,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var getRandomNumber = _cottonJs.util.getRandomNumber,
-    Point = _cottonJs.util.Point;
+    Vector2 = _cottonJs.util.Vector2;
 
 
 var getRandomLetterColour = function getRandomLetterColour() {
@@ -2165,10 +2334,10 @@ var getRandomLetterColour = function getRandomLetterColour() {
 var Letter = function (_Entity) {
   _inherits(Letter, _Entity);
 
-  function Letter(maxWidth, maxHeight, pos, letterToDrawMatrix, entityGraph) {
+  function Letter(maxWidth, maxHeight, pos, letterToDrawMatrix, entityLibrary) {
     _classCallCheck(this, Letter);
 
-    var blockSize = new Point(10, 10);
+    var blockSize = new Vector2(10, 10);
     var width = 0;
 
     letterToDrawMatrix.forEach(function (arr) {
@@ -2179,9 +2348,9 @@ var Letter = function (_Entity) {
 
     var height = letterToDrawMatrix.length;
 
-    var _this = _possibleConstructorReturn(this, (Letter.__proto__ || Object.getPrototypeOf(Letter)).call(this, pos, new Point(50, 50), entityGraph));
+    var _this = _possibleConstructorReturn(this, (Letter.__proto__ || Object.getPrototypeOf(Letter)).call(this, pos, new Vector2(50, 50), entityLibrary));
 
-    _this.velocity = new Point(width * blockSize.x, height * blockSize.y);
+    _this.velocity = new Vector2(width * blockSize.x, height * blockSize.y);
     _this.blockSize = blockSize;
     _this.maxWidth = maxWidth;
     _this.maxHeight = maxHeight;
@@ -2227,7 +2396,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"cotton-js":14}],13:[function(require,module,exports) {
+},{"cotton-js":16}],19:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2275,7 +2444,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],8:[function(require,module,exports) {
+},{}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2300,10 +2469,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Point = _cottonJs.util.Point;
+var Vector2 = _cottonJs.util.Vector2;
 
 
-var createText = function createText(maxWidth, maxHeight, str, yOffset, entityGraph) {
+var createText = function createText(maxWidth, maxHeight, str, yOffset, entityLibrary) {
   var strUppered = str.toUpperCase();
   var retVal = [];
 
@@ -2313,7 +2482,7 @@ var createText = function createText(maxWidth, maxHeight, str, yOffset, entityGr
     var char = strUppered.charAt(i);
     var letterMatrix = _letters2.default[char];
 
-    letter = new _letter2.default(maxWidth, maxHeight, new Point(currX, yOffset), letterMatrix, entityGraph);
+    letter = new _letter2.default(maxWidth, maxHeight, new Vector2(currX, yOffset), letterMatrix, entityLibrary);
 
     retVal.push(letter);
 
@@ -2343,9 +2512,9 @@ var TextLayer = function (_Layer) {
 
     _classCallCheck(this, TextLayer);
 
-    var _this = _possibleConstructorReturn(this, (TextLayer.__proto__ || Object.getPrototypeOf(TextLayer)).call(this, width, height, new _cottonJs.EntityGraph()));
+    var _this = _possibleConstructorReturn(this, (TextLayer.__proto__ || Object.getPrototypeOf(TextLayer)).call(this, width, height, new _cottonJs.EntityLibrary()));
 
-    _this.addEntities(createText(width, height, textToDisplay, yOffset, _this.entityGraph));
+    _this.addEntities(createText(width, height, textToDisplay, yOffset, _this.entityLibrary));
     return _this;
   }
 
@@ -2353,7 +2522,7 @@ var TextLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":14,"./letter":12,"./letters":13}],9:[function(require,module,exports) {
+},{"cotton-js":16,"./letter":18,"./letters":19}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2373,10 +2542,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var CloudParticle = function (_Entity) {
   _inherits(CloudParticle, _Entity);
 
-  function CloudParticle(pos, vel, size, entityGraph) {
+  function CloudParticle(pos, vel, size, entityLibrary) {
     _classCallCheck(this, CloudParticle);
 
-    return _possibleConstructorReturn(this, (CloudParticle.__proto__ || Object.getPrototypeOf(CloudParticle)).call(this, pos, size, entityGraph));
+    return _possibleConstructorReturn(this, (CloudParticle.__proto__ || Object.getPrototypeOf(CloudParticle)).call(this, pos, size, entityLibrary));
   }
 
   _createClass(CloudParticle, [{
@@ -2403,9 +2572,9 @@ var Cloud = function (_Layer) {
   function Cloud(width, height) {
     _classCallCheck(this, Cloud);
 
-    var _this2 = _possibleConstructorReturn(this, (Cloud.__proto__ || Object.getPrototypeOf(Cloud)).call(this, width, height, new _cottonJs.EntityGraph()));
+    var _this2 = _possibleConstructorReturn(this, (Cloud.__proto__ || Object.getPrototypeOf(Cloud)).call(this, width, height, new _cottonJs.EntityLibrary()));
 
-    _this2.addEntity(new CloudParticle(new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(_this2.width, _this2.height), _this2.entityGraph));
+    _this2.addEntity(new CloudParticle(new _cottonJs.util.Vector2(0, 0), new _cottonJs.util.Vector2(0, 0), new _cottonJs.util.Vector2(_this2.width, _this2.height), _this2.entityLibrary));
     return _this2;
   }
 
@@ -2413,7 +2582,7 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":14}],3:[function(require,module,exports) {
+},{"cotton-js":16}],3:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2449,7 +2618,7 @@ var runGalaxy = exports.runGalaxy = function runGalaxy() {
 
   animator.start();
 };
-},{"cotton-js":14,"./background-layer":7,"./text-layer":8,"../common/cloud":9}],10:[function(require,module,exports) {
+},{"cotton-js":16,"./background-layer":8,"./text-layer":9,"../common/cloud":10}],14:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2457,6 +2626,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cottonJs = require("cotton-js");
 
@@ -2470,19 +2641,24 @@ var SimpleEntity = function (_Entity) {
   _inherits(SimpleEntity, _Entity);
 
   function SimpleEntity(pos, size) {
-    var entityGraph = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new _cottonJs.EntityGraph();
+    var entityLibrary = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new _cottonJs.EntityLibrary();
     var colour = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "green";
     var traits = arguments[4];
 
     _classCallCheck(this, SimpleEntity);
 
-    var _this = _possibleConstructorReturn(this, (SimpleEntity.__proto__ || Object.getPrototypeOf(SimpleEntity)).call(this, pos, size, entityGraph, traits, true));
+    var _this = _possibleConstructorReturn(this, (SimpleEntity.__proto__ || Object.getPrototypeOf(SimpleEntity)).call(this, pos, size, entityLibrary, traits, false));
 
     _this.colour = colour;
     return _this;
   }
 
   _createClass(SimpleEntity, [{
+    key: "update",
+    value: function update(delta) {
+      _get(SimpleEntity.prototype.__proto__ || Object.getPrototypeOf(SimpleEntity.prototype), "update", this).call(this, delta);
+    }
+  }, {
     key: "draw",
     value: function draw() {
       var context = this.buffer.getContext();
@@ -2495,7 +2671,7 @@ var SimpleEntity = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = SimpleEntity;
-},{"cotton-js":14}],4:[function(require,module,exports) {
+},{"cotton-js":16}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2520,7 +2696,7 @@ var runInputTest = exports.runInputTest = function runInputTest() {
     var width = window.innerWidth;
     var height = window.innerHeight;
 
-    var movableEntity = new _simpleEntity2.default(new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(50, 50));
+    var movableEntity = new _simpleEntity2.default(new _cottonJs.util.Vector2(0, 0), new _cottonJs.util.Vector2(50, 50));
 
     var inputHandler = new _cottonJs.input.Keyboard(window);
 
@@ -2540,19 +2716,17 @@ var runInputTest = exports.runInputTest = function runInputTest() {
         movableEntity.position.y += 10;
     });
 
-    var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityGraph(), [movableEntity])]));
+    var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), [movableEntity])]));
 
     animator.start();
 };
-},{"../common/cloud":9,"cotton-js":14,"../common/simple-entity":10}],5:[function(require,module,exports) {
+},{"../common/cloud":10,"cotton-js":16,"../common/simple-entity":14}],5:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.runTraitTest = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _cloud = require("../common/cloud");
 
@@ -2572,210 +2746,31 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var Obstacle = _cottonJs.traits.Obstacle,
+    BoundByGravity = _cottonJs.traits.BoundByGravity,
+    BoundByPhysicsConstrainedByObstacles = _cottonJs.traits.BoundByPhysicsConstrainedByObstacles;
+var Vector2 = _cottonJs.util.Vector2,
+    getRandomNumber = _cottonJs.util.getRandomNumber,
+    getRandomInt = _cottonJs.util.getRandomInt;
+
+
 var rootEl = document.getElementById('yaboi');
 var width = window.innerWidth;
 var height = window.innerHeight;
 
-var BoundByGravity = function (_Trait) {
-  _inherits(BoundByGravity, _Trait);
+var getRandomColour = function getRandomColour() {
+  var colours = ["225,247,213", "255,189,189", "201,201,255", "241,203,255"];
 
-  function BoundByGravity(acceleration) {
-    _classCallCheck(this, BoundByGravity);
-
-    var _this = _possibleConstructorReturn(this, (BoundByGravity.__proto__ || Object.getPrototypeOf(BoundByGravity)).call(this));
-
-    _this.acceleration = acceleration;
-    return _this;
-  }
-
-  _createClass(BoundByGravity, [{
-    key: "update",
-    value: function update(entity, entityGraph, deltaTime) {
-      if (!entity.acceleration) {
-        entity.acceleration = new _cottonJs.util.Point(0, 0);
-      };
-
-      entity.acceleration.y = this.acceleration.y;
-      entity.acceleration.x = this.acceleration.x;
-    }
-  }, {
-    key: "getName",
-    value: function getName() {
-      return this.constructor.name;;
-    }
-  }]);
-
-  return BoundByGravity;
-}(_cottonJs.Trait);
-
-var BoundByPhysics = function (_Trait2) {
-  _inherits(BoundByPhysics, _Trait2);
-
-  function BoundByPhysics(terminalVelocity) {
-    _classCallCheck(this, BoundByPhysics);
-
-    var _this2 = _possibleConstructorReturn(this, (BoundByPhysics.__proto__ || Object.getPrototypeOf(BoundByPhysics)).call(this));
-
-    _this2.terminalVelocity = terminalVelocity;
-    return _this2;
-  }
-
-  _createClass(BoundByPhysics, [{
-    key: "setPhysicsDefaults",
-    value: function setPhysicsDefaults(entity) {
-      if (!entity.acceleration) {
-        entity.acceleration = new _cottonJs.util.Point(0, 0);
-      };
-
-      if (!entity.velocity) {
-        entity.velocity = new _cottonJs.util.Point(0, 0);
-      };
-    }
-  }, {
-    key: "update",
-    value: function update(entity, entityGraph, deltaTime) {
-      this.setPhysicsDefaults(entity);
-      this.updateX(entity, entityGraph, deltaTime);
-      this.updateY(entity, entityGraph, deltaTime);
-    }
-  }, {
-    key: "updateY",
-    value: function updateY(entity, entityGraph, deltaTime) {
-      // Update velocity
-      entity.velocity.y += deltaTime * entity.acceleration.y;
-
-      // Cap out at terminal velocity if required
-      if (this.terminalVelocity && Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) entity.velocity.y = Math.sign(entity.velocity.y) * this.terminalVelocity.y;
-
-      // Update position
-      entity.position.y += deltaTime * entity.velocity.y;
-    }
-  }, {
-    key: "updateX",
-    value: function updateX(entity, entityGraph, deltaTime) {
-      // Update velocity
-      entity.velocity.x += deltaTime * entity.acceleration.x;
-
-      // Cap out at terminal velocity if required
-      if (this.terminalVelocity && Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) entity.velocity.x = Math.sign(entity.velocity.x) * this.terminalVelocity.x;
-
-      // Update position
-      entity.position.x += deltaTime * entity.velocity.x;
-    }
-  }, {
-    key: "getName",
-    value: function getName() {
-      return this.constructor.name;
-    }
-  }]);
-
-  return BoundByPhysics;
-}(_cottonJs.Trait);
-
-var BoundByPhysicsConstrainedByObstacles = function (_BoundByPhysics) {
-  _inherits(BoundByPhysicsConstrainedByObstacles, _BoundByPhysics);
-
-  function BoundByPhysicsConstrainedByObstacles(terminalVelocity) {
-    _classCallCheck(this, BoundByPhysicsConstrainedByObstacles);
-
-    return _possibleConstructorReturn(this, (BoundByPhysicsConstrainedByObstacles.__proto__ || Object.getPrototypeOf(BoundByPhysicsConstrainedByObstacles)).call(this, terminalVelocity));
-  }
-
-  _createClass(BoundByPhysicsConstrainedByObstacles, [{
-    key: "update",
-    value: function update(entity, entityGraph, deltaTime) {
-      var obstacles = entityGraph.getEntitiesByTraitName('Obstacle');
-
-      this.setPhysicsDefaults(entity);
-
-      // Process X
-      this.updateX(entity, entityGraph, deltaTime);
-      this.applyObstacleCollisionResolutionX(entity, obstacles);
-
-      // Process Y
-      this.updateY(entity, entityGraph, deltaTime);
-      this.applyObstacleCollisionResolutionY(entity, obstacles);
-    }
-  }, {
-    key: "applyObstacleCollisionResolutionX",
-    value: function applyObstacleCollisionResolutionX(entity, obstacles) {
-      var xResolution = 0;
-
-      obstacles.forEach(function (obstacle) {
-        if (!_cottonJs.util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
-
-        var sides = _cottonJs.util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
-
-        // We may have colided with left or right edge
-        if (sides.right) {
-          // Coming in from the left
-          xResolution -= entity.bounds.right - obstacle.bounds.left;
-        }
-
-        if (sides.left) {
-          // Coming in from the right        
-          xResolution += obstacle.bounds.right - entity.bounds.left;
-        }
-      });
-
-      entity.position.x += xResolution;
-    }
-  }, {
-    key: "applyObstacleCollisionResolutionY",
-    value: function applyObstacleCollisionResolutionY(entity, obstacles) {
-      var yResolution = 0;
-
-      obstacles.forEach(function (obstacle) {
-        if (!_cottonJs.util.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) return;
-
-        var sides = _cottonJs.util.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
-
-        // Based on current acceleration, check what needs a tweak
-        // We may have colided with top or bottom edge
-        if (sides.bottom) {
-          // Coming in from the top        
-          yResolution -= entity.bounds.bottom - obstacle.bounds.top;
-        }
-
-        if (sides.top) {
-          // Coming in from the bottom
-          yResolution += obstacle.bounds.bottom - entity.bounds.top;
-        }
-      });
-
-      entity.position.y += yResolution;
-    }
-  }]);
-
-  return BoundByPhysicsConstrainedByObstacles;
-}(BoundByPhysics);
-
-var Obstacle = function (_Trait3) {
-  _inherits(Obstacle, _Trait3);
-
-  function Obstacle() {
-    _classCallCheck(this, Obstacle);
-
-    return _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).apply(this, arguments));
-  }
-
-  _createClass(Obstacle, [{
-    key: "getName",
-    value: function getName() {
-      return this.constructor.name;
-    }
-  }]);
-
-  return Obstacle;
-}(_cottonJs.Trait);
+  return colours[Math.floor(Math.random() * colours.length)];
+};
 
 var Block = function (_SimpleEntity) {
   _inherits(Block, _SimpleEntity);
 
-  function Block(pos, entityGraph) {
+  function Block(pos, entityLibrary) {
     _classCallCheck(this, Block);
 
-    return _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, pos, new _cottonJs.util.Point(50, 50), entityGraph, 'red', [new Obstacle()]));
+    return _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, pos, new Vector2(50, 50), entityLibrary, 'white', [new Obstacle()]));
   }
 
   return Block;
@@ -2784,10 +2779,10 @@ var Block = function (_SimpleEntity) {
 var Yaboi = function (_SimpleEntity2) {
   _inherits(Yaboi, _SimpleEntity2);
 
-  function Yaboi(pos, entityGraph, traits) {
+  function Yaboi(pos, entityLibrary, traits) {
     _classCallCheck(this, Yaboi);
 
-    return _possibleConstructorReturn(this, (Yaboi.__proto__ || Object.getPrototypeOf(Yaboi)).call(this, pos, new _cottonJs.util.Point(20, 20), entityGraph, 'cyan', traits));
+    return _possibleConstructorReturn(this, (Yaboi.__proto__ || Object.getPrototypeOf(Yaboi)).call(this, pos, new Vector2(20, 20), entityLibrary, "rgba(" + getRandomColour() + ", " + getRandomInt(50, 100) + ")", traits));
   }
 
   return Yaboi;
@@ -2795,7 +2790,7 @@ var Yaboi = function (_SimpleEntity2) {
 
 var runTraitTest = exports.runTraitTest = function runTraitTest() {
 
-  var entityGraph = new _cottonJs.EntityGraph();
+  var entityLibrary = new _cottonJs.EntityLibrary();
 
   var entities = [];
 
@@ -2804,7 +2799,7 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
   var y = height - 50;
 
   while (x < width) {
-    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
     x += 50;
   }
 
@@ -2813,7 +2808,7 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
   y = 0;
 
   while (x < width) {
-    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
     x += 50;
   }
 
@@ -2822,7 +2817,7 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
   y = 0;
 
   while (y < height) {
-    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
     y += 50;
   }
 
@@ -2831,29 +2826,19 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
   y = 0;
 
   while (y < height) {
-    entities.push(new Block(new _cottonJs.util.Point(x, y), entityGraph));
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
     y += 50;
   }
 
-  // Create the movable entity
-  var startingLoc1 = new _cottonJs.util.Point(width / 2, height / 2);
-  var startingLoc2 = new _cottonJs.util.Point(width / 2, height / 2);
-  var startingLoc3 = new _cottonJs.util.Point(width / 2, height / 2);
-  var startingLoc4 = new _cottonJs.util.Point(width / 2, height / 2);
+  for (var i = 0; i < 150; i += 1) {
+    entities.push(new Yaboi(new Vector2(width / 2, height / 2), entityLibrary, [new BoundByGravity(new Vector2(getRandomNumber(-9.8, 9.8), getRandomNumber(-9.8, 9.8))), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120))]));
+  }
 
-  entities.push(new Yaboi(startingLoc1, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(-9.8, 3)), new BoundByPhysicsConstrainedByObstacles(new _cottonJs.util.Point(120, 120))]));
-
-  entities.push(new Yaboi(startingLoc2, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(3, -9.8)), new BoundByPhysicsConstrainedByObstacles(new _cottonJs.util.Point(120, 120))]));
-
-  entities.push(new Yaboi(startingLoc3, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(9.8, 3)), new BoundByPhysicsConstrainedByObstacles(new _cottonJs.util.Point(120, 120))]));
-
-  entities.push(new Yaboi(startingLoc4, entityGraph, [new BoundByGravity(new _cottonJs.util.Point(3, 9.8)), new BoundByPhysicsConstrainedByObstacles(new _cottonJs.util.Point(120, 120))]));
-
-  var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityGraph(), entities)]));
+  var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cloud2.default(width, height), new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), entities)]));
 
   animator.start();
 };
-},{"../common/cloud":9,"../common/simple-entity":10,"cotton-js":14}],2:[function(require,module,exports) {
+},{"../common/cloud":10,"../common/simple-entity":14,"cotton-js":16}],2:[function(require,module,exports) {
 'use strict';
 
 var _teamCottonGalaxy = require('./team-cotton-galaxy');
@@ -2876,7 +2861,7 @@ tests.forEach(function (test) {
   };
   rootEl.appendChild(testButton);
 });
-},{"./team-cotton-galaxy":3,"./input-test":4,"./trait-test":5}],35:[function(require,module,exports) {
+},{"./team-cotton-galaxy":3,"./input-test":4,"./trait-test":5}],62:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -2906,7 +2891,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '65405' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '53470' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -3045,5 +3030,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[35,2])
+},{}]},{},[62,2])
 //# sourceMappingURL=/cotton-js-test-bench.8d2766ad.map
