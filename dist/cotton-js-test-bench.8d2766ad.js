@@ -77,7 +77,7 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({46:[function(require,module,exports) {
+})({26:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var PRESSED = 1;
@@ -116,7 +116,7 @@ var Keyboard = (function () {
 }());
 exports.Keyboard = Keyboard;
 //# sourceMappingURL=keyboard.js.map
-},{}],36:[function(require,module,exports) {
+},{}],23:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var keyboard_1 = require("./keyboard");
@@ -124,7 +124,7 @@ exports.input = {
     Keyboard: keyboard_1.Keyboard,
 };
 //# sourceMappingURL=index.js.map
-},{"./keyboard":46}],61:[function(require,module,exports) {
+},{"./keyboard":26}],34:[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {};
@@ -311,7 +311,7 @@ process.chdir = function (dir) {
 process.umask = function () {
     return 0;
 };
-},{}],60:[function(require,module,exports) {
+},{}],33:[function(require,module,exports) {
 var global = (1,eval)("this");
 var process = require("process");
 /*!
@@ -1494,7 +1494,7 @@ return Promise$1;
 
 //# sourceMappingURL=es6-promise.map
 
-},{"process":61}],47:[function(require,module,exports) {
+},{"process":34}],27:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var es6_promise_1 = require("es6-promise");
@@ -1514,7 +1514,7 @@ var CottonImage = (function () {
 }());
 exports.CottonImage = CottonImage;
 //# sourceMappingURL=image.js.map
-},{"es6-promise":60}],48:[function(require,module,exports) {
+},{"es6-promise":33}],28:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Json = (function () {
@@ -1527,7 +1527,7 @@ var Json = (function () {
 }());
 exports.Json = Json;
 //# sourceMappingURL=json.js.map
-},{}],43:[function(require,module,exports) {
+},{}],22:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var BoundingBox = (function () {
@@ -1645,7 +1645,7 @@ exports.getRandomInt = function (min, max) {
 };
 exports.sign = function (n) { return n && n / Math.abs(n); };
 //# sourceMappingURL=math.js.map
-},{}],37:[function(require,module,exports) {
+},{}],24:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var image_1 = require("./image");
@@ -1660,7 +1660,7 @@ exports.util = {
     getRandomNumber: math_1.getRandomNumber,
 };
 //# sourceMappingURL=index.js.map
-},{"./image":47,"./json":48,"./math":43}],42:[function(require,module,exports) {
+},{"./image":27,"./json":28,"./math":22}],21:[function(require,module,exports) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1686,7 +1686,7 @@ var Buffer = (function () {
 }());
 exports.Buffer = Buffer;
 //# sourceMappingURL=buffer.js.map
-},{}],24:[function(require,module,exports) {
+},{}],15:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1737,7 +1737,7 @@ var Layer = (function () {
 }());
 exports.Layer = Layer;
 //# sourceMappingURL=layer.js.map
-},{"./buffer":42,"./util/math":43}],25:[function(require,module,exports) {
+},{"./buffer":21,"./util/math":22}],16:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1795,7 +1795,7 @@ var Entity = (function () {
 }());
 exports.Entity = Entity;
 //# sourceMappingURL=entity.js.map
-},{"./buffer":42,"./util/math":43}],26:[function(require,module,exports) {
+},{"./buffer":21,"./util/math":22}],17:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Animator = (function () {
@@ -1830,7 +1830,7 @@ var Animator = (function () {
 }());
 exports.Animator = Animator;
 //# sourceMappingURL=animator.js.map
-},{}],27:[function(require,module,exports) {
+},{}],18:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1887,7 +1887,7 @@ var Compositor = (function () {
 }());
 exports.Compositor = Compositor;
 //# sourceMappingURL=compositor.js.map
-},{"./buffer":42}],28:[function(require,module,exports) {
+},{"./buffer":21}],19:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var EntityLibrary = (function () {
@@ -1925,7 +1925,7 @@ var EntityLibrary = (function () {
 }());
 exports.EntityLibrary = EntityLibrary;
 //# sourceMappingURL=entity-library.js.map
-},{}],29:[function(require,module,exports) {
+},{}],20:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Trait = (function () {
@@ -1938,7 +1938,7 @@ var Trait = (function () {
 }());
 exports.Trait = Trait;
 //# sourceMappingURL=trait.js.map
-},{}],49:[function(require,module,exports) {
+},{}],29:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -1974,7 +1974,7 @@ var BoundByGravity = (function (_super) {
 }(__1.Trait));
 exports.BoundByGravity = BoundByGravity;
 //# sourceMappingURL=bound-by-gravity.js.map
-},{"..":22,"../util/math":43}],50:[function(require,module,exports) {
+},{"..":14,"../util/math":22}],30:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2021,7 +2021,7 @@ var BoundByPhysics = (function (_super) {
 }(__1.Trait));
 exports.BoundByPhysics = BoundByPhysics;
 //# sourceMappingURL=bound-by-physics.js.map
-},{"..":22,"../util/math":43}],51:[function(require,module,exports) {
+},{"..":14,"../util/math":22}],31:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2080,7 +2080,7 @@ var BoundByPhysicsConstrainedByObstacles = (function (_super) {
 }(bound_by_physics_1.BoundByPhysics));
 exports.BoundByPhysicsConstrainedByObstacles = BoundByPhysicsConstrainedByObstacles;
 //# sourceMappingURL=bound-by-physics-constrained-by-obstacles.js.map
-},{"../util/math":43,"./bound-by-physics":50}],52:[function(require,module,exports) {
+},{"../util/math":22,"./bound-by-physics":30}],32:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2106,7 +2106,7 @@ var Obstacle = (function (_super) {
 }(__1.Trait));
 exports.Obstacle = Obstacle;
 //# sourceMappingURL=obstacle.js.map
-},{"..":22}],38:[function(require,module,exports) {
+},{"..":14}],25:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bound_by_gravity_1 = require("./bound-by-gravity");
@@ -2120,7 +2120,7 @@ exports.traits = {
     Obstacle: obstacle_1.Obstacle,
 };
 //# sourceMappingURL=index.js.map
-},{"./bound-by-gravity":49,"./bound-by-physics":50,"./bound-by-physics-constrained-by-obstacles":51,"./obstacle":52}],22:[function(require,module,exports) {
+},{"./bound-by-gravity":29,"./bound-by-physics":30,"./bound-by-physics-constrained-by-obstacles":31,"./obstacle":32}],14:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var input_1 = require("./input");
@@ -2142,7 +2142,7 @@ exports.Trait = trait_1.Trait;
 var traits_1 = require("./traits");
 exports.traits = traits_1.traits;
 //# sourceMappingURL=index.js.map
-},{"./input":36,"./util":37,"./layer":24,"./entity":25,"./animator":26,"./compositor":27,"./entity-library":28,"./trait":29,"./traits":38}],16:[function(require,module,exports) {
+},{"./input":23,"./util":24,"./layer":15,"./entity":16,"./animator":17,"./compositor":18,"./entity-library":19,"./trait":20,"./traits":25}],13:[function(require,module,exports) {
 'use strict';
 
 var _dist = require('./dist');
@@ -2152,7 +2152,7 @@ var cotton = _interopRequireWildcard(_dist);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 module.exports = cotton;
-},{"./dist":22}],17:[function(require,module,exports) {
+},{"./dist":14}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2243,7 +2243,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":16}],8:[function(require,module,exports) {
+},{"cotton-js":13}],6:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2302,7 +2302,7 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"cotton-js":16,"./star":17}],18:[function(require,module,exports) {
+},{"cotton-js":13,"./star":10}],11:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2393,7 +2393,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"cotton-js":16}],19:[function(require,module,exports) {
+},{"cotton-js":13}],12:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2441,7 +2441,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],9:[function(require,module,exports) {
+},{}],7:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2519,7 +2519,7 @@ var TextLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":16,"./letter":18,"./letters":19}],10:[function(require,module,exports) {
+},{"cotton-js":13,"./letter":11,"./letters":12}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2579,7 +2579,7 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":16}],3:[function(require,module,exports) {
+},{"cotton-js":13}],3:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2615,7 +2615,7 @@ var runGalaxy = exports.runGalaxy = function runGalaxy() {
 
   animator.start();
 };
-},{"cotton-js":16,"./background-layer":8,"./text-layer":9,"../common/cloud":10}],14:[function(require,module,exports) {
+},{"cotton-js":13,"./background-layer":6,"./text-layer":7,"../common/cloud":8}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2668,7 +2668,7 @@ var SimpleEntity = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = SimpleEntity;
-},{"cotton-js":16}],4:[function(require,module,exports) {
+},{"cotton-js":13}],5:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2717,7 +2717,7 @@ var runInputTest = exports.runInputTest = function runInputTest() {
 
     animator.start();
 };
-},{"../common/cloud":10,"cotton-js":16,"../common/simple-entity":14}],5:[function(require,module,exports) {
+},{"../common/cloud":8,"cotton-js":13,"../common/simple-entity":9}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2767,7 +2767,7 @@ var Block = function (_SimpleEntity) {
   function Block(pos, entityLibrary) {
     _classCallCheck(this, Block);
 
-    return _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, pos, new Vector2(50, 50), entityLibrary, 'white', [new Obstacle()]));
+    return _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, pos, new Vector2(10, 10), entityLibrary, 'white', [new Obstacle()]));
   }
 
   return Block;
@@ -2793,11 +2793,11 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
 
   // Create the floor
   var x = 0;
-  var y = height - 50;
+  var y = height - 10;
 
   while (x < width) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    x += 50;
+    x += 10;
   }
 
   // Create the roof
@@ -2806,7 +2806,7 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
 
   while (x < width) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    x += 50;
+    x += 10;
   }
 
   // Create left wall
@@ -2815,27 +2815,27 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
 
   while (y < height) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    y += 50;
+    y += 10;
   }
 
   // Create right wall
-  x = width - 50;
+  x = width - 10;
   y = 0;
 
   while (y < height) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    y += 50;
+    y += 10;
   }
 
   for (var i = 0; i < 150; i += 1) {
-    entities.push(new Yaboi(new Vector2(width / 2, height / 2), entityLibrary, [new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120))]));
+    entities.push(new Yaboi(new Vector2(getRandomInt(20, width - 20), getRandomInt(20, height - 20)), entityLibrary, [new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)), new Obstacle()]));
   }
 
   var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cloud2.default(width, height), new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), entities)]));
 
   animator.start();
 };
-},{"../common/cloud":10,"../common/simple-entity":14,"cotton-js":16}],2:[function(require,module,exports) {
+},{"../common/cloud":8,"../common/simple-entity":9,"cotton-js":13}],2:[function(require,module,exports) {
 'use strict';
 
 var _teamCottonGalaxy = require('./team-cotton-galaxy');
@@ -2858,7 +2858,7 @@ tests.forEach(function (test) {
   };
   rootEl.appendChild(testButton);
 });
-},{"./team-cotton-galaxy":3,"./input-test":4,"./trait-test":5}],62:[function(require,module,exports) {
+},{"./team-cotton-galaxy":3,"./input-test":5,"./trait-test":4}],35:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -2888,7 +2888,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '53470' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '57865' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -3027,5 +3027,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[62,2])
+},{}]},{},[35,2])
 //# sourceMappingURL=/cotton-js-test-bench.8d2766ad.map

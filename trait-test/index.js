@@ -19,7 +19,7 @@ class Block extends SimpleEntity {
   constructor(pos, entityLibrary) {
     super(
       pos,
-      new Vector2(50, 50),
+      new Vector2(10, 10),
       entityLibrary,
       'white',
       [new Obstacle()]
@@ -47,11 +47,11 @@ export const runTraitTest = function runTraitTest() {
 
   // Create the floor
   let x = 0;
-  let y = height - 50;
+  let y = height - 10;
 
   while (x < width) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    x += 50;
+    x += 10;
   }
 
   // Create the roof
@@ -60,7 +60,7 @@ export const runTraitTest = function runTraitTest() {
 
   while (x < width) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    x += 50;
+    x += 10;
   }
 
   // Create left wall
@@ -69,25 +69,26 @@ export const runTraitTest = function runTraitTest() {
 
   while (y < height) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    y += 50;
+    y += 10;
   }
 
   // Create right wall
-  x = width - 50;
+  x = width - 10;
   y = 0;
 
   while (y < height) {
     entities.push(new Block(new Vector2(x, y), entityLibrary));
-    y += 50;
+    y += 10;
   }
 
   for (let i = 0; i < 150; i += 1) {
     entities.push(
       new Yaboi(
-          new Vector2(width/2, height/2), 
+          new Vector2(getRandomInt(20, width-20), getRandomInt(20, height-20)), 
           entityLibrary, [
             new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))),
             new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)),
+            new Obstacle()
           ]
     ));
   }
