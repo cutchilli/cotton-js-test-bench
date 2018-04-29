@@ -77,7 +77,54 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({21:[function(require,module,exports) {
+})({26:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var PRESSED = 1;
+var RELEASED = 0;
+var KEYDOWN = "keydown";
+var KEYUP = "keyup";
+var Keyboard = (function () {
+    function Keyboard(htmlElement) {
+        var _this = this;
+        this.keyStates = {};
+        this.keyMap = {};
+        [KEYDOWN, KEYUP]
+            .forEach(function (eventName) { return htmlElement.addEventListener(eventName, function (event) { return _this.handleEvent(event); }); });
+    }
+    Keyboard.prototype.addMapping = function (code, callback) {
+        if (!this.keyMap[code]) {
+            this.keyMap[code] = new Array();
+        }
+        this.keyMap[code].push(callback);
+    };
+    Keyboard.prototype.handleEvent = function (event) {
+        var code = event.code;
+        event.preventDefault();
+        if (!this.keyMap[code]) {
+            return;
+        }
+        var keyState = event.type === KEYDOWN ? PRESSED : RELEASED;
+        if (this.keyStates[code] === keyState) {
+            return;
+        }
+        this.keyStates[code] = keyState;
+        this.keyMap[code]
+            .forEach(function (callback) { return callback(keyState); });
+    };
+    return Keyboard;
+}());
+exports.Keyboard = Keyboard;
+//# sourceMappingURL=keyboard.js.map
+},{}],23:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var keyboard_1 = require("./keyboard");
+exports.input = {
+    Keyboard: keyboard_1.Keyboard,
+};
+//# sourceMappingURL=index.js.map
+},{"./keyboard":26}],34:[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {};
@@ -264,7 +311,7 @@ process.chdir = function (dir) {
 process.umask = function () {
     return 0;
 };
-},{}],20:[function(require,module,exports) {
+},{}],33:[function(require,module,exports) {
 var global = (1,eval)("this");
 var process = require("process");
 /*!
@@ -1447,7 +1494,7 @@ return Promise$1;
 
 //# sourceMappingURL=es6-promise.map
 
-},{"process":21}],18:[function(require,module,exports) {
+},{"process":34}],27:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var es6_promise_1 = require("es6-promise");
@@ -1457,7 +1504,7 @@ var CottonImage = (function () {
     CottonImage.prototype.loadImage = function (url) {
         return new es6_promise_1.Promise(function (resolve) {
             var img = new Image();
-            img.addEventListener('load', function () {
+            img.addEventListener("load", function () {
                 resolve(img);
             });
             img.src = url;
@@ -1467,7 +1514,7 @@ var CottonImage = (function () {
 }());
 exports.CottonImage = CottonImage;
 //# sourceMappingURL=image.js.map
-},{"es6-promise":20}],19:[function(require,module,exports) {
+},{"es6-promise":33}],28:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Json = (function () {
@@ -1480,7 +1527,7 @@ var Json = (function () {
 }());
 exports.Json = Json;
 //# sourceMappingURL=json.js.map
-},{}],16:[function(require,module,exports) {
+},{}],22:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var BoundingBox = (function () {
@@ -1488,14 +1535,53 @@ var BoundingBox = (function () {
         this.pos = pos;
         this.size = size;
     }
-    BoundingBox.prototype.overlaps = function (box) {
-        return BoundingBox.overlaps(this, box);
+    BoundingBox.contains = function (a, b) {
+        return !(b.left < a.left ||
+            b.top < a.top ||
+            b.right > a.right ||
+            b.bottom > a.bottom);
     };
-    BoundingBox.overlaps = function (box1, box2) {
-        return (box1.bottom > box2.top &&
-            box1.top < box2.bottom &&
-            box1.left < box2.right &&
-            box1.right > box2.left);
+    BoundingBox.touches = function (a, b) {
+        if (a.left > b.right || b.left > a.right) {
+            return false;
+        }
+        if (a.top > b.bottom || b.top > a.bottom) {
+            return false;
+        }
+        return true;
+    };
+    BoundingBox.overlaps = function (a, b) {
+        if (a.left >= b.right || b.left >= a.right) {
+            return false;
+        }
+        if (a.top >= b.bottom || b.top >= a.bottom) {
+            return false;
+        }
+        return true;
+    };
+    BoundingBox.getOverlappingSides = function (box1, box2) {
+        var left = false;
+        var right = false;
+        var top = false;
+        var bottom = false;
+        if (BoundingBox.touches(box1, box2) && box1.left < box2.left && box1.right >= box2.left) {
+            right = true;
+        }
+        if (BoundingBox.touches(box1, box2) && box1.right > box2.right && box1.left <= box2.right) {
+            left = true;
+        }
+        if (BoundingBox.touches(box1, box2) && box1.top < box2.bottom && box1.bottom >= box2.bottom) {
+            top = true;
+        }
+        if (BoundingBox.touches(box1, box2) && box1.bottom > box2.top && box1.top <= box2.top) {
+            bottom = true;
+        }
+        return {
+            bottom: bottom,
+            left: left,
+            right: right,
+            top: top,
+        };
     };
     Object.defineProperty(BoundingBox.prototype, "bottom", {
         get: function () {
@@ -1540,49 +1626,52 @@ var BoundingBox = (function () {
     return BoundingBox;
 }());
 exports.BoundingBox = BoundingBox;
-var Point = (function () {
-    function Point(x, y) {
+var Vector2 = (function () {
+    function Vector2(x, y) {
         this.set(x, y);
     }
-    Point.prototype.set = function (x, y) {
+    Vector2.prototype.set = function (x, y) {
         this.x = x;
         this.y = y;
     };
-    return Point;
+    return Vector2;
 }());
-exports.Point = Point;
+exports.Vector2 = Vector2;
 exports.getRandomNumber = function (min, max) { return Math.random() * (max - min) + min; };
 exports.getRandomInt = function (min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
 };
+exports.sign = function (n) { return n && n / Math.abs(n); };
 //# sourceMappingURL=math.js.map
-},{}],17:[function(require,module,exports) {
+},{}],24:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var image_1 = require("./image");
 var json_1 = require("./json");
 var math_1 = require("./math");
 exports.util = {
+    BoundingBox: math_1.BoundingBox,
     CottonImage: image_1.CottonImage,
     Json: json_1.Json,
-    BoundingBox: math_1.BoundingBox,
-    getRandomNumber: math_1.getRandomNumber,
+    Vector2: math_1.Vector2,
     getRandomInt: math_1.getRandomInt,
-    Point: math_1.Point,
+    getRandomNumber: math_1.getRandomNumber,
 };
 //# sourceMappingURL=index.js.map
-},{"./image":18,"./json":19,"./math":16}],15:[function(require,module,exports) {
+},{"./image":27,"./json":28,"./math":22}],21:[function(require,module,exports) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Buffer = (function () {
     function Buffer(width, height, canvas) {
-        this.canvas = canvas || document.createElement('canvas');
+        this.canvas = canvas || document.createElement("canvas");
         this.canvas.width = canvas ? canvas.width : width;
         this.canvas.height = canvas ? canvas.height : height;
-        this.context = this.canvas.getContext('2d');
+        this.context = this.canvas.getContext("2d");
+        this.width = width;
+        this.height = height;
     }
     Buffer.prototype.getContext = function () {
         return this.context;
@@ -1596,26 +1685,23 @@ var Buffer = (function () {
     return Buffer;
 }());
 exports.Buffer = Buffer;
-;
 //# sourceMappingURL=buffer.js.map
-},{}],11:[function(require,module,exports) {
+},{}],15:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var math_1 = require("./util/math");
 var buffer_1 = require("./buffer");
+var math_1 = require("./util/math");
 var Layer = (function () {
-    function Layer(width, height, entities) {
+    function Layer(width, height, entityLibrary, entities) {
         if (entities === void 0) { entities = []; }
         this.entities = [];
         this.width = width;
         this.height = height;
+        this.entityLibrary = entityLibrary;
         this.buffer = new buffer_1.Buffer(this.width, this.height);
         this.calculateBounds();
         this.addEntities(entities);
     }
-    Layer.prototype.calculateBounds = function () {
-        this.bounds = new math_1.BoundingBox(new math_1.Point(0, 0), new math_1.Point(this.width, this.height));
-    };
     Layer.prototype.addEntity = function (entity) {
         this.addEntities([entity]);
     };
@@ -1626,142 +1712,419 @@ var Layer = (function () {
         this.entities = this.entities.filter(function (e) {
             return e !== entity;
         });
+        this.entityLibrary.deregisterEntity(entity);
     };
     Layer.prototype.update = function (deltaTime) {
-        for (var i = 0; i < this.entities.length; i++) {
-            this.entities[i].update(deltaTime);
+        for (var _i = 0, _a = this.entities; _i < _a.length; _i++) {
+            var entity = _a[_i];
+            entity.update(deltaTime);
         }
     };
     Layer.prototype.paintOn = function (context) {
         this.buffer.clear();
-        for (var i = 0; i < this.entities.length; i++) {
-            var entity = this.entities[i];
-            if (math_1.BoundingBox.overlaps(this.bounds, entity.bounds))
+        for (var _i = 0, _a = this.entities; _i < _a.length; _i++) {
+            var entity = _a[_i];
+            if (math_1.BoundingBox.overlaps(this.bounds, entity.bounds)) {
                 entity.paintOn(this.buffer.getContext());
+            }
         }
         context.drawImage(this.buffer.getCanvas(), 0, 0);
+    };
+    Layer.prototype.calculateBounds = function () {
+        this.bounds = new math_1.BoundingBox(new math_1.Vector2(0, 0), new math_1.Vector2(this.width, this.height));
     };
     return Layer;
 }());
 exports.Layer = Layer;
 //# sourceMappingURL=layer.js.map
-},{"./util/math":16,"./buffer":15}],12:[function(require,module,exports) {
+},{"./buffer":21,"./util/math":22}],16:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var math_1 = require("./util/math");
 var buffer_1 = require("./buffer");
+var math_1 = require("./util/math");
 var Entity = (function () {
-    function Entity(pos, vel, size, traits) {
+    function Entity(position, size, entityLibrary, traits, debug) {
         if (traits === void 0) { traits = []; }
-        this.name = 'entity';
-        this.pos = pos;
-        this.vel = vel;
+        if (debug === void 0) { debug = false; }
+        var _this = this;
+        this.name = "entity";
+        this.debug = debug;
+        this.position = position;
+        this.velocity = new math_1.Vector2(0, 0);
+        this.acceleration = new math_1.Vector2(0, 0);
         this.size = size;
+        this.entityLibrary = entityLibrary;
+        this.traits = traits;
+        this.trait = {};
+        this.traits.forEach(function (trait) {
+            _this.trait[trait.getName()] = trait;
+        });
         this.lifetime = 0;
         this.firstPaintComplete = false;
         this.calculateBounds();
-        this.initialiseTraits(traits);
         this.buffer = new buffer_1.Buffer(this.size.x, this.size.y);
+        this.entityLibrary.registerEntity(this);
     }
-    Entity.prototype.initialiseTraits = function (traits) {
-        var _this = this;
-        traits.forEach(function (trait) {
-            _this.traits[trait.getName()] = trait;
-        });
-    };
-    Entity.prototype.calculateBounds = function () {
-        this.bounds = new math_1.BoundingBox(this.pos, this.size);
-    };
     Entity.prototype.paintOn = function (context) {
         if (!this.firstPaintComplete) {
-            var debug = false;
             this.draw();
-            if (debug) {
+            if (this.debug) {
                 var bufferContext = this.buffer.getContext();
-                bufferContext.strokeStyle = 'green';
-                bufferContext.rect(0, 0, this.size.x - 1, this.size.y - 1);
+                bufferContext.strokeStyle = "green";
+                bufferContext.rect(0, 0, this.size.x, this.size.y);
                 bufferContext.stroke();
             }
+            this.firstPaintComplete = true;
         }
-        context.drawImage(this.buffer.getCanvas(), (0.5 + this.pos.x) << 0, (0.5 + this.pos.y) << 0);
+        context.drawImage(this.buffer.getCanvas(), (0.5 + this.position.x) << 0, (0.5 + this.position.y) << 0);
     };
     Entity.prototype.update = function (deltaTime) {
-        for (var trait in this.traits) {
-            this.traits[trait].update(this, deltaTime);
+        for (var _i = 0, _a = this.traits; _i < _a.length; _i++) {
+            var trait = _a[_i];
+            trait.update(this, this.entityLibrary, deltaTime);
         }
         this.lifetime += deltaTime;
+    };
+    Entity.prototype.getTraits = function () {
+        return this.traits;
+    };
+    Entity.prototype.calculateBounds = function () {
+        this.bounds = new math_1.BoundingBox(this.position, this.size);
     };
     return Entity;
 }());
 exports.Entity = Entity;
 //# sourceMappingURL=entity.js.map
-},{"./util/math":16,"./buffer":15}],13:[function(require,module,exports) {
+},{"./buffer":21,"./util/math":22}],17:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Animator = (function () {
-    function Animator(compositor, context, deltaTime) {
+    function Animator(compositor, deltaTime) {
         if (deltaTime === void 0) { deltaTime = 1 / 60; }
         this.accumulatedTime = 0;
         this.lastTime = 0;
         this.deltaTime = deltaTime;
         this.compositor = compositor;
-        this.context = context;
         this.animate = this.animate.bind(this);
     }
-    Animator.prototype.enqueue = function () {
-        window.requestAnimationFrame(this.animate);
+    Animator.prototype.start = function () {
+        this.enqueue();
     };
     Animator.prototype.animate = function (time) {
         this.accumulatedTime += (time - this.lastTime) / 1000;
         if (this.accumulatedTime > 1) {
             this.accumulatedTime = 1;
         }
-        while (this.accumulatedTime > this.deltaTime) {
+        while (this.accumulatedTime >= this.deltaTime) {
             this.compositor.update(this.deltaTime);
             this.accumulatedTime -= this.deltaTime;
         }
-        this.compositor.paintOn(this.context);
+        this.compositor.paint();
         this.lastTime = time;
         this.enqueue();
     };
-    Animator.prototype.start = function () {
-        this.enqueue();
+    Animator.prototype.enqueue = function () {
+        window.requestAnimationFrame(this.animate);
     };
     return Animator;
 }());
 exports.Animator = Animator;
 //# sourceMappingURL=animator.js.map
-},{}],14:[function(require,module,exports) {
+},{}],18:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
-var Compositor = (function () {
-    function Compositor(width, height, layers) {
-        if (layers === void 0) { layers = []; }
-        this.layers = layers;
-        this.buffer = new buffer_1.Buffer(width, height);
+var CanvasElementToLayer = (function () {
+    function CanvasElementToLayer(buffer, layer) {
+        this.buffer = buffer;
+        this.layer = layer;
     }
-    Compositor.prototype.addLayer = function (layer) {
-        this.layers.push(layer);
+    return CanvasElementToLayer;
+}());
+var Compositor = (function () {
+    function Compositor(width, height, rootElement, layers) {
+        if (layers === void 0) { layers = []; }
+        this.canvasElementToLayers = [];
+        var newContainer = document.createElement("div");
+        newContainer.style.position = "relative";
+        rootElement.parentNode.replaceChild(newContainer, rootElement);
+        this.rootContainer = newContainer;
+        this.addLayers(width, height, layers);
+    }
+    Compositor.prototype.addLayers = function (width, height, layers) {
+        for (var i = 0; i < layers.length; i++) {
+            var layer = layers[i];
+            var layerCanvas = this.createLayerElement(width, height, i);
+            this.canvasElementToLayers.push(new CanvasElementToLayer(new buffer_1.Buffer(width, height, layerCanvas), layer));
+            this.rootContainer.appendChild(layerCanvas);
+        }
     };
     Compositor.prototype.update = function (deltaTime) {
-        for (var i = 0; i < this.layers.length; i++) {
-            this.layers[i].update(deltaTime);
+        for (var _i = 0, _a = this.canvasElementToLayers; _i < _a.length; _i++) {
+            var canvasElementToLayer = _a[_i];
+            canvasElementToLayer.layer.update(deltaTime);
         }
     };
-    Compositor.prototype.paintOn = function (context) {
-        for (var i = 0; i < this.layers.length; i++) {
-            this.layers[i].paintOn(this.buffer.getContext());
+    Compositor.prototype.paint = function () {
+        for (var _i = 0, _a = this.canvasElementToLayers; _i < _a.length; _i++) {
+            var canvasElementToLayer = _a[_i];
+            canvasElementToLayer.buffer.clear();
+            canvasElementToLayer.layer.paintOn(canvasElementToLayer.buffer.getContext());
         }
-        context.drawImage(this.buffer.getCanvas(), 0, 0);
+    };
+    Compositor.prototype.createLayerElement = function (width, height, i) {
+        var layerCanvas = document.createElement("canvas");
+        layerCanvas.width = width;
+        layerCanvas.height = height;
+        layerCanvas.style.position = "absolute";
+        layerCanvas.style.left = "0px";
+        layerCanvas.style.top = "0px";
+        layerCanvas.id = "layer" + i;
+        layerCanvas.style.zIndex = String(i);
+        return layerCanvas;
     };
     return Compositor;
 }());
 exports.Compositor = Compositor;
 //# sourceMappingURL=compositor.js.map
-},{"./buffer":15}],10:[function(require,module,exports) {
+},{"./buffer":21}],19:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var EntityLibrary = (function () {
+    function EntityLibrary() {
+        this.entities = [];
+        this.entitiesByTrait = {};
+    }
+    EntityLibrary.prototype.getEntitiesByTraitName = function (traitName) {
+        return this.entitiesByTrait[traitName] || [];
+    };
+    EntityLibrary.prototype.registerEntity = function (entity) {
+        var _this = this;
+        this.entities.push(entity);
+        var traits = entity.getTraits();
+        traits.forEach(function (trait) {
+            if (!_this.entitiesByTrait[trait.getName()]) {
+                _this.entitiesByTrait[trait.getName()] = [];
+            }
+            _this.entitiesByTrait[trait.getName()].push(entity);
+        });
+    };
+    EntityLibrary.prototype.deregisterEntity = function (entity) {
+        var _this = this;
+        var traits = entity.getTraits();
+        traits.forEach(function (trait) {
+            if (!_this.entitiesByTrait[trait.getName()]) {
+                throw new Error("EntityLibrary out of sync");
+            }
+            _this.entitiesByTrait[trait.getName()] =
+                _this.entitiesByTrait[trait.getName()].filter(function (e) { return e !== entity; });
+            _this.entities = _this.entities.filter(function (e) { return e !== entity; });
+        });
+    };
+    return EntityLibrary;
+}());
+exports.EntityLibrary = EntityLibrary;
+//# sourceMappingURL=entity-library.js.map
+},{}],20:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Trait = (function () {
+    function Trait() {
+    }
+    Trait.prototype.update = function (entity, entityLibrary, deltaTime) {
+        return;
+    };
+    return Trait;
+}());
+exports.Trait = Trait;
+//# sourceMappingURL=trait.js.map
+},{}],29:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var __1 = require("..");
+var math_1 = require("../util/math");
+var BoundByGravity = (function (_super) {
+    __extends(BoundByGravity, _super);
+    function BoundByGravity(acceleration) {
+        var _this = _super.call(this) || this;
+        _this.acceleration = acceleration;
+        return _this;
+    }
+    BoundByGravity.prototype.update = function (entity, entityLibrary, deltaTime) {
+        if (!entity.acceleration) {
+            entity.acceleration = new math_1.Vector2(0, 0);
+        }
+        entity.acceleration.y = this.acceleration.y;
+        entity.acceleration.x = this.acceleration.x;
+    };
+    BoundByGravity.prototype.getName = function () {
+        return "BoundByGravity";
+    };
+    return BoundByGravity;
+}(__1.Trait));
+exports.BoundByGravity = BoundByGravity;
+//# sourceMappingURL=bound-by-gravity.js.map
+},{"..":14,"../util/math":22}],30:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var __1 = require("..");
+var math_1 = require("../util/math");
+var BoundByPhysics = (function (_super) {
+    __extends(BoundByPhysics, _super);
+    function BoundByPhysics(terminalVelocity) {
+        var _this = _super.call(this) || this;
+        _this.terminalVelocity = terminalVelocity;
+        return _this;
+    }
+    BoundByPhysics.prototype.update = function (entity, entityLibrary, deltaTime) {
+        this.updateX(entity, entityLibrary, deltaTime);
+        this.updateY(entity, entityLibrary, deltaTime);
+    };
+    BoundByPhysics.prototype.getName = function () {
+        return "BoundByPhysics";
+    };
+    BoundByPhysics.prototype.updateY = function (entity, entityLibrary, deltaTime) {
+        entity.velocity.y += deltaTime * entity.acceleration.y;
+        if (this.terminalVelocity && Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) {
+            entity.velocity.y = math_1.sign(entity.velocity.y) * this.terminalVelocity.y;
+        }
+        entity.position.y += deltaTime * entity.velocity.y;
+    };
+    BoundByPhysics.prototype.updateX = function (entity, entityLibrary, deltaTime) {
+        entity.velocity.x += deltaTime * entity.acceleration.x;
+        if (this.terminalVelocity && Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) {
+            entity.velocity.x = math_1.sign(entity.velocity.x) * this.terminalVelocity.x;
+        }
+        entity.position.x += deltaTime * entity.velocity.x;
+    };
+    return BoundByPhysics;
+}(__1.Trait));
+exports.BoundByPhysics = BoundByPhysics;
+//# sourceMappingURL=bound-by-physics.js.map
+},{"..":14,"../util/math":22}],31:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var math_1 = require("../util/math");
+var bound_by_physics_1 = require("./bound-by-physics");
+var BoundByPhysicsConstrainedByObstacles = (function (_super) {
+    __extends(BoundByPhysicsConstrainedByObstacles, _super);
+    function BoundByPhysicsConstrainedByObstacles(terminalVelocity) {
+        return _super.call(this, terminalVelocity) || this;
+    }
+    BoundByPhysicsConstrainedByObstacles.prototype.update = function (entity, entityLibrary, deltaTime) {
+        var obstacles = entityLibrary.getEntitiesByTraitName("Obstacle");
+        this.updateX(entity, entityLibrary, deltaTime);
+        this.resolveCollisionsX(entity, obstacles);
+        this.updateY(entity, entityLibrary, deltaTime);
+        this.resolveCollisionsY(entity, obstacles);
+    };
+    BoundByPhysicsConstrainedByObstacles.prototype.resolveCollisionsX = function (entity, obstacles) {
+        obstacles.forEach(function (obstacle) {
+            if (!math_1.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) {
+                return;
+            }
+            var sides = math_1.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+            if (sides.right) {
+                entity.position.x -= entity.bounds.right - obstacle.bounds.left;
+            }
+            if (sides.left) {
+                entity.position.x += obstacle.bounds.right - entity.bounds.left;
+            }
+        });
+    };
+    BoundByPhysicsConstrainedByObstacles.prototype.resolveCollisionsY = function (entity, obstacles) {
+        obstacles.forEach(function (obstacle) {
+            if (!math_1.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) {
+                return;
+            }
+            var sides = math_1.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
+            if (sides.bottom) {
+                entity.position.y -= entity.bounds.bottom - obstacle.bounds.top;
+            }
+            if (sides.top) {
+                entity.position.y += obstacle.bounds.bottom - entity.bounds.top;
+            }
+        });
+    };
+    return BoundByPhysicsConstrainedByObstacles;
+}(bound_by_physics_1.BoundByPhysics));
+exports.BoundByPhysicsConstrainedByObstacles = BoundByPhysicsConstrainedByObstacles;
+//# sourceMappingURL=bound-by-physics-constrained-by-obstacles.js.map
+},{"../util/math":22,"./bound-by-physics":30}],32:[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var __1 = require("..");
+var Obstacle = (function (_super) {
+    __extends(Obstacle, _super);
+    function Obstacle() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Obstacle.prototype.getName = function () {
+        return "Obstacle";
+    };
+    return Obstacle;
+}(__1.Trait));
+exports.Obstacle = Obstacle;
+//# sourceMappingURL=obstacle.js.map
+},{"..":14}],25:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var bound_by_gravity_1 = require("./bound-by-gravity");
+var bound_by_physics_1 = require("./bound-by-physics");
+var bound_by_physics_constrained_by_obstacles_1 = require("./bound-by-physics-constrained-by-obstacles");
+var obstacle_1 = require("./obstacle");
+exports.traits = {
+    BoundByGravity: bound_by_gravity_1.BoundByGravity,
+    BoundByPhysics: bound_by_physics_1.BoundByPhysics,
+    BoundByPhysicsConstrainedByObstacles: bound_by_physics_constrained_by_obstacles_1.BoundByPhysicsConstrainedByObstacles,
+    Obstacle: obstacle_1.Obstacle,
+};
+//# sourceMappingURL=index.js.map
+},{"./bound-by-gravity":29,"./bound-by-physics":30,"./bound-by-physics-constrained-by-obstacles":31,"./obstacle":32}],14:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var input_1 = require("./input");
+exports.input = input_1.input;
 var util_1 = require("./util");
 exports.util = util_1.util;
 var layer_1 = require("./layer");
@@ -1772,8 +2135,14 @@ var animator_1 = require("./animator");
 exports.Animator = animator_1.Animator;
 var compositor_1 = require("./compositor");
 exports.Compositor = compositor_1.Compositor;
+var entity_library_1 = require("./entity-library");
+exports.EntityLibrary = entity_library_1.EntityLibrary;
+var trait_1 = require("./trait");
+exports.Trait = trait_1.Trait;
+var traits_1 = require("./traits");
+exports.traits = traits_1.traits;
 //# sourceMappingURL=index.js.map
-},{"./util":17,"./layer":11,"./entity":12,"./animator":13,"./compositor":14}],9:[function(require,module,exports) {
+},{"./input":23,"./util":24,"./layer":15,"./entity":16,"./animator":17,"./compositor":18,"./entity-library":19,"./trait":20,"./traits":25}],13:[function(require,module,exports) {
 'use strict';
 
 var _dist = require('./dist');
@@ -1783,7 +2152,7 @@ var cotton = _interopRequireWildcard(_dist);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 module.exports = cotton;
-},{"./dist":10}],6:[function(require,module,exports) {
+},{"./dist":14}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1815,20 +2184,21 @@ var getRandomStarColour = function getRandomStarColour() {
 var Star = function (_Entity) {
   _inherits(Star, _Entity);
 
-  function Star(maxWidth, maxHeight, pos, vel) {
-    var radius = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 2;
-    var colour = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : getRandomStarColour();
-    var opacity = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : getRandomNumber(0.1, 1);
-    var trail = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : getRandomInt(5, 20);
+  function Star(entityLibrary, maxWidth, maxHeight, pos, vel) {
+    var radius = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 2;
+    var colour = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : getRandomStarColour();
+    var opacity = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : getRandomNumber(0.1, 1);
+    var trail = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : getRandomInt(5, 20);
 
     _classCallCheck(this, Star);
 
     if (radius < 1 || radius > 3) throw new exception("radius must be between 2 and 4");
 
-    var size = new _cottonJs.util.Point(radius * trail, radius * trail);
+    var size = new _cottonJs.util.Vector2(radius * trail, radius * trail);
 
-    var _this = _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, pos, vel, size));
+    var _this = _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, pos, size, entityLibrary));
 
+    _this.velocity = vel;
     _this.maxWidth = maxWidth;
     _this.maxHeight = maxHeight;
     _this.radius = radius;
@@ -1859,13 +2229,13 @@ var Star = function (_Entity) {
     value: function update(deltaTime) {
       _get(Star.prototype.__proto__ || Object.getPrototypeOf(Star.prototype), "update", this).call(this, deltaTime);
 
-      this.pos.x += this.vel.x * deltaTime;
-      this.pos.y += this.vel.y * deltaTime;
+      this.position.x += this.velocity.x * deltaTime;
+      this.position.y += this.velocity.y * deltaTime;
 
-      if (this.pos.x > this.maxWidth) this.pos.x = 0 - this.size.x;
-      if (this.pos.x + this.size.x < 0) this.pos.x = this.maxWidth + this.size.x;
-      if (this.pos.y > this.maxHeight) this.pos.y = 0;
-      if (this.pos.y + this.size.y < 0) this.pos.y = this.maxHeight - this.size.y;
+      if (this.position.x > this.maxWidth) this.position.x = 0 - this.size.x;
+      if (this.position.x + this.size.x < 0) this.position.x = this.maxWidth + this.size.x;
+      if (this.position.y > this.maxHeight) this.position.y = 0;
+      if (this.position.y + this.size.y < 0) this.position.y = this.maxHeight - this.size.y;
     }
   }]);
 
@@ -1873,7 +2243,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":9}],3:[function(require,module,exports) {
+},{"cotton-js":13}],6:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1896,7 +2266,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Point = _cottonJs.util.Point,
+var Vector2 = _cottonJs.util.Vector2,
     getRandomNumber = _cottonJs.util.getRandomNumber;
 
 var starCount = 200;
@@ -1907,7 +2277,7 @@ var BackgroundLayer = function (_Layer) {
   function BackgroundLayer(width, height) {
     _classCallCheck(this, BackgroundLayer);
 
-    var _this = _possibleConstructorReturn(this, (BackgroundLayer.__proto__ || Object.getPrototypeOf(BackgroundLayer)).call(this, width, height));
+    var _this = _possibleConstructorReturn(this, (BackgroundLayer.__proto__ || Object.getPrototypeOf(BackgroundLayer)).call(this, width, height, new _cottonJs.EntityLibrary()));
 
     _this.addEntities(_this.createStars());
     return _this;
@@ -1921,7 +2291,7 @@ var BackgroundLayer = function (_Layer) {
       var maxVelocity = 100;
 
       for (var i = 0; i < starCount; i += 1) {
-        stars.push(new _star2.default(this.width, this.height, new Point(getRandomNumber(0, this.width), getRandomNumber(0, this.height)), new Point(getRandomNumber(-maxVelocity, maxVelocity), getRandomNumber(-maxVelocity, maxVelocity)), getRandomNumber(2, 3)));
+        stars.push(new _star2.default(this.entityLibrary, this.width, this.height, new Vector2(getRandomNumber(0, this.width), getRandomNumber(0, this.height)), new Vector2(getRandomNumber(-maxVelocity, maxVelocity), getRandomNumber(-maxVelocity, maxVelocity)), getRandomNumber(2, 3)));
       }
 
       return stars;
@@ -1932,7 +2302,7 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"cotton-js":9,"./star":6}],7:[function(require,module,exports) {
+},{"cotton-js":13,"./star":10}],11:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1952,7 +2322,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var getRandomNumber = _cottonJs.util.getRandomNumber,
-    Point = _cottonJs.util.Point;
+    Vector2 = _cottonJs.util.Vector2;
 
 
 var getRandomLetterColour = function getRandomLetterColour() {
@@ -1964,10 +2334,10 @@ var getRandomLetterColour = function getRandomLetterColour() {
 var Letter = function (_Entity) {
   _inherits(Letter, _Entity);
 
-  function Letter(maxWidth, maxHeight, pos, letterToDrawMatrix) {
+  function Letter(maxWidth, maxHeight, pos, letterToDrawMatrix, entityLibrary) {
     _classCallCheck(this, Letter);
 
-    var blockSize = new Point(10, 10);
+    var blockSize = new Vector2(10, 10);
     var width = 0;
 
     letterToDrawMatrix.forEach(function (arr) {
@@ -1978,8 +2348,9 @@ var Letter = function (_Entity) {
 
     var height = letterToDrawMatrix.length;
 
-    var _this = _possibleConstructorReturn(this, (Letter.__proto__ || Object.getPrototypeOf(Letter)).call(this, pos, new Point(50, 50), new Point(width * blockSize.x, height * blockSize.y)));
+    var _this = _possibleConstructorReturn(this, (Letter.__proto__ || Object.getPrototypeOf(Letter)).call(this, pos, new Vector2(50, 50), entityLibrary));
 
+    _this.velocity = new Vector2(60, 60);
     _this.blockSize = blockSize;
     _this.maxWidth = maxWidth;
     _this.maxHeight = maxHeight;
@@ -2009,14 +2380,12 @@ var Letter = function (_Entity) {
     value: function update(deltaTime) {
       _get(Letter.prototype.__proto__ || Object.getPrototypeOf(Letter.prototype), "update", this).call(this, deltaTime);
 
-      this.pos.x += this.vel.x * deltaTime;
-      this.pos.y += this.vel.y * deltaTime;
-      // Bounce
-      var variance = 0.2;
+      this.position.x += this.velocity.x * deltaTime;
+      this.position.y += this.velocity.y * deltaTime;
 
-      if (this.pos.x < 0 || this.pos.x > this.maxWidth - this.size.x) this.vel.x = -_cottonJs.util.getRandomNumber(this.vel.x - variance, this.vel.x + variance);
+      if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x) this.velocity.x = -this.velocity.x;
 
-      if (this.pos.y < 0 || this.pos.y > this.maxHeight - this.size.y) this.vel.y = -_cottonJs.util.getRandomNumber(this.vel.y - variance, this.vel.y + variance);
+      if (this.position.y < 0 || this.position.y > this.maxHeight - this.size.y) this.velocity.y = -this.velocity.y;
     }
   }]);
 
@@ -2024,7 +2393,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"cotton-js":9}],8:[function(require,module,exports) {
+},{"cotton-js":13}],12:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2072,7 +2441,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],4:[function(require,module,exports) {
+},{}],7:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2097,10 +2466,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Point = _cottonJs.util.Point;
+var Vector2 = _cottonJs.util.Vector2;
 
 
-var createText = function createText(maxWidth, maxHeight, str, yOffset) {
+var createText = function createText(maxWidth, maxHeight, str, yOffset, entityLibrary) {
   var strUppered = str.toUpperCase();
   var retVal = [];
 
@@ -2110,7 +2479,7 @@ var createText = function createText(maxWidth, maxHeight, str, yOffset) {
     var char = strUppered.charAt(i);
     var letterMatrix = _letters2.default[char];
 
-    letter = new _letter2.default(maxWidth, maxHeight, new Point(currX, yOffset), letterMatrix);
+    letter = new _letter2.default(maxWidth, maxHeight, new Vector2(currX, yOffset), letterMatrix, entityLibrary);
 
     retVal.push(letter);
 
@@ -2140,14 +2509,17 @@ var TextLayer = function (_Layer) {
 
     _classCallCheck(this, TextLayer);
 
-    return _possibleConstructorReturn(this, (TextLayer.__proto__ || Object.getPrototypeOf(TextLayer)).call(this, width, height, createText(width, height, textToDisplay, yOffset)));
+    var _this = _possibleConstructorReturn(this, (TextLayer.__proto__ || Object.getPrototypeOf(TextLayer)).call(this, width, height, new _cottonJs.EntityLibrary()));
+
+    _this.addEntities(createText(width, height, textToDisplay, yOffset, _this.entityLibrary));
+    return _this;
   }
 
   return TextLayer;
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":9,"./letter":7,"./letters":8}],5:[function(require,module,exports) {
+},{"cotton-js":13,"./letter":11,"./letters":12}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2167,10 +2539,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var CloudParticle = function (_Entity) {
   _inherits(CloudParticle, _Entity);
 
-  function CloudParticle(pos, vel, size, traits) {
+  function CloudParticle(pos, vel, size, entityLibrary) {
     _classCallCheck(this, CloudParticle);
 
-    return _possibleConstructorReturn(this, (CloudParticle.__proto__ || Object.getPrototypeOf(CloudParticle)).call(this, pos, vel, size, traits));
+    return _possibleConstructorReturn(this, (CloudParticle.__proto__ || Object.getPrototypeOf(CloudParticle)).call(this, pos, size, entityLibrary));
   }
 
   _createClass(CloudParticle, [{
@@ -2197,9 +2569,9 @@ var Cloud = function (_Layer) {
   function Cloud(width, height) {
     _classCallCheck(this, Cloud);
 
-    var _this2 = _possibleConstructorReturn(this, (Cloud.__proto__ || Object.getPrototypeOf(Cloud)).call(this, width, height, []));
+    var _this2 = _possibleConstructorReturn(this, (Cloud.__proto__ || Object.getPrototypeOf(Cloud)).call(this, width, height, new _cottonJs.EntityLibrary()));
 
-    _this2.addEntity(new CloudParticle(new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(0, 0), new _cottonJs.util.Point(_this2.width, _this2.height), []));
+    _this2.addEntity(new CloudParticle(new _cottonJs.util.Vector2(0, 0), new _cottonJs.util.Vector2(0, 0), new _cottonJs.util.Vector2(_this2.width, _this2.height), _this2.entityLibrary));
     return _this2;
   }
 
@@ -2207,8 +2579,13 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":9}],2:[function(require,module,exports) {
+},{"cotton-js":13}],3:[function(require,module,exports) {
 "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.runGalaxy = undefined;
 
 var _cottonJs = require("cotton-js");
 
@@ -2220,23 +2597,268 @@ var _textLayer = require("./text-layer");
 
 var _textLayer2 = _interopRequireDefault(_textLayer);
 
-var _cloud = require("./cloud");
+var _cloud = require("../common/cloud");
 
 var _cloud2 = _interopRequireDefault(_cloud);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var canvas = document.getElementById("yaboi");
+var runGalaxy = exports.runGalaxy = function runGalaxy() {
+  var canvas = document.getElementById("yaboi");
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, canvas, [new _cloud2.default(width, height), new _backgroundLayer2.default(width, height), new _textLayer2.default(width, height, "team"), new _textLayer2.default(width, height, "cotton", 70)]));
+
+  animator.start();
+};
+},{"cotton-js":13,"./background-layer":6,"./text-layer":7,"../common/cloud":8}],9:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _cottonJs = require("cotton-js");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SimpleEntity = function (_Entity) {
+  _inherits(SimpleEntity, _Entity);
+
+  function SimpleEntity(pos, size) {
+    var entityLibrary = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new _cottonJs.EntityLibrary();
+    var colour = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "green";
+    var traits = arguments[4];
+
+    _classCallCheck(this, SimpleEntity);
+
+    var _this = _possibleConstructorReturn(this, (SimpleEntity.__proto__ || Object.getPrototypeOf(SimpleEntity)).call(this, pos, size, entityLibrary, traits, false));
+
+    _this.colour = colour;
+    return _this;
+  }
+
+  _createClass(SimpleEntity, [{
+    key: "update",
+    value: function update(delta) {
+      _get(SimpleEntity.prototype.__proto__ || Object.getPrototypeOf(SimpleEntity.prototype), "update", this).call(this, delta);
+    }
+  }, {
+    key: "draw",
+    value: function draw() {
+      var context = this.buffer.getContext();
+      context.fillStyle = this.colour;
+      context.fillRect(0, 0, this.size.x, this.size.y);
+    }
+  }]);
+
+  return SimpleEntity;
+}(_cottonJs.Entity);
+
+exports.default = SimpleEntity;
+},{"cotton-js":13}],5:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.runInputTest = undefined;
+
+var _cloud = require("../common/cloud");
+
+var _cloud2 = _interopRequireDefault(_cloud);
+
+var _cottonJs = require("cotton-js");
+
+var _simpleEntity = require("../common/simple-entity");
+
+var _simpleEntity2 = _interopRequireDefault(_simpleEntity);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var runInputTest = exports.runInputTest = function runInputTest() {
+    var rootEl = document.getElementById('yaboi');
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    var movableEntity = new _simpleEntity2.default(new _cottonJs.util.Vector2(0, 0), new _cottonJs.util.Vector2(50, 50));
+
+    var inputHandler = new _cottonJs.input.Keyboard(window);
+
+    inputHandler.addMapping('ArrowLeft', function () {
+        movableEntity.position.x -= 10;
+    });
+
+    inputHandler.addMapping('ArrowRight', function () {
+        movableEntity.position.x += 10;
+    });
+
+    inputHandler.addMapping('ArrowUp', function () {
+        movableEntity.position.y -= 10;
+    });
+
+    inputHandler.addMapping('ArrowDown', function () {
+        movableEntity.position.y += 10;
+    });
+
+    var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), [movableEntity])]));
+
+    animator.start();
+};
+},{"../common/cloud":8,"cotton-js":13,"../common/simple-entity":9}],4:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.runTraitTest = undefined;
+
+var _cloud = require("../common/cloud");
+
+var _cloud2 = _interopRequireDefault(_cloud);
+
+var _simpleEntity = require("../common/simple-entity");
+
+var _simpleEntity2 = _interopRequireDefault(_simpleEntity);
+
+var _cottonJs = require("cotton-js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Obstacle = _cottonJs.traits.Obstacle,
+    BoundByGravity = _cottonJs.traits.BoundByGravity,
+    BoundByPhysicsConstrainedByObstacles = _cottonJs.traits.BoundByPhysicsConstrainedByObstacles;
+var Vector2 = _cottonJs.util.Vector2,
+    getRandomNumber = _cottonJs.util.getRandomNumber,
+    getRandomInt = _cottonJs.util.getRandomInt;
+
+
+var rootEl = document.getElementById('yaboi');
 var width = window.innerWidth;
 var height = window.innerHeight;
 
-canvas.width = width;
-canvas.height = height;
+var getRandomColour = function getRandomColour() {
+  var colours = ["225,247,213", "255,189,189", "201,201,255", "241,203,255"];
 
-var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, [new _cloud2.default(width, height), new _backgroundLayer2.default(width, height), new _textLayer2.default(width, height, "team"), new _textLayer2.default(width, height, "cotton", 70)]), canvas.getContext("2d"));
+  return colours[Math.floor(Math.random() * colours.length)];
+};
 
-animator.start();
-},{"cotton-js":9,"./background-layer":3,"./text-layer":4,"./cloud":5}],22:[function(require,module,exports) {
+var Block = function (_SimpleEntity) {
+  _inherits(Block, _SimpleEntity);
+
+  function Block(pos, entityLibrary) {
+    _classCallCheck(this, Block);
+
+    return _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, pos, new Vector2(10, 10), entityLibrary, 'white', [new Obstacle()]));
+  }
+
+  return Block;
+}(_simpleEntity2.default);
+
+var Yaboi = function (_SimpleEntity2) {
+  _inherits(Yaboi, _SimpleEntity2);
+
+  function Yaboi(pos, entityLibrary, traits) {
+    _classCallCheck(this, Yaboi);
+
+    return _possibleConstructorReturn(this, (Yaboi.__proto__ || Object.getPrototypeOf(Yaboi)).call(this, pos, new Vector2(20, 20), entityLibrary, "rgba(" + getRandomColour() + ", " + getRandomInt(50, 100) + ")", traits));
+  }
+
+  return Yaboi;
+}(_simpleEntity2.default);
+
+var runTraitTest = exports.runTraitTest = function runTraitTest() {
+
+  var entityLibrary = new _cottonJs.EntityLibrary();
+
+  var entities = [];
+
+  // Create the floor
+  var x = 0;
+  var y = height - 10;
+
+  while (x < width) {
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
+    x += 10;
+  }
+
+  // Create the roof
+  x = 0;
+  y = 0;
+
+  while (x < width) {
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
+    x += 10;
+  }
+
+  // Create left wall
+  x = 0;
+  y = 0;
+
+  while (y < height) {
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
+    y += 10;
+  }
+
+  // Create right wall
+  x = width - 10;
+  y = 0;
+
+  while (y < height) {
+    entities.push(new Block(new Vector2(x, y), entityLibrary));
+    y += 10;
+  }
+
+  for (var i = 0; i < 150; i += 1) {
+    entities.push(new Yaboi(new Vector2(getRandomInt(20, width - 20), getRandomInt(20, height - 20)), entityLibrary, [new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)), new Obstacle()]));
+  }
+
+  var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cloud2.default(width, height), new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), entities)]));
+
+  animator.start();
+};
+},{"../common/cloud":8,"../common/simple-entity":9,"cotton-js":13}],2:[function(require,module,exports) {
+'use strict';
+
+var _teamCottonGalaxy = require('./team-cotton-galaxy');
+
+var _inputTest = require('./input-test');
+
+var _traitTest = require('./trait-test');
+
+var tests = [_teamCottonGalaxy.runGalaxy, _inputTest.runInputTest, _traitTest.runTraitTest];
+
+var rootEl = document.getElementById('test-buttons');
+
+tests.forEach(function (test) {
+  var testButton = document.createElement('button');
+  testButton.innerHTML = test.name;
+  testButton.style = 'margin: 10px;';
+  testButton.onclick = function () {
+    test();
+    rootEl.hidden = true;
+  };
+  rootEl.appendChild(testButton);
+});
+},{"./team-cotton-galaxy":3,"./input-test":5,"./trait-test":4}],35:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -2266,7 +2888,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59501' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '57865' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -2405,5 +3027,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[22,2])
+},{}]},{},[35,2])
 //# sourceMappingURL=/cotton-js-test-bench.8d2766ad.map

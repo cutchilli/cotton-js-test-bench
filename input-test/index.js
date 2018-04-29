@@ -1,52 +1,43 @@
-import Cloud from "../team-cotton-galaxy/cloud";
-import { Animator, Compositor, Layer, Entity, util, input } from "cotton-js";
+import Cloud from "../common/cloud";
+import { Animator, Compositor, Layer, Entity, util, input, EntityLibrary } from "cotton-js";
+import SimpleEntity from '../common/simple-entity';
 
-class SimpleEntity extends Entity {
-    constructor(pos, vel, size) {
-        super(pos, vel, size, [], true);
-    }
+export const runInputTest = function runInputTest() {
+  const rootEl = document.getElementById('yaboi');
+  const width = window.innerWidth;
+  const height = window.innerHeight;
 
-    // do nothing. We just want to see a box
-    draw() { }
-};
+  const movableEntity = new SimpleEntity(
+      new util.Vector2(0, 0),
+      new util.Vector2(50, 50)
+  );
 
-export const runInputTest = function run() {
-    const rootEl = document.getElementById('yaboi');
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    
-    const movableEntity = new SimpleEntity(
-        new util.Point(0, 0),
-        new util.Point(0, 0),
-        new util.Point(50, 50)
-    );
+  const inputHandler = new input.Keyboard(window);
 
-    const inputHandler = new input.Keyboard(window);
-    
-    inputHandler.addMapping('ArrowLeft', () => {
-        movableEntity.pos.x -= 10;
-    });
+  inputHandler.addMapping('ArrowLeft', () => {
+      movableEntity.position.x -= 10;
+  });
 
-    inputHandler.addMapping('ArrowRight', () => {
-        movableEntity.pos.x += 10;
-    });
+  inputHandler.addMapping('ArrowRight', () => {
+      movableEntity.position.x += 10;
+  });
 
-    inputHandler.addMapping('ArrowUp', () => {
-        movableEntity.pos.y -= 10;
-    });
+  inputHandler.addMapping('ArrowUp', () => {
+      movableEntity.position.y -= 10;
+  });
 
-    inputHandler.addMapping('ArrowDown', () => {
-        movableEntity.pos.y += 10;
-    });
+  inputHandler.addMapping('ArrowDown', () => {
+      movableEntity.position.y += 10;
+  });
 
-    let animator = new Animator(
-        new Compositor(
-            width,
-            height,
-            rootEl,
-            [new Layer(width, height, [movableEntity])],
-        )
-    );
+  let animator = new Animator(
+      new Compositor(
+          width,
+          height,
+          rootEl,
+          [new Layer(width, height, new EntityLibrary(), [movableEntity])],
+      )
+  );
 
-    animator.start();
+  animator.start();
 };

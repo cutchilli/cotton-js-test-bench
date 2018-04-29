@@ -1,9 +1,9 @@
 import { Animator, Compositor } from "cotton-js";
 import BackgroundLayer from "./background-layer";
 import TextLayer from "./text-layer";
-import Cloud from "./cloud";
+import Cloud from "../common/cloud";
 
-export const runGalaxy = function run() {
+export const runGalaxy = function runGalaxy() {
   const canvas = document.getElementById("yaboi");
   const width = window.innerWidth;
   const height = window.innerHeight;

@@ -1,4 +1,4 @@
-import { Entity, util } from "cotton-js";
+import { Entity, util, EntityLibrary } from "cotton-js";
 
 const { getRandomNumber, getRandomInt } = util;
 
@@ -10,6 +10,7 @@ const getRandomStarColour = () => {
 
 export default class Star extends Entity {
   constructor(
+    entityLibrary,
     maxWidth,
     maxHeight,
     pos,
@@ -22,10 +23,11 @@ export default class Star extends Entity {
     if (radius < 1 || radius > 3)
       throw new exception("radius must be between 2 and 4");
 
-    const size = new util.Point(radius * trail, radius * trail);
+    const size = new util.Vector2(radius * trail, radius * trail);
 
-    super(pos, vel, size);
+    super(pos, size, entityLibrary);
 
+    this.velocity = vel;
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
     this.radius = radius;
@@ -59,12 +61,12 @@ export default class Star extends Entity {
   update(deltaTime) {
     super.update(deltaTime);
 
-    this.pos.x += this.vel.x * deltaTime;
-    this.pos.y += this.vel.y * deltaTime;
+    this.position.x += this.velocity.x * deltaTime;
+    this.position.y += this.velocity.y * deltaTime;
 
-    if (this.pos.x > this.maxWidth) this.pos.x = 0 - this.size.x;
-    if (this.pos.x + this.size.x < 0) this.pos.x = this.maxWidth + this.size.x;
-    if (this.pos.y > this.maxHeight) this.pos.y = 0;
-    if (this.pos.y + this.size.y < 0) this.pos.y = this.maxHeight - this.size.y;
+    if (this.position.x > this.maxWidth) this.position.x = 0 - this.size.x;
+    if (this.position.x + this.size.x < 0) this.position.x = this.maxWidth + this.size.x;
+    if (this.position.y > this.maxHeight) this.position.y = 0;
+    if (this.position.y + this.size.y < 0) this.position.y = this.maxHeight - this.size.y;
   }
 }

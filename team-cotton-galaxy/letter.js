@@ -1,6 +1,6 @@
 import { Entity, util } from "cotton-js";
 
-const { getRandomNumber, Point } = util;
+const { getRandomNumber, Vector2 } = util;
 
 const getRandomLetterColour = () => {
   const colours = ["225,247,213", "255,189,189", "201,201,255", "241,203,255"];
@@ -9,8 +9,8 @@ const getRandomLetterColour = () => {
 };
 
 export default class Letter extends Entity {
-  constructor(maxWidth, maxHeight, pos, letterToDrawMatrix) {
-    let blockSize = new Point(10, 10);
+  constructor(maxWidth, maxHeight, pos, letterToDrawMatrix, entityLibrary) {
+    let blockSize = new Vector2(10, 10);
     let width = 0;
 
     letterToDrawMatrix.forEach(arr => {
@@ -23,10 +23,11 @@ export default class Letter extends Entity {
 
     super(
       pos,
-      new Point(50, 50),
-      new Point(width * blockSize.x, height * blockSize.y)
+      new Vector2(50, 50),
+      entityLibrary
     );
 
+    this.velocity = new Vector2(60, 60);
     this.blockSize = blockSize;
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
@@ -57,21 +58,13 @@ export default class Letter extends Entity {
   update(deltaTime) {
     super.update(deltaTime);
 
-    this.pos.x += this.vel.x * deltaTime;
-    this.pos.y += this.vel.y * deltaTime;
-    // Bounce
-    var variance = 0.2;
+    this.position.x += this.velocity.x * deltaTime;
+    this.position.y += this.velocity.y * deltaTime;
+    
+    if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x)
+      this.velocity.x = -this.velocity.x;
 
-    if (this.pos.x < 0 || this.pos.x > this.maxWidth - this.size.x)
-      this.vel.x = -util.getRandomNumber(
-        this.vel.x - variance,
-        this.vel.x + variance
-      );
-
-    if (this.pos.y < 0 || this.pos.y > this.maxHeight - this.size.y)
-      this.vel.y = -util.getRandomNumber(
-        this.vel.y - variance,
-        this.vel.y + variance
-      );
+    if (this.position.y < 0 || this.position.y > this.maxHeight - this.size.y)
+      this.velocity.y = -this.velocity.y;
   }
 }
