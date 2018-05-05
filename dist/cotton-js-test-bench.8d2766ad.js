@@ -77,7 +77,7 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({26:[function(require,module,exports) {
+})({35:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var PRESSED = 1;
@@ -116,7 +116,7 @@ var Keyboard = (function () {
 }());
 exports.Keyboard = Keyboard;
 //# sourceMappingURL=keyboard.js.map
-},{}],23:[function(require,module,exports) {
+},{}],31:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var keyboard_1 = require("./keyboard");
@@ -124,7 +124,7 @@ exports.input = {
     Keyboard: keyboard_1.Keyboard,
 };
 //# sourceMappingURL=index.js.map
-},{"./keyboard":26}],34:[function(require,module,exports) {
+},{"./keyboard":35}],34:[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {};
@@ -311,7 +311,7 @@ process.chdir = function (dir) {
 process.umask = function () {
     return 0;
 };
-},{}],33:[function(require,module,exports) {
+},{}],30:[function(require,module,exports) {
 var global = (1,eval)("this");
 var process = require("process");
 /*!
@@ -1494,40 +1494,30 @@ return Promise$1;
 
 //# sourceMappingURL=es6-promise.map
 
-},{"process":34}],27:[function(require,module,exports) {
+},{"process":34}],28:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var es6_promise_1 = require("es6-promise");
-var CottonImage = (function () {
-    function CottonImage() {
-    }
-    CottonImage.prototype.loadImage = function (url) {
-        return new es6_promise_1.Promise(function (resolve) {
-            var img = new Image();
-            img.addEventListener("load", function () {
-                resolve(img);
-            });
-            img.src = url;
+function loadImage(url) {
+    return new es6_promise_1.Promise(function (resolve) {
+        var img = new Image();
+        img.addEventListener("load", function () {
+            resolve(img);
         });
-    };
-    return CottonImage;
-}());
-exports.CottonImage = CottonImage;
+        img.src = url;
+    });
+}
+exports.loadImage = loadImage;
 //# sourceMappingURL=image.js.map
-},{"es6-promise":33}],28:[function(require,module,exports) {
+},{"es6-promise":30}],29:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Json = (function () {
-    function Json() {
-    }
-    Json.prototype.loadJson = function (url) {
-        return fetch(url).then(function (r) { return r.json(); });
-    };
-    return Json;
-}());
-exports.Json = Json;
+function loadJson(url) {
+    return fetch(url).then(function (r) { return r.json(); });
+}
+exports.loadJson = loadJson;
 //# sourceMappingURL=json.js.map
-},{}],22:[function(require,module,exports) {
+},{}],27:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var BoundingBox = (function () {
@@ -1645,7 +1635,7 @@ exports.getRandomInt = function (min, max) {
 };
 exports.sign = function (n) { return n && n / Math.abs(n); };
 //# sourceMappingURL=math.js.map
-},{}],24:[function(require,module,exports) {
+},{}],32:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var image_1 = require("./image");
@@ -1653,14 +1643,14 @@ var json_1 = require("./json");
 var math_1 = require("./math");
 exports.util = {
     BoundingBox: math_1.BoundingBox,
-    CottonImage: image_1.CottonImage,
-    Json: json_1.Json,
     Vector2: math_1.Vector2,
     getRandomInt: math_1.getRandomInt,
     getRandomNumber: math_1.getRandomNumber,
+    loadImage: image_1.loadImage,
+    loadJson: json_1.loadJson,
 };
 //# sourceMappingURL=index.js.map
-},{"./image":27,"./json":28,"./math":22}],21:[function(require,module,exports) {
+},{"./image":28,"./json":29,"./math":27}],26:[function(require,module,exports) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1686,7 +1676,7 @@ var Buffer = (function () {
 }());
 exports.Buffer = Buffer;
 //# sourceMappingURL=buffer.js.map
-},{}],15:[function(require,module,exports) {
+},{}],19:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1737,7 +1727,7 @@ var Layer = (function () {
 }());
 exports.Layer = Layer;
 //# sourceMappingURL=layer.js.map
-},{"./buffer":21,"./util/math":22}],16:[function(require,module,exports) {
+},{"./buffer":26,"./util/math":27}],20:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1795,7 +1785,7 @@ var Entity = (function () {
 }());
 exports.Entity = Entity;
 //# sourceMappingURL=entity.js.map
-},{"./buffer":21,"./util/math":22}],17:[function(require,module,exports) {
+},{"./buffer":26,"./util/math":27}],21:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Animator = (function () {
@@ -1830,7 +1820,7 @@ var Animator = (function () {
 }());
 exports.Animator = Animator;
 //# sourceMappingURL=animator.js.map
-},{}],18:[function(require,module,exports) {
+},{}],22:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var buffer_1 = require("./buffer");
@@ -1887,7 +1877,7 @@ var Compositor = (function () {
 }());
 exports.Compositor = Compositor;
 //# sourceMappingURL=compositor.js.map
-},{"./buffer":21}],19:[function(require,module,exports) {
+},{"./buffer":26}],23:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var EntityLibrary = (function () {
@@ -1925,7 +1915,105 @@ var EntityLibrary = (function () {
 }());
 exports.EntityLibrary = EntityLibrary;
 //# sourceMappingURL=entity-library.js.map
-},{}],20:[function(require,module,exports) {
+},{}],24:[function(require,module,exports) {
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var buffer_1 = require("./buffer");
+var image_1 = require("./util/image");
+var json_1 = require("./util/json");
+var SpriteSheet = (function () {
+    function SpriteSheet(sprites) {
+        this.sprites = sprites;
+    }
+    SpriteSheet.createSpriteSheet = function (spriteDef, spriteImage) {
+        if (!spriteDef.width || !spriteDef.height) {
+            throw new Error("Inalid sprite def");
+        }
+        var spriteWidth = spriteDef.width;
+        var spriteHeight = spriteDef.height;
+        var sprites = {};
+        if (spriteDef.sprites) {
+            spriteDef.sprites.forEach(function (sprite) {
+                var spriteBuffers = [false, true].map(function (flip) {
+                    var buf = new buffer_1.Buffer(spriteWidth, spriteHeight);
+                    var context = buf.getContext();
+                    if (flip) {
+                        context.scale(-1, -1);
+                        context.translate(-spriteWidth, 0);
+                    }
+                    context.drawImage(spriteImage, sprite.x * spriteWidth, sprite.y * spriteHeight, spriteWidth, spriteHeight, 0, 0, spriteWidth, spriteHeight);
+                    return buf;
+                });
+                sprites[sprite.name] = spriteBuffers;
+            });
+        }
+        return new SpriteSheet(sprites);
+    };
+    SpriteSheet.loadSpriteSheet = function (assetPath, name) {
+        return __awaiter(this, void 0, void 0, function () {
+            var spriteDef, spriteImage;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, json_1.loadJson(assetPath + "/" + name + ".json")];
+                    case 1:
+                        spriteDef = _a.sent();
+                        if (!spriteDef.imageUrl) {
+                            throw new Error("Invalid SpriteDef");
+                        }
+                        return [4, image_1.loadImage("" + spriteDef.imageUrl)];
+                    case 2:
+                        spriteImage = _a.sent();
+                        return [2, SpriteSheet.createSpriteSheet(spriteDef, spriteImage)];
+                }
+            });
+        });
+    };
+    SpriteSheet.prototype.getSprite = function (name, flip) {
+        if (!this.sprites[name]) {
+            throw new Error("Invalid sprite");
+        }
+        return this.sprites[name][flip ? 1 : 0];
+    };
+    return SpriteSheet;
+}());
+exports.SpriteSheet = SpriteSheet;
+//# sourceMappingURL=sprite-sheet.js.map
+},{"./buffer":26,"./util/image":28,"./util/json":29}],25:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Trait = (function () {
@@ -1938,7 +2026,7 @@ var Trait = (function () {
 }());
 exports.Trait = Trait;
 //# sourceMappingURL=trait.js.map
-},{}],29:[function(require,module,exports) {
+},{}],36:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -1974,7 +2062,7 @@ var BoundByGravity = (function (_super) {
 }(__1.Trait));
 exports.BoundByGravity = BoundByGravity;
 //# sourceMappingURL=bound-by-gravity.js.map
-},{"..":14,"../util/math":22}],30:[function(require,module,exports) {
+},{"..":18,"../util/math":27}],37:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2021,7 +2109,7 @@ var BoundByPhysics = (function (_super) {
 }(__1.Trait));
 exports.BoundByPhysics = BoundByPhysics;
 //# sourceMappingURL=bound-by-physics.js.map
-},{"..":14,"../util/math":22}],31:[function(require,module,exports) {
+},{"..":18,"../util/math":27}],38:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2080,7 +2168,7 @@ var BoundByPhysicsConstrainedByObstacles = (function (_super) {
 }(bound_by_physics_1.BoundByPhysics));
 exports.BoundByPhysicsConstrainedByObstacles = BoundByPhysicsConstrainedByObstacles;
 //# sourceMappingURL=bound-by-physics-constrained-by-obstacles.js.map
-},{"../util/math":22,"./bound-by-physics":30}],32:[function(require,module,exports) {
+},{"../util/math":27,"./bound-by-physics":37}],39:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2106,7 +2194,7 @@ var Obstacle = (function (_super) {
 }(__1.Trait));
 exports.Obstacle = Obstacle;
 //# sourceMappingURL=obstacle.js.map
-},{"..":14}],25:[function(require,module,exports) {
+},{"..":18}],33:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bound_by_gravity_1 = require("./bound-by-gravity");
@@ -2120,7 +2208,7 @@ exports.traits = {
     Obstacle: obstacle_1.Obstacle,
 };
 //# sourceMappingURL=index.js.map
-},{"./bound-by-gravity":29,"./bound-by-physics":30,"./bound-by-physics-constrained-by-obstacles":31,"./obstacle":32}],14:[function(require,module,exports) {
+},{"./bound-by-gravity":36,"./bound-by-physics":37,"./bound-by-physics-constrained-by-obstacles":38,"./obstacle":39}],18:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var input_1 = require("./input");
@@ -2137,12 +2225,14 @@ var compositor_1 = require("./compositor");
 exports.Compositor = compositor_1.Compositor;
 var entity_library_1 = require("./entity-library");
 exports.EntityLibrary = entity_library_1.EntityLibrary;
+var sprite_sheet_1 = require("./sprite-sheet");
+exports.SpriteSheet = sprite_sheet_1.SpriteSheet;
 var trait_1 = require("./trait");
 exports.Trait = trait_1.Trait;
 var traits_1 = require("./traits");
 exports.traits = traits_1.traits;
 //# sourceMappingURL=index.js.map
-},{"./input":23,"./util":24,"./layer":15,"./entity":16,"./animator":17,"./compositor":18,"./entity-library":19,"./trait":20,"./traits":25}],13:[function(require,module,exports) {
+},{"./input":31,"./util":32,"./layer":19,"./entity":20,"./animator":21,"./compositor":22,"./entity-library":23,"./sprite-sheet":24,"./trait":25,"./traits":33}],17:[function(require,module,exports) {
 'use strict';
 
 var _dist = require('./dist');
@@ -2152,7 +2242,7 @@ var cotton = _interopRequireWildcard(_dist);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 module.exports = cotton;
-},{"./dist":14}],10:[function(require,module,exports) {
+},{"./dist":18}],12:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2243,7 +2333,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":13}],6:[function(require,module,exports) {
+},{"cotton-js":17}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2302,7 +2392,7 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"cotton-js":13,"./star":10}],11:[function(require,module,exports) {
+},{"cotton-js":17,"./star":12}],13:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2393,7 +2483,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"cotton-js":13}],12:[function(require,module,exports) {
+},{"cotton-js":17}],14:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2441,7 +2531,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],7:[function(require,module,exports) {
+},{}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2519,7 +2609,7 @@ var TextLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":13,"./letter":11,"./letters":12}],8:[function(require,module,exports) {
+},{"cotton-js":17,"./letter":13,"./letters":14}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2579,7 +2669,7 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":13}],3:[function(require,module,exports) {
+},{"cotton-js":17}],3:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2615,7 +2705,7 @@ var runGalaxy = exports.runGalaxy = function runGalaxy() {
 
   animator.start();
 };
-},{"cotton-js":13,"./background-layer":6,"./text-layer":7,"../common/cloud":8}],9:[function(require,module,exports) {
+},{"cotton-js":17,"./background-layer":8,"./text-layer":9,"../common/cloud":10}],11:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2668,7 +2758,7 @@ var SimpleEntity = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = SimpleEntity;
-},{"cotton-js":13}],5:[function(require,module,exports) {
+},{"cotton-js":17}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2717,7 +2807,7 @@ var runInputTest = exports.runInputTest = function runInputTest() {
 
     animator.start();
 };
-},{"../common/cloud":8,"cotton-js":13,"../common/simple-entity":9}],4:[function(require,module,exports) {
+},{"../common/cloud":10,"cotton-js":17,"../common/simple-entity":11}],5:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2835,7 +2925,194 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
 
   animator.start();
 };
-},{"../common/cloud":8,"../common/simple-entity":9,"cotton-js":13}],2:[function(require,module,exports) {
+},{"../common/cloud":10,"../common/simple-entity":11,"cotton-js":17}],15:[function(require,module,exports) {
+module.exports = {
+  "imageUrl": "./atlas.png",
+  "width": 22,
+  "height": 32,
+  "sprites": [{
+    "name": "idle1",
+    "x": 2.85,
+    "y": 7.05
+  }, {
+    "name": "idle2",
+    "x": 3.85,
+    "y": 7.05
+  }, {
+    "name": "idle3",
+    "x": 4.85,
+    "y": 7.05
+  }, {
+    "name": "idle4",
+    "x": 5.85,
+    "y": 7.05
+  }, {
+    "name": "run1",
+    "x": 6.85,
+    "y": 7.05
+  }, {
+    "name": "run2",
+    "x": 7.85,
+    "y": 7.05
+  }, {
+    "name": "run3",
+    "x": 8.85,
+    "y": 7.05
+  }, {
+    "name": "run4",
+    "x": 9.85,
+    "y": 7.05
+  }, {
+    "name": "run5",
+    "x": 10.85,
+    "y": 7.05
+  }, {
+    "name": "run6",
+    "x": 11.85,
+    "y": 7.05
+  }, {
+    "name": "run7",
+    "x": 12.85,
+    "y": 7.05
+  }, {
+    "name": "run8",
+    "x": 13.85,
+    "y": 7.05
+  }]
+};
+},{}],16:[function(require,module,exports) {
+module.exports="/atlas.59fb8b15.png";
+},{}],6:[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.runtSpriteTest = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _cottonJs = require('cotton-js');
+
+var _atlas = require('./atlas.json');
+
+var _atlas2 = _interopRequireDefault(_atlas);
+
+var _atlas3 = require('./atlas.png');
+
+var _atlas4 = _interopRequireDefault(_atlas3);
+
+var _cloud = require('../common/cloud');
+
+var _cloud2 = _interopRequireDefault(_cloud);
+
+var _simpleEntity = require('../common/simple-entity');
+
+var _simpleEntity2 = _interopRequireDefault(_simpleEntity);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Obstacle = _cottonJs.traits.Obstacle,
+    BoundByGravity = _cottonJs.traits.BoundByGravity,
+    BoundByPhysicsConstrainedByObstacles = _cottonJs.traits.BoundByPhysicsConstrainedByObstacles;
+var Vector2 = _cottonJs.util.Vector2,
+    getRandomNumber = _cottonJs.util.getRandomNumber,
+    getRandomInt = _cottonJs.util.getRandomInt;
+
+
+var rootEl = document.getElementById('yaboi');
+var width = window.innerWidth;
+var height = window.innerHeight;
+
+var Ground = function (_SimpleEntity) {
+  _inherits(Ground, _SimpleEntity);
+
+  function Ground(pos, entityLibrary, groundTileSize, colour) {
+    _classCallCheck(this, Ground);
+
+    return _possibleConstructorReturn(this, (Ground.__proto__ || Object.getPrototypeOf(Ground)).call(this, pos, new Vector2(groundTileSize, groundTileSize), entityLibrary, colour, [new Obstacle()]));
+  }
+
+  return Ground;
+}(_simpleEntity2.default);
+
+function createGround(groundTileSize, entityLibrary, colour) {
+  var entities = [];
+
+  var x = 0;
+  var y = height - groundTileSize;
+
+  while (x < width) {
+    entities.push(new Ground(new Vector2(x, y), entityLibrary, 10, colour));
+    x += groundTileSize;
+  }
+
+  return entities;
+};
+
+var Bruz = function (_Entity) {
+  _inherits(Bruz, _Entity);
+
+  function Bruz(spriteSheet, pos, size, entityLib, traits) {
+    _classCallCheck(this, Bruz);
+
+    var _this2 = _possibleConstructorReturn(this, (Bruz.__proto__ || Object.getPrototypeOf(Bruz)).call(this, pos, size, entityLib, traits, false));
+
+    _this2.spriteSheet = spriteSheet;
+    _this2.frameNum = 1;
+    _this2.frame = function () {
+      return 'idle' + _this2.frameNum;
+    };
+    return _this2;
+  }
+
+  _createClass(Bruz, [{
+    key: 'update',
+    value: function update(delta) {
+      _get(Bruz.prototype.__proto__ || Object.getPrototypeOf(Bruz.prototype), 'update', this).call(this, delta);
+    }
+  }, {
+    key: 'draw',
+    value: function draw() {
+      this.buffer.clear();
+      var context = this.buffer.getContext();
+      context.drawImage(this.spriteSheet.getSprite('' + this.frame()).getCanvas(), 0, 0);
+    }
+  }]);
+
+  return Bruz;
+}(_cottonJs.Entity);
+
+;
+
+var runtSpriteTest = exports.runtSpriteTest = function runtSpriteTest() {
+  var img = new Image();
+  img.onload = function () {
+    var spriteSheet = _cottonJs.SpriteSheet.createSpriteSheet(_atlas2.default, img);
+
+    var ees = [];
+
+    var eLib = new _cottonJs.EntityLibrary();
+
+    ees = createGround(10, eLib, 'red');
+    ees.push(new Bruz(spriteSheet, new Vector2(width / 2, height / 2), new Vector2(22, 32), eLib, [new BoundByGravity(new Vector2(0, 9.8)), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120))]));
+
+    var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cloud2.default(width, height), new _cottonJs.Layer(width, height, eLib, ees)]));
+
+    animator.start();
+  };
+
+  img.src = _atlas4.default;
+};
+},{"cotton-js":17,"./atlas.json":15,"./atlas.png":16,"../common/cloud":10,"../common/simple-entity":11}],2:[function(require,module,exports) {
 'use strict';
 
 var _teamCottonGalaxy = require('./team-cotton-galaxy');
@@ -2844,7 +3121,9 @@ var _inputTest = require('./input-test');
 
 var _traitTest = require('./trait-test');
 
-var tests = [_teamCottonGalaxy.runGalaxy, _inputTest.runInputTest, _traitTest.runTraitTest];
+var _spriteTest = require('./sprite-test');
+
+var tests = [_teamCottonGalaxy.runGalaxy, _inputTest.runInputTest, _traitTest.runTraitTest, _spriteTest.runtSpriteTest];
 
 var rootEl = document.getElementById('test-buttons');
 
@@ -2858,7 +3137,7 @@ tests.forEach(function (test) {
   };
   rootEl.appendChild(testButton);
 });
-},{"./team-cotton-galaxy":3,"./input-test":5,"./trait-test":4}],35:[function(require,module,exports) {
+},{"./team-cotton-galaxy":3,"./input-test":4,"./trait-test":5,"./sprite-test":6}],40:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -2888,7 +3167,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '57865' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '50243' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -3027,5 +3306,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[35,2])
+},{}]},{},[40,2])
 //# sourceMappingURL=/cotton-js-test-bench.8d2766ad.map
