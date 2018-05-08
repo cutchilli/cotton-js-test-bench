@@ -26,6 +26,12 @@
     ]
   }],
   "sprites": [{
+    "name": "ground",
+    "x": 62.7,
+    "y": 160,
+    "width": 20,
+    "height": 20
+  }, {
     "name": "idle1",
     "x": 62.7,
     "y": 225.6,

@@ -11,33 +11,6 @@ const { Keyboard } = input;
 const rootEl = document.getElementById('yaboi');
 const width = window.innerWidth / 3;
 const height = window.innerHeight / 3;
-const img = new Image();
-
-class Ground extends SimpleEntity {
-  constructor(pos, entityLibrary, groundTileSize, colour) {
-    super(
-      pos,
-      new Vector2(groundTileSize, groundTileSize),
-      entityLibrary,
-      colour,
-      [new Obstacle()]
-    );
-  }
-}
-
-function createGround(groundTileSize, entityLibrary, colour) {
-  const entities = [];
-
-  let x = 0;
-  let y = height - groundTileSize;
-
-  while(x < width) {
-    entities.push(new Ground(new Vector2(x, y), entityLibrary, groundTileSize, colour));
-    x += groundTileSize;
-  }
-
-  return entities;
-};
 
 class Walks extends Trait {
   constructor(acceleration, deceleration) {
@@ -74,7 +47,7 @@ class Walks extends Trait {
 }
 
 class Bruz extends Entity {
-  constructor(pos, size, entityLib) {
+  constructor(pos, size, entityLib, spriteSheet) {
     const traits = [
       new BoundByGravity(new Vector2(0, 9.8)),
       new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)),
@@ -89,7 +62,7 @@ class Bruz extends Entity {
     keyboard.addMapping('ArrowRight', (keystate) => this.trait.Walks.setDirection(keystate));
 
     // Setup sprites
-    this.spriteSheet = SpriteSheet.createSpriteSheet(atlasSpriteDef, img);   
+    this.spriteSheet = spriteSheet;
     this.currentSprite = 'idle1';
   }
 
@@ -100,9 +73,9 @@ class Bruz extends Entity {
     const previousSprite = this.currentSprite;
 
     if (this.trait.Walks.isMoving()) {
-      this.currentSprite = this.spriteSheet.getSpriteForAnimation('run', this.lifetime, this.trait.Walks.facing < 1);
+      this.currentSprite = this.spriteSheet.getSpriteForAnimation('run', this.lifetime);
     } else {
-      this.currentSprite = this.spriteSheet.getSpriteForAnimation('idle', this.lifetime, this.trait.Walks.facing < 1);
+      this.currentSprite = this.spriteSheet.getSpriteForAnimation('idle', this.lifetime);
     }
 
     if (previousSprite !== this.currentSprite) this.draw();
@@ -111,19 +84,55 @@ class Bruz extends Entity {
   draw() {
     this.buffer.clear();
     const context = this.buffer.getContext();
-    context.drawImage(this.spriteSheet.getSprite(this.currentSprite).getCanvas(), 0, 0);
+    context.drawImage(this.spriteSheet.getSprite(this.currentSprite, this.trait.Walks.facing < 1).getCanvas(), 0, 0);
   }
 };
 
+class Ground extends Entity {
+  constructor(pos, size, entityLibrary, spriteSheet) {
+    const traits = [new Obstacle()];
+
+    super(pos, size, entityLibrary, traits, false);
+
+    // Setup spritesheet info
+    this.currentSprite = 'ground';
+    this.spriteSheet = spriteSheet;
+  }
+
+  draw() {
+    this.buffer.clear();
+    const context = this.buffer.getContext();
+    context.drawImage(this.spriteSheet.getSprite(this.currentSprite).getCanvas(), 0, 0);
+  }
+}
+
+function createGround(groundTileSize, entityLibrary, spriteSheet) {
+  const entities = [];
+
+  let x = 0;
+  let y = height - groundTileSize;
+
+  while(x < width) {
+    entities.push(new Ground(new Vector2(x, y), new Vector2(groundTileSize, groundTileSize), entityLibrary, spriteSheet));
+    x += groundTileSize;
+  }
+
+  return entities;
+};
+
 export const runtSpriteTest = function runtSpriteTest() {  
+  // setup sprites
+  const img = new Image();
   img.onload = () => {
+    const spriteSheet = SpriteSheet.createSpriteSheet(atlasSpriteDef, img);
+    
     let ees = [];
 
     const eLib = new EntityLibrary()
     
-    ees = createGround(20, eLib, 'red');
-    ees.push(new Bruz(new Vector2(width/2, height/2), new Vector2(22, 32), eLib));
-
+    ees = createGround(20, eLib, spriteSheet);
+    ees.push(new Bruz(new Vector2(0, height/2), new Vector2(22, 32), eLib, spriteSheet));
+  
     let animator = new Animator(
       new Compositor(
           width,
@@ -132,7 +141,7 @@ export const runtSpriteTest = function runtSpriteTest() {
           [new Cloud(width, height), new Layer(width, height, eLib, ees)],
       )
     );
-
+  
     animator.start();
   };
 
