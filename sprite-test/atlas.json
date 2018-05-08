@@ -2,53 +2,100 @@
   "imageUrl": "./atlas.png",
   "width": 22,
   "height": 32,
+  "animations": [{
+    "name": "idle",
+    "animationLength": 0.1,
+    "sprites": [
+      "idle1",
+      "idle2",
+      "idle3",
+      "idle4"
+    ]
+  }, {
+    "name": "run",
+    "animationLength": 0.08,
+    "sprites": [
+      "run1",
+      "run2",
+      "run3",
+      "run4",
+      "run5",
+      "run6",
+      "run7",
+      "run8"
+    ]
+  }],
   "sprites": [{
     "name": "idle1",
-    "x": 2.85,
-    "y": 7.05
+    "x": 62.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "idle2",
-    "x": 3.85,
-    "y": 7.05
+    "x": 84.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "idle3",
-    "x": 4.85,
-    "y": 7.05
+    "x": 106.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "idle4",
-    "x": 5.85,
-    "y": 7.05
+    "x": 128.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run1",
-    "x": 6.85,
-    "y": 7.05
+    "x": 150.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run2",
-    "x": 7.85,
-    "y": 7.05
+    "x": 172.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run3",
-    "x": 8.85,
-    "y": 7.05
+    "x": 194.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run4",
-    "x": 9.85,
-    "y": 7.05
+    "x": 216.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run5",
-    "x": 10.85,
-    "y": 7.05
+    "x": 283.85,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run6",
-    "x": 11.85,
-    "y": 7.05
+    "x": 260.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run7",
-    "x": 12.85,
-    "y": 7.05
+    "x": 282.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run8",
-    "x": 13.85,
-    "y": 7.05
+    "x": 304.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }]
 }
