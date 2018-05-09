@@ -131,7 +131,7 @@ export const runtSpriteTest = function runtSpriteTest() {
     const eLib = new EntityLibrary()
     
     ees = createGround(20, eLib, spriteSheet);
-    ees.push(new Bruz(new Vector2(0, height/2), new Vector2(22, 32), eLib, spriteSheet));
+    ees.push(new Bruz(new Vector2(0, height - 100), new Vector2(22, 32), eLib, spriteSheet));
   
     let animator = new Animator(
       new Compositor(
