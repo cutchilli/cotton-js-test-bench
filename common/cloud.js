@@ -6,7 +6,7 @@ class CloudParticle extends Entity {
   }
 
   draw() {
-    const context = this.buffer.getContext();
+    const context = this.memoryCanvas.getContext();
 
     const blueCloud = context.createRadialGradient(
       0,
