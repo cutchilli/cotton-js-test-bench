@@ -35,7 +35,7 @@ export default class Letter extends Entity {
   }
 
   draw() {
-    const context = this.buffer.getContext();
+    const context = this.memoryCanvas.getContext();
     
     context.fillStyle = `rgba(${getRandomLetterColour()}, ${1})`;
     context.shadowBlur = 0;
