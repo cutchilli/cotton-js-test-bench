@@ -2,18 +2,22 @@ import { Entity, util } from "cotton-js";
 
 
 export class BlackKey extends Entity {
-  constructor(pos, size, entityLibrary) {
-
+  constructor(pos, size, keyboardKey, entityLibrary) {
     super(pos, size, entityLibrary);
+
+    this.keyboardKey = keyboardKey;
   }
 
   draw() {
     const context = this.buffer.getContext();
 
-    context.beginPath();
-    context.strokeStyle = 'black';
+    context.fillStyle = 'black';
     context.fillRect(0, 0, this.size.x, this.size.y);
-    context.stroke();
+
+    context.fillStyle = 'white';
+    context.font = '30px arial';
+    context.textAlign = "center";
+    context.fillText(this.keyboardKey, this.size.x / 2, this.size.y * 0.9);
   }
 
   update(deltaTime) {

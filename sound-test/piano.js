@@ -18,11 +18,22 @@ export class Piano extends Entity {
 
     for (let pianoNote of pianoNotes) {
       if (pianoNote.pianoKey.includes("#")) {
-        blackKeys.push(new BlackKey(new Vector2(WhiteKeyLastEndPos - (blackKeySize.x / 2), 0), blackKeySize, entityLibrary));
+        blackKeys.push(new BlackKey(
+          new Vector2(
+            WhiteKeyLastEndPos - (blackKeySize.x / 2), 0), 
+            blackKeySize, 
+            pianoNote.keyboardKey, 
+            entityLibrary)
+          );
         continue;
       }
 
-      whiteKeys.push(new WhiteKey(new Vector2(WhiteKeyLastEndPos, 0), whiteKeySize, entityLibrary));
+      whiteKeys.push(new WhiteKey(
+        new Vector2(WhiteKeyLastEndPos, 0), 
+        whiteKeySize, 
+        pianoNote.keyboardKey,
+        entityLibrary)
+      );
       WhiteKeyLastEndPos += whiteKeySize.x;
     }
 
