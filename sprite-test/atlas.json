@@ -1,7 +1,5 @@
 {
   "imageUrl": "./atlas.png",
-  "width": 22,
-  "height": 32,
   "animations": [{
     "name": "idle",
     "animationLength": 0.1,

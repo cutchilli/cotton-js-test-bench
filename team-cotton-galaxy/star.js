@@ -37,7 +37,7 @@ export default class Star extends Entity {
   }
 
   draw() {
-    const context = this.buffer.getContext();
+    const context = this.memoryCanvas.getContext();
 
     context.fillStyle = `rgba(${this.colour}, ${this.opacity})`;
     context.shadowBlur = this.trail;

@@ -2,7 +2,6 @@ import { Animator, Compositor, SpriteSheet, Layer, Entity, EntityLibrary, util, 
 import atlasSpriteDef from './atlas.json';
 import atlasSpriteImageUrl from './atlas.png';
 import Cloud from '../common/cloud';
-import SimpleEntity from '../common/simple-entity';
 
 const { Obstacle, BoundByGravity, BoundByPhysicsConstrainedByObstacles } = traits;
 const { Vector2 } = util;
@@ -82,8 +81,8 @@ class Bruz extends Entity {
   }
 
   draw() {
-    this.buffer.clear();
-    const context = this.buffer.getContext();
+    this.memoryCanvas.clear();
+    const context = this.memoryCanvas.getContext();
     context.drawImage(this.spriteSheet.getSprite(this.currentSprite, this.trait.Walks.facing < 1).getCanvas(), 0, 0);
   }
 };
@@ -100,8 +99,8 @@ class Ground extends Entity {
   }
 
   draw() {
-    this.buffer.clear();
-    const context = this.buffer.getContext();
+    this.memoryCanvas.clear();
+    const context = this.memoryCanvas.getContext();
     context.drawImage(this.spriteSheet.getSprite(this.currentSprite).getCanvas(), 0, 0);
   }
 }
@@ -131,7 +130,7 @@ export const runtSpriteTest = function runtSpriteTest() {
     const eLib = new EntityLibrary()
     
     ees = createGround(20, eLib, spriteSheet);
-    ees.push(new Bruz(new Vector2(0, height - 100), new Vector2(22, 32), eLib, spriteSheet));
+    ees.push(new Bruz(new Vector2(0, 0), new Vector2(22, 32), eLib, spriteSheet));
   
     let animator = new Animator(
       new Compositor(
