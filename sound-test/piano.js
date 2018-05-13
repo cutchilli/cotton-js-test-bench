@@ -15,8 +15,9 @@ export class Piano extends Entity {
     let i = 0;
     let WhiteKeyLastEndPos = 0;
 
-    for (let pianoNoteKey in pianoNotes) {
-      if (pianoNoteKey.includes("Sharp")) {
+
+    for (let pianoNote of pianoNotes) {
+      if (pianoNote.pianoKey.includes("#")) {
         blackKeys.push(new BlackKey(new Vector2(WhiteKeyLastEndPos - (blackKeySize.x / 2), 0), blackKeySize, entityLibrary));
         continue;
       }

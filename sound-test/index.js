@@ -1,5 +1,5 @@
 import { Animator, Compositor, Audio, input, EntityLibrary, util } from "cotton-js";
-import * as pianoSoundUrls from "./piano-sounds"
+import { C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B } from "./piano-sounds"
 import {PianoLayer} from "./piano-layer";
 import {Piano} from "./piano";
 
@@ -7,22 +7,29 @@ export const runSoundTest = function runSoundTest() {
   const { Vector2 } = util;
 
   var audio = new Audio();
+  const inputHandler = new input.Keyboard(window);
 
-  var pianoNotes = {};
+let pianoNotes = [
+ {pianoKey: "C", keyboardKey: "A", clip: audio.createSoundClip(C) },
+ {pianoKey: "C#", keyboardKey: "W", clip: audio.createSoundClip(CSharp) },
+ {pianoKey: "D", keyboardKey: "S", clip: audio.createSoundClip(D) },
+ {pianoKey: "D#", keyboardKey: "E", clip: audio.createSoundClip(DSharp) },
+ {pianoKey: "E", keyboardKey: "D", clip: audio.createSoundClip(E) },
+ {pianoKey: "F", keyboardKey: "F", clip: audio.createSoundClip(F) },
+ {pianoKey: "F#", keyboardKey: "T", clip: audio.createSoundClip(FSharp) },
+ {pianoKey: "G", keyboardKey: "G", clip: audio.createSoundClip(G) },
+ {pianoKey: "G#", keyboardKey: "Y", clip: audio.createSoundClip(GSharp) },
+ {pianoKey: "A", keyboardKey: "H", clip: audio.createSoundClip(A) },
+ {pianoKey: "A#", keyboardKey: "U", clip: audio.createSoundClip(ASharp) },
+ {pianoKey: "B", keyboardKey: "J", clip: audio.createSoundClip(B) }
+];
 
-  for (let key in pianoSoundUrls) {
-    pianoNotes[key] = audio.createSoundClip(pianoSoundUrls[key]);
-  }
-
-  // const inputHandler = new input.Keyboard(window);
-
-  // for (let i = 0; i < pianoSoundClips.length; i++) {
-  //   const soundClip = pianoSoundClips[i];
-
-  //   const keyCode = 'Digit' + (i + 1);
-    
-  //   inputHandler.addMapping(keyCode, () => soundClip.play());
-  // }
+  pianoNotes.forEach(
+    pianoNote => 
+      inputHandler.addMapping("Key" + pianoNote.keyboardKey, 
+                              () => pianoNote.clip.play()
+                            )
+  )
 
   const canvas = document.getElementById("yaboi");
 
@@ -34,7 +41,7 @@ export const runSoundTest = function runSoundTest() {
 
   const entityLibrary = new EntityLibrary();
 
-  const piano = new Piano(new Vector2(0, 0), pianoNotes, entityLibrary);
+  const piano = new Piano(new Vector2(100, 50), pianoNotes, entityLibrary);
 
   let animator = new Animator(
     new Compositor(width, height, canvas, [
