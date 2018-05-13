@@ -25,8 +25,10 @@ let pianoNotes = [
 ];
 
   pianoNotes.forEach(
-    pianoNote => 
-      inputHandler.addMapping("Key" + pianoNote.keyboardKey, () => pianoNote.clip.play())
+    pianoNote =>
+      inputHandler.addMapping("Key" + pianoNote.keyboardKey, (keyState) => {
+        if (keyState === 1) pianoNote.clip.play()
+      })
   )
 
   const canvas = document.getElementById("yaboi");

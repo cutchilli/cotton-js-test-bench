@@ -10,7 +10,7 @@ export class WhiteKey extends Entity {
   }
 
   draw() {
-    const context = this.buffer.getContext();
+    const context = this.memoryCanvas.getContext();
 
     context.beginPath();
     context.strokeStyle = 'black';

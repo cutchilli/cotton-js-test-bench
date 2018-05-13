@@ -44,7 +44,7 @@ export class Piano extends Entity {
   }
 
   draw() {
-    let context = this.buffer.getContext();
+    let context = this.memoryCanvas.getContext();
 
     for (let whiteKey of this.whiteKeys) {
       whiteKey.paintOn(context);

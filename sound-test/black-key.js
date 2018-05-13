@@ -9,7 +9,7 @@ export class BlackKey extends Entity {
   }
 
   draw() {
-    const context = this.buffer.getContext();
+    const context = this.memoryCanvas.getContext();
 
     context.fillStyle = 'black';
     context.fillRect(0, 0, this.size.x, this.size.y);
