@@ -2,8 +2,15 @@ import { runGalaxy } from './team-cotton-galaxy';
 import { runInputTest } from './input-test';
 import { runTraitTest } from './trait-test';
 import { runSoundTest } from './sound-test';
+import { runtSpriteTest } from './sprite-test';
 
-const tests = [runGalaxy, runInputTest, runTraitTest, runSoundTest];
+const tests = [
+  runGalaxy,
+  runInputTest,
+  runTraitTest,
+  runSoundTest,
+  runtSpriteTest
+];
 
 const rootEl = document.getElementById('test-buttons');
 
