@@ -10,26 +10,19 @@ export const runSoundTest = function runSoundTest() {
   const inputHandler = new input.Keyboard(window);
 
 let pianoNotes = [
- {pianoKey: "C", keyboardKey: "A", clip: audio.createSoundClip(C) },
- {pianoKey: "C#", keyboardKey: "W", clip: audio.createSoundClip(CSharp) },
- {pianoKey: "D", keyboardKey: "S", clip: audio.createSoundClip(D) },
- {pianoKey: "D#", keyboardKey: "E", clip: audio.createSoundClip(DSharp) },
- {pianoKey: "E", keyboardKey: "D", clip: audio.createSoundClip(E) },
- {pianoKey: "F", keyboardKey: "F", clip: audio.createSoundClip(F) },
- {pianoKey: "F#", keyboardKey: "T", clip: audio.createSoundClip(FSharp) },
- {pianoKey: "G", keyboardKey: "G", clip: audio.createSoundClip(G) },
- {pianoKey: "G#", keyboardKey: "Y", clip: audio.createSoundClip(GSharp) },
- {pianoKey: "A", keyboardKey: "H", clip: audio.createSoundClip(A) },
- {pianoKey: "A#", keyboardKey: "U", clip: audio.createSoundClip(ASharp) },
- {pianoKey: "B", keyboardKey: "J", clip: audio.createSoundClip(B) }
+ {pianoKey: "C", keyboardKey: "A", url: C },
+ {pianoKey: "C#", keyboardKey: "W", url: CSharp },
+ {pianoKey: "D", keyboardKey: "S", url: D },
+ {pianoKey: "D#", keyboardKey: "E", url: DSharp },
+ {pianoKey: "E", keyboardKey: "D", url: E },
+ {pianoKey: "F", keyboardKey: "F", url: F },
+ {pianoKey: "F#", keyboardKey: "T", url: FSharp },
+ {pianoKey: "G", keyboardKey: "G", url: G },
+ {pianoKey: "G#", keyboardKey: "Y", url: GSharp },
+ {pianoKey: "A", keyboardKey: "H", url: A },
+ {pianoKey: "A#", keyboardKey: "U", url: ASharp },
+ {pianoKey: "B", keyboardKey: "J", url: B }
 ];
-
-  pianoNotes.forEach(
-    pianoNote =>
-      inputHandler.addMapping("Key" + pianoNote.keyboardKey, (keyState) => {
-        if (keyState === 1) pianoNote.clip.play()
-      })
-  )
 
   const canvas = document.getElementById("yaboi");
 
@@ -41,7 +34,7 @@ let pianoNotes = [
 
   const entityLibrary = new EntityLibrary();
 
-  const piano = new Piano(new Vector2(100, 50), pianoNotes, entityLibrary);
+  const piano = new Piano(new Vector2(100, 50), inputHandler, audio, pianoNotes, entityLibrary);
 
   let animator = new Animator(
     new Compositor(width, height, canvas, [
