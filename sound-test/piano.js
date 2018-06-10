@@ -5,7 +5,7 @@ import { PlaysKey } from "./plays-key";
 const {Vector2} = util;
 
 export class Piano extends Entity {
-  constructor(pos, inputHandler, audio, pianoNotes, entityLibrary) {
+  constructor(pos, inputHandler, pianoNotes, entityLibrary) {
     let whiteKeys = [];
     let blackKeys = [];
 
@@ -25,7 +25,7 @@ export class Piano extends Entity {
             blackKeySize, 
             pianoNote.keyboardKey, 
             entityLibrary, 
-            [new PlaysKey(inputHandler, audio, pianoNote)]
+            [new PlaysKey(inputHandler, pianoNote)]
         );
         blackKeys.push(blackKey);
         continue;
@@ -38,7 +38,7 @@ export class Piano extends Entity {
         whiteKeySize, 
         pianoNote.keyboardKey,
         entityLibrary,
-        [new PlaysKey(inputHandler, audio, pianoNote)]
+        [new PlaysKey(inputHandler, pianoNote)]
       );
 
       whiteKeys.push(whiteKey);

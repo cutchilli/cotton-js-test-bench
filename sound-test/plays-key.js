@@ -2,14 +2,12 @@ import { Trait } from "cotton-js";
 
 
 export class PlaysKey extends Trait {
-  constructor(inputHandler, audio, pianoNote) {
+  constructor(inputHandler, pianoNote) {
     super();
-
-    const clip = audio.createSoundClip(pianoNote.url);
-
+    
     inputHandler.addMapping("Key" + pianoNote.keyboardKey, (keyState) => {
       if (keyState === 1) {
-        clip.play();
+        pianoNote.clip.play();
         this.playing = true;
       }
     });

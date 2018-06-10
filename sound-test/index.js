@@ -1,27 +1,27 @@
-import { Animator, Compositor, Audio, input, EntityLibrary, util } from "cotton-js";
+import { Animator, Compositor, createSoundClip, input, EntityLibrary, util } from "cotton-js";
 import { C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B } from "./piano-sounds"
 import {PianoLayer} from "./piano-layer";
 import {Piano} from "./piano";
 
-export const runSoundTest = function runSoundTest() {
+export const runSoundTest = async function runSoundTest() {
   const { Vector2 } = util;
 
-  var audio = new Audio();
   const inputHandler = new input.Keyboard(window);
 
+  // Could probably do an await all here, but this is easier for now.
 let pianoNotes = [
- {pianoKey: "C", keyboardKey: "A", url: C },
- {pianoKey: "C#", keyboardKey: "W", url: CSharp },
- {pianoKey: "D", keyboardKey: "S", url: D },
- {pianoKey: "D#", keyboardKey: "E", url: DSharp },
- {pianoKey: "E", keyboardKey: "D", url: E },
- {pianoKey: "F", keyboardKey: "F", url: F },
- {pianoKey: "F#", keyboardKey: "T", url: FSharp },
- {pianoKey: "G", keyboardKey: "G", url: G },
- {pianoKey: "G#", keyboardKey: "Y", url: GSharp },
- {pianoKey: "A", keyboardKey: "H", url: A },
- {pianoKey: "A#", keyboardKey: "U", url: ASharp },
- {pianoKey: "B", keyboardKey: "J", url: B }
+ {pianoKey: "C", keyboardKey: "A", clip: await createSoundClip(C) },
+ {pianoKey: "C#", keyboardKey: "W", clip: await createSoundClip(CSharp) },
+ {pianoKey: "D", keyboardKey: "S", clip: await createSoundClip(D) },
+ {pianoKey: "D#", keyboardKey: "E", clip: await createSoundClip(DSharp) },
+ {pianoKey: "E", keyboardKey: "D", clip: await createSoundClip(E) },
+ {pianoKey: "F", keyboardKey: "F", clip: await createSoundClip(F) },
+ {pianoKey: "F#", keyboardKey: "T", clip: await createSoundClip(FSharp) },
+ {pianoKey: "G", keyboardKey: "G", clip: await createSoundClip(G) },
+ {pianoKey: "G#", keyboardKey: "Y", clip: await createSoundClip(GSharp) },
+ {pianoKey: "A", keyboardKey: "H", clip: await createSoundClip(A) },
+ {pianoKey: "A#", keyboardKey: "U", clip: await createSoundClip(ASharp) },
+ {pianoKey: "B", keyboardKey: "J", clip: await createSoundClip(B) }
 ];
 
   const canvas = document.getElementById("yaboi");
@@ -34,7 +34,7 @@ let pianoNotes = [
 
   const entityLibrary = new EntityLibrary();
 
-  const piano = new Piano(new Vector2(100, 50), inputHandler, audio, pianoNotes, entityLibrary);
+  const piano = new Piano(new Vector2(100, 50), inputHandler, pianoNotes, entityLibrary);
 
   let animator = new Animator(
     new Compositor(width, height, canvas, [
