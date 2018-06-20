@@ -1,7 +1,22 @@
-import { Animator, Compositor, createSoundClip, input, EntityLibrary, util } from "cotton-js";
+import { Animator, Compositor, createSoundClip, Mixer, Track, Reverb, browserSpeaker, input, EntityLibrary, util } from "cotton-js";
 import { C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B } from "./piano-sounds"
 import {PianoLayer} from "./piano-layer";
 import {Piano} from "./piano";
+
+const mixer = new Mixer();
+const reverb = new Reverb(2, 2);
+reverb.setDryWet(0.1)
+mixer.getMaster().addEffects([reverb]);
+mixer.connectTo(browserSpeaker);
+
+async function createClipInMixer(clip, trackname) {
+  const track = new Track();
+  var clip = await createSoundClip(clip, false);
+
+  clip.connectTo(track);
+  mixer.setTrack(track, trackname);
+  return clip;
+}
 
 export const runSoundTest = async function runSoundTest() {
   const { Vector2 } = util;
@@ -10,18 +25,18 @@ export const runSoundTest = async function runSoundTest() {
 
   // Could probably do an await all here, but this is easier for now.
 let pianoNotes = [
- {pianoKey: "C", keyboardKey: "A", clip: await createSoundClip(C) },
- {pianoKey: "C#", keyboardKey: "W", clip: await createSoundClip(CSharp) },
- {pianoKey: "D", keyboardKey: "S", clip: await createSoundClip(D) },
- {pianoKey: "D#", keyboardKey: "E", clip: await createSoundClip(DSharp) },
- {pianoKey: "E", keyboardKey: "D", clip: await createSoundClip(E) },
- {pianoKey: "F", keyboardKey: "F", clip: await createSoundClip(F) },
- {pianoKey: "F#", keyboardKey: "T", clip: await createSoundClip(FSharp) },
- {pianoKey: "G", keyboardKey: "G", clip: await createSoundClip(G) },
- {pianoKey: "G#", keyboardKey: "Y", clip: await createSoundClip(GSharp) },
- {pianoKey: "A", keyboardKey: "H", clip: await createSoundClip(A) },
- {pianoKey: "A#", keyboardKey: "U", clip: await createSoundClip(ASharp) },
- {pianoKey: "B", keyboardKey: "J", clip: await createSoundClip(B) }
+ {pianoKey: "C", keyboardKey: "A", clip: await createClipInMixer(C, "C") },
+ {pianoKey: "C#", keyboardKey: "W", clip: await createClipInMixer(CSharp, "C#") },
+ {pianoKey: "D", keyboardKey: "S", clip: await createClipInMixer(D, "D") },
+ {pianoKey: "D#", keyboardKey: "E", clip: await createClipInMixer(DSharp, "D#") },
+ {pianoKey: "E", keyboardKey: "D", clip: await createClipInMixer(E, "E#") },
+ {pianoKey: "F", keyboardKey: "F", clip: await createClipInMixer(F, "F") },
+ {pianoKey: "F#", keyboardKey: "T", clip: await createClipInMixer(FSharp, "F#") },
+ {pianoKey: "G", keyboardKey: "G", clip: await createClipInMixer(G, "G") },
+ {pianoKey: "G#", keyboardKey: "Y", clip: await createClipInMixer(GSharp, "G#") },
+ {pianoKey: "A", keyboardKey: "H", clip: await createClipInMixer(A, "A") },
+ {pianoKey: "A#", keyboardKey: "U", clip: await createClipInMixer(ASharp, "A#") },
+ {pianoKey: "B", keyboardKey: "J", clip: await createClipInMixer(B, "B") }
 ];
 
   const canvas = document.getElementById("yaboi");
