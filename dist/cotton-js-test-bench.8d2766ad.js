@@ -77,19 +77,19 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({35:[function(require,module,exports) {
+})({47:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var PRESSED = 1;
-var RELEASED = 0;
-var KEYDOWN = "keydown";
-var KEYUP = "keyup";
+exports.PRESSED = 1;
+exports.RELEASED = 0;
+exports.KEYDOWN = "keydown";
+exports.KEYUP = "keyup";
 var Keyboard = (function () {
     function Keyboard(htmlElement) {
         var _this = this;
         this.keyStates = {};
         this.keyMap = {};
-        [KEYDOWN, KEYUP]
+        [exports.KEYDOWN, exports.KEYUP]
             .forEach(function (eventName) { return htmlElement.addEventListener(eventName, function (event) { return _this.handleEvent(event); }); });
     }
     Keyboard.prototype.addMapping = function (code, callback) {
@@ -104,7 +104,7 @@ var Keyboard = (function () {
         if (!this.keyMap[code]) {
             return;
         }
-        var keyState = event.type === KEYDOWN ? PRESSED : RELEASED;
+        var keyState = event.type === exports.KEYDOWN ? exports.PRESSED : exports.RELEASED;
         if (this.keyStates[code] === keyState) {
             return;
         }
@@ -116,15 +116,268 @@ var Keyboard = (function () {
 }());
 exports.Keyboard = Keyboard;
 //# sourceMappingURL=keyboard.js.map
-},{}],31:[function(require,module,exports) {
+},{}],40:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var BoundingBox = (function () {
+    function BoundingBox(pos, size) {
+        this.pos = pos;
+        this.size = size;
+    }
+    BoundingBox.contains = function (a, b) {
+        return !(b.left < a.left ||
+            b.top < a.top ||
+            b.right > a.right ||
+            b.bottom > a.bottom);
+    };
+    BoundingBox.touches = function (a, b) {
+        if (a.left > b.right || b.left > a.right) {
+            return false;
+        }
+        if (a.top > b.bottom || b.top > a.bottom) {
+            return false;
+        }
+        return true;
+    };
+    BoundingBox.overlaps = function (a, b) {
+        if (a.left >= b.right || b.left >= a.right) {
+            return false;
+        }
+        if (a.top >= b.bottom || b.top >= a.bottom) {
+            return false;
+        }
+        return true;
+    };
+    BoundingBox.getOverlappingSides = function (box1, box2) {
+        var left = false;
+        var right = false;
+        var top = false;
+        var bottom = false;
+        if (BoundingBox.touches(box1, box2) && box1.left < box2.left && box1.right >= box2.left) {
+            right = true;
+        }
+        if (BoundingBox.touches(box1, box2) && box1.right > box2.right && box1.left <= box2.right) {
+            left = true;
+        }
+        if (BoundingBox.touches(box1, box2) && box1.top < box2.bottom && box1.bottom >= box2.bottom) {
+            top = true;
+        }
+        if (BoundingBox.touches(box1, box2) && box1.bottom > box2.top && box1.top <= box2.top) {
+            bottom = true;
+        }
+        return {
+            bottom: bottom,
+            left: left,
+            right: right,
+            top: top,
+        };
+    };
+    Object.defineProperty(BoundingBox.prototype, "bottom", {
+        get: function () {
+            return this.pos.y + this.size.y;
+        },
+        set: function (y) {
+            this.pos.y = y - this.size.y;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BoundingBox.prototype, "top", {
+        get: function () {
+            return this.pos.y;
+        },
+        set: function (y) {
+            this.pos.y = y;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BoundingBox.prototype, "left", {
+        get: function () {
+            return this.pos.x;
+        },
+        set: function (x) {
+            this.pos.x = x;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BoundingBox.prototype, "right", {
+        get: function () {
+            return this.pos.x + this.size.x;
+        },
+        set: function (x) {
+            this.pos.x = x - this.size.x;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return BoundingBox;
+}());
+exports.BoundingBox = BoundingBox;
+var Vector2 = (function () {
+    function Vector2(x, y) {
+        this.set(x, y);
+    }
+    Vector2.prototype.set = function (x, y) {
+        this.x = x;
+        this.y = y;
+    };
+    return Vector2;
+}());
+exports.Vector2 = Vector2;
+exports.getRandomNumber = function (min, max) { return Math.random() * (max - min) + min; };
+exports.getRandomInt = function (min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+};
+exports.sign = function (n) { return n && n / Math.abs(n); };
+//# sourceMappingURL=math.js.map
+},{}],48:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var math_1 = require("../util/math");
+exports.CLICK = "click";
+exports.MOVE = "move";
+var Mouse = (function () {
+    function Mouse(htmlElement) {
+        var _this = this;
+        this.mouseMap = {};
+        this.pointerPosition = new math_1.Vector2(0, 0);
+        htmlElement.addEventListener("mousemove", function (e) { return _this.handleMoveEvent(e); });
+        htmlElement.addEventListener("click", function (e) { return _this.handleClickEvent(e); });
+        htmlElement.addEventListener("contextmenu", function (e) { return e.preventDefault(); });
+    }
+    Mouse.prototype.addMapping = function (code, callback) {
+        if (!this.mouseMap[code]) {
+            this.mouseMap[code] = new Array();
+        }
+        this.mouseMap[code].push(callback);
+    };
+    Mouse.prototype.handleClickEvent = function (event) {
+        var _this = this;
+        event.preventDefault();
+        if (!this.mouseMap[exports.CLICK]) {
+            return;
+        }
+        this.mouseMap[exports.CLICK]
+            .forEach(function (callback) { return callback({
+            buttonCode: exports.CLICK,
+            pointerPosition: _this.pointerPosition,
+        }); });
+    };
+    Mouse.prototype.handleMoveEvent = function (event) {
+        var _this = this;
+        event.preventDefault();
+        this.pointerPosition.set(event.clientX, event.clientY);
+        if (!this.mouseMap[exports.MOVE]) {
+            return;
+        }
+        this.mouseMap[exports.MOVE]
+            .forEach(function (callback) { return callback({
+            buttonCode: null,
+            pointerPosition: _this.pointerPosition,
+        }); });
+    };
+    return Mouse;
+}());
+exports.Mouse = Mouse;
+//# sourceMappingURL=mouse.js.map
+},{"../util/math":40}],49:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SWIPEUP = "swipeup";
+exports.SWIPEDOWN = "swipedown";
+exports.SWIPELEFT = "swipeleft";
+exports.SWIPERIGHT = "swiperight";
+exports.SWIPEIDLE = "swipeidle";
+var Swipe = (function () {
+    function Swipe(htmlElement) {
+        var _this = this;
+        this.xDown = null;
+        this.yDown = null;
+        this.swipeMap = {};
+        htmlElement.addEventListener("touchstart", function (e) { return _this.handleEventStart(e); }, false);
+        htmlElement.addEventListener("touchend", function (e) { return _this.handleEventStop(e); }, false);
+        htmlElement.addEventListener("touchmove", function (e) { return _this.handleEvent(e); }, false);
+    }
+    Swipe.prototype.addMapping = function (swipeDirection, callback) {
+        if (!this.swipeMap[swipeDirection]) {
+            this.swipeMap[swipeDirection] = new Array();
+        }
+        this.swipeMap[swipeDirection].push(callback);
+    };
+    Swipe.prototype.handleEventStart = function (event) {
+        event.preventDefault();
+        this.xDown = event.touches[0].clientX;
+        this.yDown = event.touches[0].clientY;
+    };
+    Swipe.prototype.handleEventStop = function (event) {
+        event.preventDefault();
+        this.xDown = null;
+        this.yDown = null;
+        this.runMappedEvents(exports.SWIPEIDLE);
+    };
+    Swipe.prototype.handleEvent = function (event) {
+        event.preventDefault();
+        if (!this.xDown || !this.yDown) {
+            return;
+        }
+        var xUp = event.touches[0].clientX;
+        var yUp = event.touches[0].clientY;
+        this.xDiff = this.xDown - xUp;
+        this.yDiff = this.yDown - yUp;
+        if (Math.abs(this.xDiff) > Math.abs(this.yDiff)) {
+            if (this.xDiff > 0) {
+                this.runMappedEvents(exports.SWIPELEFT);
+            }
+            else {
+                this.runMappedEvents(exports.SWIPERIGHT);
+            }
+        }
+        else if (this.yDiff > 0) {
+            this.runMappedEvents(exports.SWIPEUP);
+        }
+        else {
+            this.runMappedEvents(exports.SWIPEDOWN);
+        }
+    };
+    Swipe.prototype.runMappedEvents = function (swipeDirection) {
+        if (!this.swipeMap[swipeDirection]) {
+            return;
+        }
+        this.swipeMap[swipeDirection]
+            .forEach(function (callback) { return callback(); });
+    };
+    return Swipe;
+}());
+exports.Swipe = Swipe;
+//# sourceMappingURL=swipe.js.map
+},{}],33:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var keyboard_1 = require("./keyboard");
+var mouse_1 = require("./mouse");
+var swipe_1 = require("./swipe");
 exports.input = {
+    CLICK: mouse_1.CLICK,
+    KEYDOWN: keyboard_1.KEYDOWN,
+    KEYUP: keyboard_1.KEYUP,
+    MOVE: mouse_1.MOVE,
+    PRESSED: keyboard_1.PRESSED,
+    RELEASED: keyboard_1.RELEASED,
+    SWIPEDOWN: swipe_1.SWIPEDOWN,
+    SWIPEIDLE: swipe_1.SWIPEIDLE,
+    SWIPELEFT: swipe_1.SWIPELEFT,
+    SWIPERIGHT: swipe_1.SWIPERIGHT,
+    SWIPEUP: swipe_1.SWIPEUP,
     Keyboard: keyboard_1.Keyboard,
+    Mouse: mouse_1.Mouse,
+    Swipe: swipe_1.Swipe,
 };
 //# sourceMappingURL=index.js.map
-},{"./keyboard":35}],34:[function(require,module,exports) {
+},{"./keyboard":47,"./mouse":48,"./swipe":49}],62:[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {};
@@ -311,7 +564,7 @@ process.chdir = function (dir) {
 process.umask = function () {
     return 0;
 };
-},{}],30:[function(require,module,exports) {
+},{}],61:[function(require,module,exports) {
 var global = (1,eval)("this");
 var process = require("process");
 /*!
@@ -1494,7 +1747,7 @@ return Promise$1;
 
 //# sourceMappingURL=es6-promise.map
 
-},{"process":34}],28:[function(require,module,exports) {
+},{"process":62}],41:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var es6_promise_1 = require("es6-promise");
@@ -1509,7 +1762,7 @@ function loadImage(url) {
 }
 exports.loadImage = loadImage;
 //# sourceMappingURL=image.js.map
-},{"es6-promise":30}],29:[function(require,module,exports) {
+},{"es6-promise":61}],42:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function loadJson(url) {
@@ -1517,125 +1770,7 @@ function loadJson(url) {
 }
 exports.loadJson = loadJson;
 //# sourceMappingURL=json.js.map
-},{}],27:[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var BoundingBox = (function () {
-    function BoundingBox(pos, size) {
-        this.pos = pos;
-        this.size = size;
-    }
-    BoundingBox.contains = function (a, b) {
-        return !(b.left < a.left ||
-            b.top < a.top ||
-            b.right > a.right ||
-            b.bottom > a.bottom);
-    };
-    BoundingBox.touches = function (a, b) {
-        if (a.left > b.right || b.left > a.right) {
-            return false;
-        }
-        if (a.top > b.bottom || b.top > a.bottom) {
-            return false;
-        }
-        return true;
-    };
-    BoundingBox.overlaps = function (a, b) {
-        if (a.left >= b.right || b.left >= a.right) {
-            return false;
-        }
-        if (a.top >= b.bottom || b.top >= a.bottom) {
-            return false;
-        }
-        return true;
-    };
-    BoundingBox.getOverlappingSides = function (box1, box2) {
-        var left = false;
-        var right = false;
-        var top = false;
-        var bottom = false;
-        if (BoundingBox.touches(box1, box2) && box1.left < box2.left && box1.right >= box2.left) {
-            right = true;
-        }
-        if (BoundingBox.touches(box1, box2) && box1.right > box2.right && box1.left <= box2.right) {
-            left = true;
-        }
-        if (BoundingBox.touches(box1, box2) && box1.top < box2.bottom && box1.bottom >= box2.bottom) {
-            top = true;
-        }
-        if (BoundingBox.touches(box1, box2) && box1.bottom > box2.top && box1.top <= box2.top) {
-            bottom = true;
-        }
-        return {
-            bottom: bottom,
-            left: left,
-            right: right,
-            top: top,
-        };
-    };
-    Object.defineProperty(BoundingBox.prototype, "bottom", {
-        get: function () {
-            return this.pos.y + this.size.y;
-        },
-        set: function (y) {
-            this.pos.y = y - this.size.y;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(BoundingBox.prototype, "top", {
-        get: function () {
-            return this.pos.y;
-        },
-        set: function (y) {
-            this.pos.y = y;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(BoundingBox.prototype, "left", {
-        get: function () {
-            return this.pos.x;
-        },
-        set: function (x) {
-            this.pos.x = x;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(BoundingBox.prototype, "right", {
-        get: function () {
-            return this.pos.x + this.size.x;
-        },
-        set: function (x) {
-            this.pos.x = x - this.size.x;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return BoundingBox;
-}());
-exports.BoundingBox = BoundingBox;
-var Vector2 = (function () {
-    function Vector2(x, y) {
-        this.set(x, y);
-    }
-    Vector2.prototype.set = function (x, y) {
-        this.x = x;
-        this.y = y;
-    };
-    return Vector2;
-}());
-exports.Vector2 = Vector2;
-exports.getRandomNumber = function (min, max) { return Math.random() * (max - min) + min; };
-exports.getRandomInt = function (min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-};
-exports.sign = function (n) { return n && n / Math.abs(n); };
-//# sourceMappingURL=math.js.map
-},{}],32:[function(require,module,exports) {
+},{}],34:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var image_1 = require("./image");
@@ -1650,12 +1785,11 @@ exports.util = {
     loadJson: json_1.loadJson,
 };
 //# sourceMappingURL=index.js.map
-},{"./image":28,"./json":29,"./math":27}],26:[function(require,module,exports) {
-
+},{"./image":41,"./json":42,"./math":40}],39:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Buffer = (function () {
-    function Buffer(width, height, canvas) {
+var MemoryCanvas = (function () {
+    function MemoryCanvas(width, height, canvas) {
         this.canvas = canvas || document.createElement("canvas");
         this.canvas.width = canvas ? canvas.width : width;
         this.canvas.height = canvas ? canvas.height : height;
@@ -1663,23 +1797,23 @@ var Buffer = (function () {
         this.width = width;
         this.height = height;
     }
-    Buffer.prototype.getContext = function () {
+    MemoryCanvas.prototype.getContext = function () {
         return this.context;
     };
-    Buffer.prototype.getCanvas = function () {
+    MemoryCanvas.prototype.getCanvas = function () {
         return this.canvas;
     };
-    Buffer.prototype.clear = function () {
+    MemoryCanvas.prototype.clear = function () {
         this.context.clearRect(0, 0, this.width, this.height);
     };
-    return Buffer;
+    return MemoryCanvas;
 }());
-exports.Buffer = Buffer;
-//# sourceMappingURL=buffer.js.map
+exports.MemoryCanvas = MemoryCanvas;
+//# sourceMappingURL=memory-canvas.js.map
 },{}],19:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var buffer_1 = require("./buffer");
+var memory_canvas_1 = require("./memory-canvas");
 var math_1 = require("./util/math");
 var Layer = (function () {
     function Layer(width, height, entityLibrary, entities) {
@@ -1688,7 +1822,7 @@ var Layer = (function () {
         this.width = width;
         this.height = height;
         this.entityLibrary = entityLibrary;
-        this.buffer = new buffer_1.Buffer(this.width, this.height);
+        this.memoryCanvas = new memory_canvas_1.MemoryCanvas(this.width, this.height);
         this.calculateBounds();
         this.addEntities(entities);
     }
@@ -1711,14 +1845,14 @@ var Layer = (function () {
         }
     };
     Layer.prototype.paintOn = function (context) {
-        this.buffer.clear();
+        this.memoryCanvas.clear();
         for (var _i = 0, _a = this.entities; _i < _a.length; _i++) {
             var entity = _a[_i];
             if (math_1.BoundingBox.overlaps(this.bounds, entity.bounds)) {
-                entity.paintOn(this.buffer.getContext());
+                entity.paintOn(this.memoryCanvas.getContext());
             }
         }
-        context.drawImage(this.buffer.getCanvas(), 0, 0);
+        context.drawImage(this.memoryCanvas.getCanvas(), 0, 0);
     };
     Layer.prototype.calculateBounds = function () {
         this.bounds = new math_1.BoundingBox(new math_1.Vector2(0, 0), new math_1.Vector2(this.width, this.height));
@@ -1727,56 +1861,76 @@ var Layer = (function () {
 }());
 exports.Layer = Layer;
 //# sourceMappingURL=layer.js.map
-},{"./buffer":26,"./util/math":27}],20:[function(require,module,exports) {
+},{"./memory-canvas":39,"./util/math":40}],20:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var buffer_1 = require("./buffer");
+var memory_canvas_1 = require("./memory-canvas");
 var math_1 = require("./util/math");
 var Entity = (function () {
     function Entity(position, size, entityLibrary, traits, debug) {
         if (traits === void 0) { traits = []; }
         if (debug === void 0) { debug = false; }
-        var _this = this;
-        this.name = "entity";
         this.debug = debug;
         this.position = position;
         this.velocity = new math_1.Vector2(0, 0);
         this.acceleration = new math_1.Vector2(0, 0);
         this.size = size;
         this.entityLibrary = entityLibrary;
-        this.traits = traits;
         this.trait = {};
-        this.traits.forEach(function (trait) {
-            _this.trait[trait.getName()] = trait;
-        });
+        this.addTraits(traits);
         this.lifetime = 0;
         this.firstPaintComplete = false;
         this.calculateBounds();
-        this.buffer = new buffer_1.Buffer(this.size.x, this.size.y);
+        this.memoryCanvas = new memory_canvas_1.MemoryCanvas(this.size.x, this.size.y);
         this.entityLibrary.registerEntity(this);
     }
     Entity.prototype.paintOn = function (context) {
         if (!this.firstPaintComplete) {
             this.draw();
             if (this.debug) {
-                var bufferContext = this.buffer.getContext();
-                bufferContext.strokeStyle = "green";
-                bufferContext.rect(0, 0, this.size.x, this.size.y);
-                bufferContext.stroke();
+                var memoryCanvasContext = this.memoryCanvas.getContext();
+                memoryCanvasContext.strokeStyle = "green";
+                memoryCanvasContext.rect(0, 0, this.size.x, this.size.y);
+                memoryCanvasContext.stroke();
             }
             this.firstPaintComplete = true;
         }
-        context.drawImage(this.buffer.getCanvas(), (0.5 + this.position.x) << 0, (0.5 + this.position.y) << 0);
+        context.drawImage(this.memoryCanvas.getCanvas(), (0.5 + this.position.x) << 0, (0.5 + this.position.y) << 0);
     };
     Entity.prototype.update = function (deltaTime) {
-        for (var _i = 0, _a = this.traits; _i < _a.length; _i++) {
+        for (var _i = 0, _a = this.getTraits(); _i < _a.length; _i++) {
             var trait = _a[_i];
-            trait.update(this, this.entityLibrary, deltaTime);
+            trait.update(deltaTime);
         }
         this.lifetime += deltaTime;
     };
+    Entity.prototype.addTrait = function (trait) {
+        this.addTraits([trait]);
+    };
+    Entity.prototype.addTraits = function (traits) {
+        var _this = this;
+        traits.forEach(function (trait) {
+            _this.trait[trait.getName()] = trait;
+        });
+    };
+    Entity.prototype.removeTrait = function (trait) {
+        if (!this.trait[trait]) {
+            return;
+        }
+        delete this.trait[trait];
+    };
     Entity.prototype.getTraits = function () {
-        return this.traits;
+        var _this = this;
+        var traits = [];
+        Object.keys(this.trait).forEach(function (trait) { return traits.push(_this.trait[trait]); });
+        return traits;
+    };
+    Entity.prototype.getEntityLibrary = function () {
+        return this.entityLibrary;
+    };
+    Entity.prototype.getName = function () {
+        var instance = this.constructor;
+        return instance.name;
     };
     Entity.prototype.calculateBounds = function () {
         this.bounds = new math_1.BoundingBox(this.position, this.size);
@@ -1785,7 +1939,7 @@ var Entity = (function () {
 }());
 exports.Entity = Entity;
 //# sourceMappingURL=entity.js.map
-},{"./buffer":26,"./util/math":27}],21:[function(require,module,exports) {
+},{"./memory-canvas":39,"./util/math":40}],21:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Animator = (function () {
@@ -1823,10 +1977,10 @@ exports.Animator = Animator;
 },{}],22:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var buffer_1 = require("./buffer");
+var memory_canvas_1 = require("./memory-canvas");
 var CanvasElementToLayer = (function () {
-    function CanvasElementToLayer(buffer, layer) {
-        this.buffer = buffer;
+    function CanvasElementToLayer(memoryCanvas, layer) {
+        this.memoryCanvas = memoryCanvas;
         this.layer = layer;
     }
     return CanvasElementToLayer;
@@ -1845,7 +1999,7 @@ var Compositor = (function () {
         for (var i = 0; i < layers.length; i++) {
             var layer = layers[i];
             var layerCanvas = this.createLayerElement(width, height, i);
-            this.canvasElementToLayers.push(new CanvasElementToLayer(new buffer_1.Buffer(width, height, layerCanvas), layer));
+            this.canvasElementToLayers.push(new CanvasElementToLayer(new memory_canvas_1.MemoryCanvas(width, height, layerCanvas), layer));
             this.rootContainer.appendChild(layerCanvas);
         }
     };
@@ -1858,8 +2012,8 @@ var Compositor = (function () {
     Compositor.prototype.paint = function () {
         for (var _i = 0, _a = this.canvasElementToLayers; _i < _a.length; _i++) {
             var canvasElementToLayer = _a[_i];
-            canvasElementToLayer.buffer.clear();
-            canvasElementToLayer.layer.paintOn(canvasElementToLayer.buffer.getContext());
+            canvasElementToLayer.memoryCanvas.clear();
+            canvasElementToLayer.layer.paintOn(canvasElementToLayer.memoryCanvas.getContext());
         }
     };
     Compositor.prototype.createLayerElement = function (width, height, i) {
@@ -1877,7 +2031,7 @@ var Compositor = (function () {
 }());
 exports.Compositor = Compositor;
 //# sourceMappingURL=compositor.js.map
-},{"./buffer":26}],23:[function(require,module,exports) {
+},{"./memory-canvas":39}],23:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var EntityLibrary = (function () {
@@ -1885,6 +2039,14 @@ var EntityLibrary = (function () {
         this.entities = [];
         this.entitiesByTrait = {};
     }
+    EntityLibrary.prototype.getEntitiesByTraitNames = function (traitNames) {
+        var _this = this;
+        var retVal = [];
+        traitNames.forEach(function (traitName) {
+            retVal = retVal.concat(_this.getEntitiesByTraitName(traitName));
+        });
+        return retVal;
+    };
     EntityLibrary.prototype.getEntitiesByTraitName = function (traitName) {
         return this.entitiesByTrait[traitName] || [];
     };
@@ -1953,36 +2115,41 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var buffer_1 = require("./buffer");
+var memory_canvas_1 = require("./memory-canvas");
 var image_1 = require("./util/image");
 var json_1 = require("./util/json");
 var SpriteSheet = (function () {
-    function SpriteSheet(sprites) {
+    function SpriteSheet(sprites, animations) {
         this.sprites = sprites;
+        this.animations = animations;
     }
     SpriteSheet.createSpriteSheet = function (spriteDef, spriteImage) {
-        if (!spriteDef.width || !spriteDef.height) {
-            throw new Error("Inalid sprite def");
-        }
-        var spriteWidth = spriteDef.width;
-        var spriteHeight = spriteDef.height;
         var sprites = {};
         if (spriteDef.sprites) {
             spriteDef.sprites.forEach(function (sprite) {
-                var spriteBuffers = [false, true].map(function (flip) {
-                    var buf = new buffer_1.Buffer(spriteWidth, spriteHeight);
-                    var context = buf.getContext();
-                    if (flip) {
-                        context.scale(-1, -1);
-                        context.translate(-spriteWidth, 0);
-                    }
-                    context.drawImage(spriteImage, sprite.x * spriteWidth, sprite.y * spriteHeight, spriteWidth, spriteHeight, 0, 0, spriteWidth, spriteHeight);
-                    return buf;
+                var spriteBuffers = [false, true].map(function (flipX) {
+                    return [false, true].map(function (flipY) {
+                        var buf = new memory_canvas_1.MemoryCanvas(sprite.width, sprite.height);
+                        var context = buf.getContext();
+                        context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+                        context.translate(flipX ? -sprite.width : 0, flipY ? -sprite.height : 0);
+                        context.drawImage(spriteImage, sprite.x, sprite.y, sprite.width, sprite.height, 0, 0, sprite.width, sprite.height);
+                        return buf;
+                    });
                 });
                 sprites[sprite.name] = spriteBuffers;
             });
         }
-        return new SpriteSheet(sprites);
+        var animations = {};
+        if (spriteDef.animations) {
+            spriteDef.animations.forEach(function (animation) {
+                animations[animation.name] = function (animationDelta) {
+                    var spriteIndex = Math.floor(animationDelta / animation.animationLength) % animation.sprites.length;
+                    return animation.sprites[spriteIndex];
+                };
+            });
+        }
+        return new SpriteSheet(sprites, animations);
     };
     SpriteSheet.loadSpriteSheet = function (assetPath, name) {
         return __awaiter(this, void 0, void 0, function () {
@@ -2003,30 +2170,41 @@ var SpriteSheet = (function () {
             });
         });
     };
-    SpriteSheet.prototype.getSprite = function (name, flip) {
+    SpriteSheet.prototype.getSprite = function (name, flipX, flipY) {
         if (!this.sprites[name]) {
-            throw new Error("Invalid sprite");
+            throw new Error("Sprite " + name + " is not defined");
         }
-        return this.sprites[name][flip ? 1 : 0];
+        return this.sprites[name][flipX ? 1 : 0][flipY ? 1 : 0];
+    };
+    SpriteSheet.prototype.getSpriteForAnimation = function (name, animationDelta) {
+        if (!this.animations[name]) {
+            throw new Error("Animation " + name + " is not defined");
+        }
+        return this.animations[name](animationDelta);
     };
     return SpriteSheet;
 }());
 exports.SpriteSheet = SpriteSheet;
 //# sourceMappingURL=sprite-sheet.js.map
-},{"./buffer":26,"./util/image":28,"./util/json":29}],25:[function(require,module,exports) {
+},{"./memory-canvas":39,"./util/image":41,"./util/json":42}],25:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Trait = (function () {
-    function Trait() {
+    function Trait(entity) {
+        this.entity = entity;
     }
-    Trait.prototype.update = function (entity, entityLibrary, deltaTime) {
+    Trait.prototype.update = function (deltaTime) {
         return;
+    };
+    Trait.prototype.getName = function () {
+        var instance = this.constructor;
+        return instance.name;
     };
     return Trait;
 }());
 exports.Trait = Trait;
 //# sourceMappingURL=trait.js.map
-},{}],36:[function(require,module,exports) {
+},{}],50:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2043,17 +2221,17 @@ var __1 = require("..");
 var math_1 = require("../util/math");
 var BoundByGravity = (function (_super) {
     __extends(BoundByGravity, _super);
-    function BoundByGravity(acceleration) {
-        var _this = _super.call(this) || this;
+    function BoundByGravity(entity, acceleration) {
+        var _this = _super.call(this, entity) || this;
         _this.acceleration = acceleration;
         return _this;
     }
-    BoundByGravity.prototype.update = function (entity, entityLibrary, deltaTime) {
-        if (!entity.acceleration) {
-            entity.acceleration = new math_1.Vector2(0, 0);
+    BoundByGravity.prototype.update = function (deltaTime) {
+        if (!this.entity.acceleration) {
+            this.entity.acceleration = new math_1.Vector2(0, 0);
         }
-        entity.acceleration.y = this.acceleration.y;
-        entity.acceleration.x = this.acceleration.x;
+        this.entity.acceleration.y = this.acceleration.y;
+        this.entity.acceleration.x = this.acceleration.x;
     };
     BoundByGravity.prototype.getName = function () {
         return "BoundByGravity";
@@ -2062,7 +2240,7 @@ var BoundByGravity = (function (_super) {
 }(__1.Trait));
 exports.BoundByGravity = BoundByGravity;
 //# sourceMappingURL=bound-by-gravity.js.map
-},{"..":18,"../util/math":27}],37:[function(require,module,exports) {
+},{"..":17,"../util/math":40}],51:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2079,37 +2257,83 @@ var __1 = require("..");
 var math_1 = require("../util/math");
 var BoundByPhysics = (function (_super) {
     __extends(BoundByPhysics, _super);
-    function BoundByPhysics(terminalVelocity) {
-        var _this = _super.call(this) || this;
+    function BoundByPhysics(entity, terminalVelocity) {
+        var _this = _super.call(this, entity) || this;
         _this.terminalVelocity = terminalVelocity;
         return _this;
     }
-    BoundByPhysics.prototype.update = function (entity, entityLibrary, deltaTime) {
-        this.updateX(entity, entityLibrary, deltaTime);
-        this.updateY(entity, entityLibrary, deltaTime);
+    BoundByPhysics.prototype.update = function (deltaTime) {
+        this.updateX(deltaTime);
+        this.updateY(deltaTime);
     };
     BoundByPhysics.prototype.getName = function () {
         return "BoundByPhysics";
     };
-    BoundByPhysics.prototype.updateY = function (entity, entityLibrary, deltaTime) {
-        entity.velocity.y += deltaTime * entity.acceleration.y;
-        if (this.terminalVelocity && Math.abs(entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) {
-            entity.velocity.y = math_1.sign(entity.velocity.y) * this.terminalVelocity.y;
+    BoundByPhysics.prototype.updateY = function (deltaTime) {
+        this.entity.velocity.y += deltaTime * this.entity.acceleration.y;
+        if (this.terminalVelocity && Math.abs(this.entity.velocity.y) >= Math.abs(this.terminalVelocity.y)) {
+            this.entity.velocity.y = math_1.sign(this.entity.velocity.y) * this.terminalVelocity.y;
         }
-        entity.position.y += deltaTime * entity.velocity.y;
+        this.entity.position.y += deltaTime * this.entity.velocity.y;
     };
-    BoundByPhysics.prototype.updateX = function (entity, entityLibrary, deltaTime) {
-        entity.velocity.x += deltaTime * entity.acceleration.x;
-        if (this.terminalVelocity && Math.abs(entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) {
-            entity.velocity.x = math_1.sign(entity.velocity.x) * this.terminalVelocity.x;
+    BoundByPhysics.prototype.updateX = function (deltaTime) {
+        this.entity.velocity.x += deltaTime * this.entity.acceleration.x;
+        if (this.terminalVelocity && Math.abs(this.entity.velocity.x) >= Math.abs(this.terminalVelocity.x)) {
+            this.entity.velocity.x = math_1.sign(this.entity.velocity.x) * this.terminalVelocity.x;
         }
-        entity.position.x += deltaTime * entity.velocity.x;
+        this.entity.position.x += deltaTime * this.entity.velocity.x;
     };
     return BoundByPhysics;
 }(__1.Trait));
 exports.BoundByPhysics = BoundByPhysics;
 //# sourceMappingURL=bound-by-physics.js.map
-},{"..":18,"../util/math":27}],38:[function(require,module,exports) {
+},{"..":17,"../util/math":40}],65:[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var math_1 = require("../util/math");
+var AABBCollision = (function () {
+    function AABBCollision(entity, sides) {
+        this.entity = entity;
+        this.sides = sides;
+    }
+    return AABBCollision;
+}());
+exports.AABBCollision = AABBCollision;
+var AABBCollider = (function () {
+    function AABBCollider(entity, collidableEntityTraits) {
+        this.entity = entity;
+        this.collidableEntityTraits = collidableEntityTraits;
+    }
+    AABBCollider.prototype.detectCollisions = function () {
+        var _this = this;
+        var collidableEntities = this.entity
+            .getEntityLibrary()
+            .getEntitiesByTraitNames(this.collidableEntityTraits.map(function (trait) { return trait; }));
+        var collisions = [];
+        collidableEntities.forEach(function (testEntity) {
+            if (_this.entity === testEntity) {
+                return;
+            }
+            if (!math_1.BoundingBox.overlaps(_this.entity.bounds, testEntity.bounds)) {
+                return;
+            }
+            collisions.push(new AABBCollision(testEntity, math_1.BoundingBox.getOverlappingSides(_this.entity.bounds, testEntity.bounds)));
+        });
+        return collisions;
+    };
+    return AABBCollider;
+}());
+exports.AABBCollider = AABBCollider;
+//# sourceMappingURL=aabb-collider.js.map
+},{"../util/math":40}],63:[function(require,module,exports) {
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(require("./aabb-collider"));
+//# sourceMappingURL=index.js.map
+},{"./aabb-collider":65}],52:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2122,45 +2346,40 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var math_1 = require("../util/math");
+var collision_1 = require("../collision");
 var bound_by_physics_1 = require("./bound-by-physics");
 var BoundByPhysicsConstrainedByObstacles = (function (_super) {
     __extends(BoundByPhysicsConstrainedByObstacles, _super);
-    function BoundByPhysicsConstrainedByObstacles(terminalVelocity) {
-        return _super.call(this, terminalVelocity) || this;
+    function BoundByPhysicsConstrainedByObstacles(entity, terminalVelocity) {
+        var _this = _super.call(this, entity, terminalVelocity) || this;
+        _this.collider = new collision_1.AABBCollider(_this.entity, ["Obstacle"]);
+        return _this;
     }
-    BoundByPhysicsConstrainedByObstacles.prototype.update = function (entity, entityLibrary, deltaTime) {
-        var obstacles = entityLibrary.getEntitiesByTraitName("Obstacle");
-        this.updateX(entity, entityLibrary, deltaTime);
-        this.resolveCollisionsX(entity, obstacles);
-        this.updateY(entity, entityLibrary, deltaTime);
-        this.resolveCollisionsY(entity, obstacles);
+    BoundByPhysicsConstrainedByObstacles.prototype.update = function (deltaTime) {
+        this.updateX(deltaTime);
+        this.resolveCollisions(true, false);
+        this.updateY(deltaTime);
+        this.resolveCollisions(false, true);
     };
-    BoundByPhysicsConstrainedByObstacles.prototype.resolveCollisionsX = function (entity, obstacles) {
-        obstacles.forEach(function (obstacle) {
-            if (!math_1.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) {
-                return;
+    BoundByPhysicsConstrainedByObstacles.prototype.resolveCollisions = function (resolveX, resolveY) {
+        var _this = this;
+        var collisions = this.collider.detectCollisions();
+        collisions.forEach(function (collision) {
+            if (resolveX) {
+                if (collision.sides.right) {
+                    _this.entity.position.x -= _this.entity.bounds.right - collision.entity.bounds.left;
+                }
+                if (collision.sides.left) {
+                    _this.entity.position.x += collision.entity.bounds.right - _this.entity.bounds.left;
+                }
             }
-            var sides = math_1.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
-            if (sides.right) {
-                entity.position.x -= entity.bounds.right - obstacle.bounds.left;
-            }
-            if (sides.left) {
-                entity.position.x += obstacle.bounds.right - entity.bounds.left;
-            }
-        });
-    };
-    BoundByPhysicsConstrainedByObstacles.prototype.resolveCollisionsY = function (entity, obstacles) {
-        obstacles.forEach(function (obstacle) {
-            if (!math_1.BoundingBox.overlaps(entity.bounds, obstacle.bounds)) {
-                return;
-            }
-            var sides = math_1.BoundingBox.getOverlappingSides(entity.bounds, obstacle.bounds);
-            if (sides.bottom) {
-                entity.position.y -= entity.bounds.bottom - obstacle.bounds.top;
-            }
-            if (sides.top) {
-                entity.position.y += obstacle.bounds.bottom - entity.bounds.top;
+            if (resolveY) {
+                if (collision.sides.bottom) {
+                    _this.entity.position.y -= _this.entity.bounds.bottom - collision.entity.bounds.top;
+                }
+                if (collision.sides.top) {
+                    _this.entity.position.y += collision.entity.bounds.bottom - _this.entity.bounds.top;
+                }
             }
         });
     };
@@ -2168,7 +2387,7 @@ var BoundByPhysicsConstrainedByObstacles = (function (_super) {
 }(bound_by_physics_1.BoundByPhysics));
 exports.BoundByPhysicsConstrainedByObstacles = BoundByPhysicsConstrainedByObstacles;
 //# sourceMappingURL=bound-by-physics-constrained-by-obstacles.js.map
-},{"../util/math":27,"./bound-by-physics":37}],39:[function(require,module,exports) {
+},{"../collision":63,"./bound-by-physics":51}],53:[function(require,module,exports) {
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -2194,7 +2413,7 @@ var Obstacle = (function (_super) {
 }(__1.Trait));
 exports.Obstacle = Obstacle;
 //# sourceMappingURL=obstacle.js.map
-},{"..":18}],33:[function(require,module,exports) {
+},{"..":17}],35:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bound_by_gravity_1 = require("./bound-by-gravity");
@@ -2208,7 +2427,7 @@ exports.traits = {
     Obstacle: obstacle_1.Obstacle,
 };
 //# sourceMappingURL=index.js.map
-},{"./bound-by-gravity":36,"./bound-by-physics":37,"./bound-by-physics-constrained-by-obstacles":38,"./obstacle":39}],18:[function(require,module,exports) {
+},{"./bound-by-gravity":50,"./bound-by-physics":51,"./bound-by-physics-constrained-by-obstacles":52,"./obstacle":53}],17:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var input_1 = require("./input");
@@ -2232,7 +2451,7 @@ exports.Trait = trait_1.Trait;
 var traits_1 = require("./traits");
 exports.traits = traits_1.traits;
 //# sourceMappingURL=index.js.map
-},{"./input":31,"./util":32,"./layer":19,"./entity":20,"./animator":21,"./compositor":22,"./entity-library":23,"./sprite-sheet":24,"./trait":25,"./traits":33}],17:[function(require,module,exports) {
+},{"./input":33,"./util":34,"./layer":19,"./entity":20,"./animator":21,"./compositor":22,"./entity-library":23,"./sprite-sheet":24,"./trait":25,"./traits":35}],16:[function(require,module,exports) {
 'use strict';
 
 var _dist = require('./dist');
@@ -2242,7 +2461,7 @@ var cotton = _interopRequireWildcard(_dist);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 module.exports = cotton;
-},{"./dist":18}],12:[function(require,module,exports) {
+},{"./dist":17}],13:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2301,7 +2520,7 @@ var Star = function (_Entity) {
   _createClass(Star, [{
     key: "draw",
     value: function draw() {
-      var context = this.buffer.getContext();
+      var context = this.memoryCanvas.getContext();
 
       context.fillStyle = "rgba(" + this.colour + ", " + this.opacity + ")";
       context.shadowBlur = this.trail;
@@ -2333,7 +2552,7 @@ var Star = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Star;
-},{"cotton-js":17}],8:[function(require,module,exports) {
+},{"cotton-js":16}],11:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2392,7 +2611,7 @@ var BackgroundLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = BackgroundLayer;
-},{"cotton-js":17,"./star":12}],13:[function(require,module,exports) {
+},{"cotton-js":16,"./star":13}],14:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2451,7 +2670,7 @@ var Letter = function (_Entity) {
   _createClass(Letter, [{
     key: "draw",
     value: function draw() {
-      var context = this.buffer.getContext();
+      var context = this.memoryCanvas.getContext();
 
       context.fillStyle = "rgba(" + getRandomLetterColour() + ", " + 1 + ")";
       context.shadowBlur = 0;
@@ -2483,7 +2702,7 @@ var Letter = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = Letter;
-},{"cotton-js":17}],14:[function(require,module,exports) {
+},{"cotton-js":16}],15:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2531,7 +2750,7 @@ var letters = {
 };
 
 exports.default = letters;
-},{}],9:[function(require,module,exports) {
+},{}],12:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2609,7 +2828,7 @@ var TextLayer = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = TextLayer;
-},{"cotton-js":17,"./letter":13,"./letters":14}],10:[function(require,module,exports) {
+},{"cotton-js":16,"./letter":14,"./letters":15}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2638,7 +2857,7 @@ var CloudParticle = function (_Entity) {
   _createClass(CloudParticle, [{
     key: "draw",
     value: function draw() {
-      var context = this.buffer.getContext();
+      var context = this.memoryCanvas.getContext();
 
       var blueCloud = context.createRadialGradient(0, 0, this.size.x / 4, this.size.x / 2, this.size.y / 2, 2000);
 
@@ -2669,7 +2888,7 @@ var Cloud = function (_Layer) {
 }(_cottonJs.Layer);
 
 exports.default = Cloud;
-},{"cotton-js":17}],3:[function(require,module,exports) {
+},{"cotton-js":16}],3:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2705,7 +2924,7 @@ var runGalaxy = exports.runGalaxy = function runGalaxy() {
 
   animator.start();
 };
-},{"cotton-js":17,"./background-layer":8,"./text-layer":9,"../common/cloud":10}],11:[function(require,module,exports) {
+},{"cotton-js":16,"./background-layer":11,"./text-layer":12,"../common/cloud":9}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2748,7 +2967,7 @@ var SimpleEntity = function (_Entity) {
   }, {
     key: "draw",
     value: function draw() {
-      var context = this.buffer.getContext();
+      var context = this.memoryCanvas.getContext();
       context.fillStyle = this.colour;
       context.fillRect(0, 0, this.size.x, this.size.y);
     }
@@ -2758,7 +2977,7 @@ var SimpleEntity = function (_Entity) {
 }(_cottonJs.Entity);
 
 exports.default = SimpleEntity;
-},{"cotton-js":17}],4:[function(require,module,exports) {
+},{"cotton-js":16}],4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2778,6 +2997,11 @@ var _simpleEntity2 = _interopRequireDefault(_simpleEntity);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var Keyboard = _cottonJs.input.Keyboard,
+    Mouse = _cottonJs.input.Mouse,
+    PRESSED = _cottonJs.input.PRESSED,
+    RELEASED = _cottonJs.input.RELEASED;
+var getRandomInt = _cottonJs.util.getRandomInt;
 var runInputTest = exports.runInputTest = function runInputTest() {
     var rootEl = document.getElementById('yaboi');
     var width = window.innerWidth;
@@ -2785,29 +3009,50 @@ var runInputTest = exports.runInputTest = function runInputTest() {
 
     var movableEntity = new _simpleEntity2.default(new _cottonJs.util.Vector2(0, 0), new _cottonJs.util.Vector2(50, 50));
 
-    var inputHandler = new _cottonJs.input.Keyboard(window);
+    var keyboardHandler = new Keyboard(window);
 
-    inputHandler.addMapping('ArrowLeft', function () {
+    keyboardHandler.addMapping('ArrowLeft', function () {
         movableEntity.position.x -= 10;
     });
 
-    inputHandler.addMapping('ArrowRight', function () {
+    keyboardHandler.addMapping('ArrowRight', function () {
         movableEntity.position.x += 10;
     });
 
-    inputHandler.addMapping('ArrowUp', function () {
+    keyboardHandler.addMapping('ArrowUp', function () {
         movableEntity.position.y -= 10;
     });
 
-    inputHandler.addMapping('ArrowDown', function () {
+    keyboardHandler.addMapping('ArrowDown', function () {
         movableEntity.position.y += 10;
     });
+
+    var mouseMove = new Mouse(window);
+    var mouseClick = new Mouse(window);
+
+    var demoOptions = [function () {
+        console.log("RUNNING THE CLICK TEST");
+        mouseClick.addMapping('click', function (mouseInfo) {
+            movableEntity.position.x += 10;
+        });
+    }, function () {
+        console.log("RUNNING THE MOVE TEST");
+        mouseMove.addMapping('move', function (mouseInfo) {
+            console.log("x:" + mouseInfo.pointerPosition.x + ", y:" + mouseInfo.pointerPosition.y);
+            movableEntity.position.x = mouseInfo.pointerPosition.x;
+            movableEntity.position.y = mouseInfo.pointerPosition.y;
+        });
+    }];
+
+    // Run a random demo
+    var randomMouseTestIdx = getRandomInt(0, 10) > 5 ? 1 : 0;
+    demoOptions[randomMouseTestIdx]();
 
     var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), [movableEntity])]));
 
     animator.start();
 };
-},{"../common/cloud":10,"cotton-js":17,"../common/simple-entity":11}],5:[function(require,module,exports) {
+},{"../common/cloud":9,"cotton-js":16,"../common/simple-entity":10}],5:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2918,69 +3163,124 @@ var runTraitTest = exports.runTraitTest = function runTraitTest() {
   }
 
   for (var i = 0; i < 150; i += 1) {
-    entities.push(new Yaboi(new Vector2(getRandomInt(20, width - 20), getRandomInt(20, height - 20)), entityLibrary, [new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)), new Obstacle()]));
+    var newYaboi = new Yaboi(new Vector2(getRandomInt(20, width - 20), getRandomInt(20, height - 20)), entityLibrary);
+
+    newYaboi.addTraits([new BoundByGravity(newYaboi, new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))), new BoundByPhysicsConstrainedByObstacles(newYaboi, new Vector2(120, 120)), new Obstacle()]);
+
+    entities.push(newYaboi);
   }
 
   var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cloud2.default(width, height), new _cottonJs.Layer(width, height, new _cottonJs.EntityLibrary(), entities)]));
 
   animator.start();
 };
-},{"../common/cloud":10,"../common/simple-entity":11,"cotton-js":17}],15:[function(require,module,exports) {
+},{"../common/cloud":9,"../common/simple-entity":10,"cotton-js":16}],7:[function(require,module,exports) {
 module.exports = {
   "imageUrl": "./atlas.png",
-  "width": 22,
-  "height": 32,
+  "animations": [{
+    "name": "idle",
+    "animationLength": 0.1,
+    "sprites": [
+      "idle1",
+      "idle2",
+      "idle3",
+      "idle4"
+    ]
+  }, {
+    "name": "run",
+    "animationLength": 0.08,
+    "sprites": [
+      "run1",
+      "run2",
+      "run3",
+      "run4",
+      "run5",
+      "run6",
+      "run7",
+      "run8"
+    ]
+  }],
   "sprites": [{
+    "name": "ground",
+    "x": 62.7,
+    "y": 160,
+    "width": 20,
+    "height": 20
+  }, {
     "name": "idle1",
-    "x": 2.85,
-    "y": 7.05
+    "x": 62.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "idle2",
-    "x": 3.85,
-    "y": 7.05
+    "x": 84.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "idle3",
-    "x": 4.85,
-    "y": 7.05
+    "x": 106.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "idle4",
-    "x": 5.85,
-    "y": 7.05
+    "x": 128.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run1",
-    "x": 6.85,
-    "y": 7.05
+    "x": 150.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run2",
-    "x": 7.85,
-    "y": 7.05
+    "x": 172.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run3",
-    "x": 8.85,
-    "y": 7.05
+    "x": 194.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run4",
-    "x": 9.85,
-    "y": 7.05
+    "x": 216.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run5",
-    "x": 10.85,
-    "y": 7.05
+    "x": 283.85,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run6",
-    "x": 11.85,
-    "y": 7.05
+    "x": 260.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run7",
-    "x": 12.85,
-    "y": 7.05
+    "x": 282.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }, {
     "name": "run8",
-    "x": 13.85,
-    "y": 7.05
+    "x": 304.7,
+    "y": 225.6,
+    "width": 22,
+    "height": 32
   }]
 };
-},{}],16:[function(require,module,exports) {
+},{}],8:[function(require,module,exports) {
 module.exports="/atlas.59fb8b15.png";
 },{}],6:[function(require,module,exports) {
 'use strict';
@@ -2990,9 +3290,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.runtSpriteTest = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _cottonJs = require('cotton-js');
 
@@ -3008,10 +3308,6 @@ var _cloud = require('../common/cloud');
 
 var _cloud2 = _interopRequireDefault(_cloud);
 
-var _simpleEntity = require('../common/simple-entity');
-
-var _simpleEntity2 = _interopRequireDefault(_simpleEntity);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3023,54 +3319,85 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Obstacle = _cottonJs.traits.Obstacle,
     BoundByGravity = _cottonJs.traits.BoundByGravity,
     BoundByPhysicsConstrainedByObstacles = _cottonJs.traits.BoundByPhysicsConstrainedByObstacles;
-var Vector2 = _cottonJs.util.Vector2,
-    getRandomNumber = _cottonJs.util.getRandomNumber,
-    getRandomInt = _cottonJs.util.getRandomInt;
+var Vector2 = _cottonJs.util.Vector2;
+var Keyboard = _cottonJs.input.Keyboard;
 
 
 var rootEl = document.getElementById('yaboi');
-var width = window.innerWidth;
-var height = window.innerHeight;
+var width = window.innerWidth / 3;
+var height = window.innerHeight / 3;
 
-var Ground = function (_SimpleEntity) {
-  _inherits(Ground, _SimpleEntity);
+var Walks = function (_Trait) {
+  _inherits(Walks, _Trait);
 
-  function Ground(pos, entityLibrary, groundTileSize, colour) {
-    _classCallCheck(this, Ground);
+  function Walks(entity, acceleration, deceleration) {
+    _classCallCheck(this, Walks);
 
-    return _possibleConstructorReturn(this, (Ground.__proto__ || Object.getPrototypeOf(Ground)).call(this, pos, new Vector2(groundTileSize, groundTileSize), entityLibrary, colour, [new Obstacle()]));
+    var _this = _possibleConstructorReturn(this, (Walks.__proto__ || Object.getPrototypeOf(Walks)).call(this, entity));
+
+    _this.acceleration = acceleration;
+    _this.deceleration = deceleration;
+    _this.direction = 0;
+    _this.facing = 1;
+    return _this;
   }
 
-  return Ground;
-}(_simpleEntity2.default);
+  _createClass(Walks, [{
+    key: 'isMoving',
+    value: function isMoving() {
+      return !!this.direction;
+    }
+  }, {
+    key: 'setDirection',
+    value: function setDirection(direction) {
+      this.direction = direction;
+    }
+  }, {
+    key: 'update',
+    value: function update(deltaTime) {
+      if (this.isMoving()) {
+        // We have a direction input
+        this.entity.velocity.x += this.acceleration * deltaTime * this.direction;
+        this.facing = Math.sign(this.direction);
+      } else if (this.entity.velocity.x) {
+        // We do not have a direction, therefore we are not moving
+        this.entity.velocity.x = 0;
+      }
+    }
+  }, {
+    key: 'getName',
+    value: function getName() {
+      return "Walks";
+    }
+  }]);
 
-function createGround(groundTileSize, entityLibrary, colour) {
-  var entities = [];
-
-  var x = 0;
-  var y = height - groundTileSize;
-
-  while (x < width) {
-    entities.push(new Ground(new Vector2(x, y), entityLibrary, 10, colour));
-    x += groundTileSize;
-  }
-
-  return entities;
-};
+  return Walks;
+}(_cottonJs.Trait);
 
 var Bruz = function (_Entity) {
   _inherits(Bruz, _Entity);
 
-  function Bruz(spriteSheet, pos, size, entityLib, traits) {
+  function Bruz(pos, size, entityLib, spriteSheet) {
     _classCallCheck(this, Bruz);
 
-    var _this2 = _possibleConstructorReturn(this, (Bruz.__proto__ || Object.getPrototypeOf(Bruz)).call(this, pos, size, entityLib, traits, false));
+    var _this2 = _possibleConstructorReturn(this, (Bruz.__proto__ || Object.getPrototypeOf(Bruz)).call(this, pos, size, entityLib));
 
+    var traits = [new BoundByGravity(_this2, new Vector2(0, 9.8)), new BoundByPhysicsConstrainedByObstacles(_this2, new Vector2(120, 120)), new Walks(_this2, 400, 300)];
+
+    _this2.addTraits(traits);
+
+    // Setup input handling
+    var keyboard = new Keyboard(window);
+    keyboard.addMapping('ArrowLeft', function (keystate) {
+      return _this2.trait.Walks.setDirection(-keystate);
+    });
+    keyboard.addMapping('ArrowRight', function (keystate) {
+      return _this2.trait.Walks.setDirection(keystate);
+    });
+
+    // Setup sprites
     _this2.spriteSheet = spriteSheet;
-    _this2.frameNum = 1;
-    _this2.frame = function () {
-      return 'idle' + _this2.frameNum;
-    };
+    _this2.currentSprite = 'idle1';
     return _this2;
   }
 
@@ -3078,13 +3405,24 @@ var Bruz = function (_Entity) {
     key: 'update',
     value: function update(delta) {
       _get(Bruz.prototype.__proto__ || Object.getPrototypeOf(Bruz.prototype), 'update', this).call(this, delta);
+
+      // Animate me
+      var previousSprite = this.currentSprite;
+
+      if (this.trait.Walks.isMoving()) {
+        this.currentSprite = this.spriteSheet.getSpriteForAnimation('run', this.lifetime);
+      } else {
+        this.currentSprite = this.spriteSheet.getSpriteForAnimation('idle', this.lifetime);
+      }
+
+      if (previousSprite !== this.currentSprite) this.draw();
     }
   }, {
     key: 'draw',
     value: function draw() {
-      this.buffer.clear();
-      var context = this.buffer.getContext();
-      context.drawImage(this.spriteSheet.getSprite('' + this.frame()).getCanvas(), 0, 0);
+      this.memoryCanvas.clear();
+      var context = this.memoryCanvas.getContext();
+      context.drawImage(this.spriteSheet.getSprite(this.currentSprite, this.trait.Walks.facing < 1).getCanvas(), 0, 0);
     }
   }]);
 
@@ -3093,7 +3431,50 @@ var Bruz = function (_Entity) {
 
 ;
 
+var Ground = function (_Entity2) {
+  _inherits(Ground, _Entity2);
+
+  function Ground(pos, size, entityLibrary, spriteSheet) {
+    _classCallCheck(this, Ground);
+
+    var traits = [new Obstacle()];
+
+    // Setup spritesheet info
+    var _this3 = _possibleConstructorReturn(this, (Ground.__proto__ || Object.getPrototypeOf(Ground)).call(this, pos, size, entityLibrary, traits, false));
+
+    _this3.currentSprite = 'ground';
+    _this3.spriteSheet = spriteSheet;
+    return _this3;
+  }
+
+  _createClass(Ground, [{
+    key: 'draw',
+    value: function draw() {
+      this.memoryCanvas.clear();
+      var context = this.memoryCanvas.getContext();
+      context.drawImage(this.spriteSheet.getSprite(this.currentSprite).getCanvas(), 0, 0);
+    }
+  }]);
+
+  return Ground;
+}(_cottonJs.Entity);
+
+function createGround(groundTileSize, entityLibrary, spriteSheet) {
+  var entities = [];
+
+  var x = 0;
+  var y = height - groundTileSize;
+
+  while (x < width) {
+    entities.push(new Ground(new Vector2(x, y), new Vector2(groundTileSize, groundTileSize), entityLibrary, spriteSheet));
+    x += groundTileSize;
+  }
+
+  return entities;
+};
+
 var runtSpriteTest = exports.runtSpriteTest = function runtSpriteTest() {
+  // setup sprites
   var img = new Image();
   img.onload = function () {
     var spriteSheet = _cottonJs.SpriteSheet.createSpriteSheet(_atlas2.default, img);
@@ -3102,8 +3483,8 @@ var runtSpriteTest = exports.runtSpriteTest = function runtSpriteTest() {
 
     var eLib = new _cottonJs.EntityLibrary();
 
-    ees = createGround(10, eLib, 'red');
-    ees.push(new Bruz(spriteSheet, new Vector2(width / 2, height / 2), new Vector2(22, 32), eLib, [new BoundByGravity(new Vector2(0, 9.8)), new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120))]));
+    ees = createGround(20, eLib, spriteSheet);
+    ees.push(new Bruz(new Vector2(0, 0), new Vector2(22, 32), eLib, spriteSheet));
 
     var animator = new _cottonJs.Animator(new _cottonJs.Compositor(width, height, rootEl, [new _cloud2.default(width, height), new _cottonJs.Layer(width, height, eLib, ees)]));
 
@@ -3112,7 +3493,7 @@ var runtSpriteTest = exports.runtSpriteTest = function runtSpriteTest() {
 
   img.src = _atlas4.default;
 };
-},{"cotton-js":17,"./atlas.json":15,"./atlas.png":16,"../common/cloud":10,"../common/simple-entity":11}],2:[function(require,module,exports) {
+},{"cotton-js":16,"./atlas.json":7,"./atlas.png":8,"../common/cloud":9}],2:[function(require,module,exports) {
 'use strict';
 
 var _teamCottonGalaxy = require('./team-cotton-galaxy');
@@ -3137,7 +3518,7 @@ tests.forEach(function (test) {
   };
   rootEl.appendChild(testButton);
 });
-},{"./team-cotton-galaxy":3,"./input-test":4,"./trait-test":5,"./sprite-test":6}],40:[function(require,module,exports) {
+},{"./team-cotton-galaxy":3,"./input-test":4,"./trait-test":5,"./sprite-test":6}],67:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -3167,7 +3548,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '50243' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '60251' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -3306,5 +3687,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[40,2])
+},{}]},{},[67,2])
 //# sourceMappingURL=/cotton-js-test-bench.8d2766ad.map
