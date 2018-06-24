@@ -1,6 +1,6 @@
 import Cloud from "../common/cloud";
 import SimpleEntity from "../common/simple-entity";
-import { Animator, Compositor, Layer, Entity, EntityLibrary, Trait, util, traits } from "cotton-js";
+import { Animator, Compositor, Layer, EntityLibrary, util, traits } from "cotton-js";
 
 const { Obstacle, BoundByGravity, BoundByPhysicsConstrainedByObstacles } = traits;
 const { Vector2, getRandomNumber, getRandomInt } = util;
@@ -40,7 +40,7 @@ class Yaboi extends SimpleEntity {
 }
 
 export const runTraitTest = function runTraitTest() {
-  
+
   const entityLibrary = new EntityLibrary();
 
   const entities = [];
@@ -82,15 +82,18 @@ export const runTraitTest = function runTraitTest() {
   }
 
   for (let i = 0; i < 150; i += 1) {
-    entities.push(
-      new Yaboi(
-          new Vector2(getRandomInt(20, width-20), getRandomInt(20, height-20)), 
-          entityLibrary, [
-            new BoundByGravity(new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))),
-            new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)),
-            new Obstacle()
-          ]
-    ));
+    const newYaboi = new Yaboi(
+      new Vector2(getRandomInt(20, width-20), getRandomInt(20, height-20)),
+      entityLibrary,
+    );
+
+    newYaboi.addTraits([
+      new BoundByGravity(newYaboi, new Vector2(getRandomNumber(-30, 30), getRandomNumber(-30, 30))),
+      new BoundByPhysicsConstrainedByObstacles(newYaboi, new Vector2(120, 120)),
+      new Obstacle()
+    ]);
+
+    entities.push(newYaboi);
   }
 
   let animator = new Animator(
