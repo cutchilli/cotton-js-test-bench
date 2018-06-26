@@ -1,4 +1,4 @@
-import { Entity, util, EntityLibrary } from "cotton-js";
+import { RectangleEntity, util, EntityLibrary } from "cotton-js";
 
 const { getRandomNumber, getRandomInt } = util;
 
@@ -8,7 +8,7 @@ const getRandomStarColour = () => {
   return colours[Math.floor(Math.random() * colours.length)];
 };
 
-export default class Star extends Entity {
+export default class Star extends RectangleEntity {
   constructor(
     entityLibrary,
     maxWidth,

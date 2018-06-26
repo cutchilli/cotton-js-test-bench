@@ -1,4 +1,4 @@
-import { Animator, Compositor, SpriteSheet, Layer, Entity, EntityLibrary, util, traits, Trait, input } from 'cotton-js';
+import { Animator, Compositor, SpriteSheet, Layer, RectangleEntity, EntityLibrary, util, traits, Trait, input } from 'cotton-js';
 import atlasSpriteDef from './atlas.json';
 import atlasSpriteImageUrl from './atlas.png';
 import Cloud from '../common/cloud';
@@ -45,7 +45,7 @@ class Walks extends Trait {
   }
 }
 
-class Bruz extends Entity {
+class Bruz extends RectangleEntity {
   constructor(pos, size, entityLib, spriteSheet) {
     super(pos, size, entityLib);
 
@@ -89,7 +89,7 @@ class Bruz extends Entity {
   }
 };
 
-class Ground extends Entity {
+class Ground extends RectangleEntity {
   constructor(pos, size, entityLibrary, spriteSheet) {
     const traits = [new Obstacle()];
 
