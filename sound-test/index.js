@@ -5,16 +5,19 @@ import {Piano} from "./piano";
 
 const mixer = new Mixer();
 const reverb = new Reverb(2, 2);
-reverb.setDryWet(0.1)
+reverb.setDryWet(0.1);
+reverb.connectTo(browserSpeaker);
+
 mixer.getMaster().addEffects([reverb]);
 mixer.connectTo(browserSpeaker);
 
-async function createClipInMixer(clip, trackname) {
+async function createClipInMixer(clipUrl, trackname) {
   const track = new Track();
-  var clip = await createSoundClip(clip, false);
+   var clip = await createSoundClip(clipUrl, false);
 
   clip.connectTo(track);
   mixer.setTrack(track, trackname);
+
   return clip;
 }
 
