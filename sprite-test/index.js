@@ -12,8 +12,8 @@ const width = window.innerWidth / 3;
 const height = window.innerHeight / 3;
 
 class Walks extends Trait {
-  constructor(acceleration, deceleration) {
-    super();
+  constructor(entity, acceleration, deceleration) {
+    super(entity);
 
     this.acceleration = acceleration;
     this.deceleration = deceleration;
@@ -29,14 +29,14 @@ class Walks extends Trait {
     this.direction = direction;
   }
 
-  update(entity, entityLibrary, deltaTime) {
+  update(deltaTime) {
     if (this.isMoving()) {
       // We have a direction input
-      entity.velocity.x += this.acceleration * deltaTime * this.direction;
+      this.entity.velocity.x += this.acceleration * deltaTime * this.direction;
       this.facing = Math.sign(this.direction);
-    } else if (entity.velocity.x) {
+    } else if (this.entity.velocity.x) {
       // We do not have a direction, therefore we are not moving
-      entity.velocity.x = 0;
+      this.entity.velocity.x = 0;
     }
   }
 
@@ -47,13 +47,15 @@ class Walks extends Trait {
 
 class Bruz extends Entity {
   constructor(pos, size, entityLib, spriteSheet) {
+    super(pos, size, entityLib);
+
     const traits = [
-      new BoundByGravity(new Vector2(0, 9.8)),
-      new BoundByPhysicsConstrainedByObstacles(new Vector2(120, 120)),
-      new Walks(400, 300)
+      new BoundByGravity(this, new Vector2(0, 9.8)),
+      new BoundByPhysicsConstrainedByObstacles(this, new Vector2(120, 120)),
+      new Walks(this, 400, 300)
     ];
-    
-    super(pos, size, entityLib, traits, false);
+
+    this.addTraits(traits);
 
     // Setup input handling
     const keyboard = new Keyboard(window);
@@ -119,19 +121,19 @@ function createGround(groundTileSize, entityLibrary, spriteSheet) {
   return entities;
 };
 
-export const runtSpriteTest = function runtSpriteTest() {  
+export const runtSpriteTest = function runtSpriteTest() {
   // setup sprites
   const img = new Image();
   img.onload = () => {
     const spriteSheet = SpriteSheet.createSpriteSheet(atlasSpriteDef, img);
-    
+
     let ees = [];
 
     const eLib = new EntityLibrary()
-    
+
     ees = createGround(20, eLib, spriteSheet);
     ees.push(new Bruz(new Vector2(0, 0), new Vector2(22, 32), eLib, spriteSheet));
-  
+
     let animator = new Animator(
       new Compositor(
           width,
@@ -140,7 +142,7 @@ export const runtSpriteTest = function runtSpriteTest() {
           [new Cloud(width, height), new Layer(width, height, eLib, ees)],
       )
     );
-  
+
     animator.start();
   };
 
