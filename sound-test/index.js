@@ -5,8 +5,7 @@ import {Piano} from "./piano";
 
 const mixer = new Mixer();
 const reverb = new Reverb(2, 2);
-reverb.setDryWet(0.1);
-reverb.connectTo(browserSpeaker);
+reverb.setDryWet(1);
 
 mixer.getMaster().addEffects([reverb]);
 mixer.connectTo(browserSpeaker);
