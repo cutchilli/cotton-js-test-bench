@@ -9,11 +9,12 @@ import {
   traits,
   input,
   detectCollisionsSAT,
+  CircleEntity,
 } from 'cotton-js';
 
 const { Mouse, MOVE } = input;
 const { Obstacle } = traits;
-const { Vector2, Polygon } = util;
+const { Vector2, Polygon, Circle } = util;
 
 class Collidable extends Trait {
   constructor(entity) {
@@ -31,13 +32,24 @@ class Collidable extends Trait {
     if (!collisions || !collisions.length) return;
 
     collisions.forEach((collision) => {
+      console.log(`OverlapX=${collision.response.overlapV.x} OverlapY=${collision.response.overlapV.y}`);
       this.entity.position.x -= collision.response.overlapV.x;
       this.entity.position.y -= collision.response.overlapV.y;
     });
   }
 }
 
-export default class SimplePolygonEntity extends PolygonEntity {
+export class SimpleCircleEntity extends CircleEntity {
+  constructor(pos, entityLibrary, radius) {
+    super(pos, radius, entityLibrary, [], true);
+  }
+
+  draw() {
+    return;
+  }
+}
+
+export class SimplePolygonEntity extends PolygonEntity {
   constructor(pos, entityLibrary, shape) {
     super(pos, shape, entityLibrary, [], true);
   }
@@ -72,6 +84,9 @@ export const runSatTest = function runSatTest() {
   ]));
   obstacle.addTraits([new Obstacle()]);
 
+  const obstacle2 = new SimpleCircleEntity(new Vector2(200, 500), entityLibrary, 50);
+  obstacle2.addTraits([new Obstacle()]);
+
   const mouse = new Mouse(document.documentElement);
   mouse.addMapping(MOVE, ({ pointerPosition }) => {
     daBoi.position.set(pointerPosition.x, pointerPosition.y);
@@ -80,6 +95,7 @@ export const runSatTest = function runSatTest() {
   entities.push(
     daBoi,
     obstacle,
+    obstacle2,
   );
 
   let animator = new Animator(
