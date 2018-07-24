@@ -1,6 +1,6 @@
-import { Entity, Layer, util, EntityLibrary } from "cotton-js";
+import { RectangleEntity, Layer, util, EntityLibrary } from "cotton-js";
 
-class CloudParticle extends Entity {
+class CloudParticle extends RectangleEntity {
   constructor(pos, vel, size, entityLibrary) {
     super(pos, size, entityLibrary);
   }

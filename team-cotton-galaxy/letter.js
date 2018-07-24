@@ -1,4 +1,4 @@
-import { Entity, util } from "cotton-js";
+import { RectangleEntity, util } from "cotton-js";
 
 const { getRandomNumber, Vector2 } = util;
 
@@ -8,7 +8,7 @@ const getRandomLetterColour = () => {
   return colours[Math.floor(Math.random() * colours.length)];
 };
 
-export default class Letter extends Entity {
+export default class Letter extends RectangleEntity {
   constructor(maxWidth, maxHeight, pos, letterToDrawMatrix, entityLibrary) {
     let blockSize = new Vector2(10, 10);
     let width = 0;
@@ -36,7 +36,7 @@ export default class Letter extends Entity {
 
   draw() {
     const context = this.memoryCanvas.getContext();
-    
+
     context.fillStyle = `rgba(${getRandomLetterColour()}, ${1})`;
     context.shadowBlur = 0;
 
@@ -60,7 +60,7 @@ export default class Letter extends Entity {
 
     this.position.x += this.velocity.x * deltaTime;
     this.position.y += this.velocity.y * deltaTime;
-    
+
     if (this.position.x < 0 || this.position.x > this.maxWidth - this.size.x)
       this.velocity.x = -this.velocity.x;
 

@@ -1,6 +1,6 @@
-import { Entity, EntityLibrary } from 'cotton-js';
+import { RectangleEntity, EntityLibrary } from 'cotton-js';
 
-export default class SimpleEntity extends Entity {
+export default class SimpleEntity extends RectangleEntity {
   constructor(pos, size, entityLibrary = new EntityLibrary(), colour = "green", traits) {
       super(pos, size, entityLibrary, traits, false);
       this.colour = colour;
@@ -10,7 +10,7 @@ export default class SimpleEntity extends Entity {
     super.update(delta);
   }
 
-  draw() { 
+  draw() {
     const context = this.memoryCanvas.getContext();
     context.fillStyle = this.colour;
     context.fillRect(0, 0, this.size.x, this.size.y);
