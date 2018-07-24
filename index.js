@@ -3,6 +3,7 @@ import { runInputTest } from './input-test';
 import { runTraitTest } from './trait-test';
 import { runtSpriteTest } from './sprite-test';
 import { runSatTest } from './sat-test';
+import { runRotationTest } from './rotation-test';
 
 const tests = [
   runGalaxy,
@@ -10,6 +11,7 @@ const tests = [
   runTraitTest,
   runtSpriteTest,
   runSatTest,
+  runRotationTest,
 ];
 
 const rootEl = document.getElementById('test-buttons');
